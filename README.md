@@ -6,7 +6,8 @@ Diferente de soluções de mercado que dependem de redes colaborativas (mesh) de
 
 ### 🚀 Tecnologias Utilizadas
 * **Mobile:** React Native (TypeScript) & Expo
-* **Backend:** Supabase (PostgreSQL)
+* **Backend:** Node.js + TypeScript + Fastify
+* **Database/Auth/Storage:** Supabase
 * **IoT / Hardware:** ESP32-C3 SuperMini, SIM868/A7680C (GNSS/GSM), C++
 
 ### 👥 Equipe Desenvolvedora

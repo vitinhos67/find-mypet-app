@@ -1,17 +1,11 @@
 {
   "name": "@findmypet/api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
     "start": "node dist/main.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
     "dotenv": "^17.4.2",
