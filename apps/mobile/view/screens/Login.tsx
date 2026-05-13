@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Image, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import {
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet, Switch, Text, TextInput, View
+} from 'react-native';
 import { SafeAreaView, } from 'react-native-safe-area-context';
 import { Colors } from "../styles/color";
 
@@ -13,56 +20,67 @@ export default function Login() {
     }
     return(
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Find my PET</Text>
-            <Image 
-                source={require("../../assets/images/logo-pet.png")}
-                style={styles.logo} 
-            />
-            <View style={styles.formContainer}>
-                <Text style={styles.welcomeTitle}>Bem-vindo</Text>
-                <Text style={styles.welcomeSubtitle}>
-                    Insira seus dados para acessar
-                </Text>
-                <View style={styles.inputsSection}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="E-mail"
-                        placeholderTextColor="#888888"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Senha"
-                        placeholderTextColor="#888888"
-                        secureTextEntry
-                        value={senha}
-                        onChangeText={setSenha}
-                    />
-                </View>
-                <View style={styles.checkboxContainer}>
-                    <Switch
-                        value={manterConectado}
-                        onValueChange={setManterConectado}
-                    />
-                    <Text style={styles.checkboxText}>Manter conectado</Text>
-                </View>
-                <Pressable
-                    onPress={handleEntrar}
-                    style={styles.mainButton}
+            <KeyboardAvoidingView
+                style={styles.keyboardContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
-                    <Text style={styles.mainButtonText}>Entrar</Text>
-                </Pressable>
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Não tem uma conta? </Text>
-                    <Pressable onPress={handleCriarConta}>
-                        <Text style={styles.footerLink}>Crie uma</Text>
+                <Text style={styles.title}>Find my PET</Text>
+                <Image 
+                    source={require("../../assets/images/logo-pet.png")}
+                    style={styles.logo} 
+                />
+                <View style={styles.formContainer}>
+                    <Text style={styles.welcomeTitle}>Bem-vindo</Text>
+                    <Text style={styles.welcomeSubtitle}>
+                        Insira seus dados para acessar
+                    </Text>
+                    
+                        <View style={styles.inputsSection}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="E-mail"
+                                placeholderTextColor="#888888"
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                value={email}
+                                onChangeText={setEmail}
+                            />
+
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Senha"
+                                placeholderTextColor="#888888"
+                                secureTextEntry
+                                value={senha}
+                                onChangeText={setSenha}
+                            />
+                        </View>
+                    <View style={styles.checkboxContainer}>
+                        <Switch
+                            value={manterConectado}
+                            onValueChange={setManterConectado}
+                        />
+                        <Text style={styles.checkboxText}>Manter conectado</Text>
+                    </View>
+                    <Pressable
+                        onPress={handleEntrar}
+                        style={styles.mainButton}
+                    >
+                        <Text style={styles.mainButtonText}>Entrar</Text>
                     </Pressable>
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Não tem uma conta? </Text>
+                        <Pressable onPress={handleCriarConta}>
+                            <Text style={styles.footerLink}>Crie uma</Text>
+                        </Pressable>
+                    </View>
                 </View>
-            </View>
+                </ScrollView>
+            </KeyboardAvoidingView >
         </SafeAreaView>
 
     );
