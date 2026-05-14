@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
@@ -7,23 +7,28 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    StyleSheet, Switch, Text, TextInput, View
+    StyleSheet,
+    Text, TextInput, View
 } from 'react-native';
 import { SafeAreaView, } from 'react-native-safe-area-context';
 import { AuthStackParams } from '../../navigation/types';
 import { Colors } from "../styles/color";
 
-
-export default function Login() {
+export default function Cadastro() {
 
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParams>>();
+    const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const [manterConectado, setManterConectado] = useState(false);
+    const [confirmarSenha, setConfirmarSenha] = useState('');
+    const [telefone, setTelefone] = useState('');
+    const [genero, setGenero] = useState('Gênero');
+
+
     function handleEntrar() {
     }
-    function handleCriarConta() {
-        navigation.navigate('Cadastro');
+
+    function abrirSeletorGenero() {
     }
     return(
         <SafeAreaView style={styles.container}>
@@ -35,18 +40,28 @@ export default function Login() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                <Text style={styles.title}>Find my PET</Text>
-                <Image 
-                    source={require("../../assets/images/logo-pet.png")}
-                    style={styles.logo} 
-                />
+                <View style={styles.header}>
+                    <Text style={styles.title}>Find my PET</Text>
+                    <Image 
+                        source={require("../../assets/images/logo-pet.png")}
+                        style={styles.logo} 
+                    />
+                </View>
+
                 <View style={styles.formContainer}>
-                    <Text style={styles.welcomeTitle}>Bem-vindo</Text>
+                    <Text style={styles.welcomeTitle}>Cadastro</Text>
                     <Text style={styles.welcomeSubtitle}>
-                        Insira seus dados para acessar
+                        Preencha as informações corretamente
                     </Text>
                     
                         <View style={styles.inputsSection}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Nome completo"
+                                placeholderTextColor="#888888"
+                                value={nome}
+                                onChangeText={setNome}
+                            />
                             <TextInput
                                 style={styles.input}
                                 placeholder="E-mail"
@@ -65,24 +80,45 @@ export default function Login() {
                                 value={senha}
                                 onChangeText={setSenha}
                             />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Confirmar Senha"
+                                placeholderTextColor="#888888"
+                                secureTextEntry
+                                value={confirmarSenha}
+                                onChangeText={setConfirmarSenha}
+                            />
+
+                            <View style={styles.inputMiniSection}>
+                                <Pressable
+                                    style={styles.inputMini}
+                                    onPress={abrirSeletorGenero}
+                                >
+                                    <Text>
+                                        {genero}
+                                    </Text>
+                                </Pressable>
+                                <TextInput
+                                    style={styles.inputMini}
+                                    placeholder="Telefone"
+                                    placeholderTextColor="#888888"
+                                    keyboardType="phone-pad"
+                                    value={telefone}
+                                    onChangeText={setTelefone}
+                                />
+                            </View>
                         </View>
-                    <View style={styles.checkboxContainer}>
-                        <Switch
-                            value={manterConectado}
-                            onValueChange={setManterConectado}
-                        />
-                        <Text style={styles.checkboxText}>Manter conectado</Text>
-                    </View>
+
                     <Pressable
                         onPress={handleEntrar}
                         style={styles.mainButton}
                     >
-                        <Text style={styles.mainButtonText}>Entrar</Text>
+                        <Text style={styles.mainButtonText}>Cadastrar-se</Text>
                     </Pressable>
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>Não tem uma conta? </Text>
-                        <Pressable onPress={handleCriarConta}>
-                            <Text style={styles.footerLink}>Crie uma</Text>
+                        <Pressable onPress={() => navigation.pop()}>
+                            <Text style={styles.footerLink}>Voltar</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -99,22 +135,27 @@ const styles = StyleSheet.create({
         margin: 20,
         justifyContent: 'flex-start',
     }, 
+    header:{
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+        flex: 1,
+        alignItems: 'center',
+        gap: 10,
+    },
     keyboardContainer: {
         flex: 1,
         justifyContent: 'space-between',
     },
     title:{
-        paddingLeft: 20,
+        paddingLeft: 10,
         color: Colors.primaryBlue,
-        fontSize: 35,
+        fontSize: 28,
         fontFamily: 'Inter-Black'
     },
     logo:{
-        height: 130,
+        height: 100,  
+        width: 100,                 
         resizeMode: 'contain',
-        alignSelf: 'center',
-        marginTop: 0,
-        aspectRatio: 2,
     },
     formContainer:{
         width: '100%',
@@ -125,7 +166,14 @@ const styles = StyleSheet.create({
     },
     input: {
         borderRadius: 8,
-        padding: 15,
+        padding: 10,
+        fontSize: 16,
+        backgroundColor: Colors.secondaryOrange,
+    },
+    inputMini:{
+        flex: 1,
+        borderRadius: 8,
+        padding: 10,
         fontSize: 16,
         backgroundColor: Colors.secondaryOrange,
     },
@@ -134,6 +182,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black', 
     },
+    
     welcomeSubtitle: {
         fontSize: 14,
         color: Colors.secondaryBlue,
@@ -143,6 +192,12 @@ const styles = StyleSheet.create({
     inputsSection: {
         gap: 16, 
         marginBottom: 24,
+    },
+    inputMiniSection:{
+        gap: 5,
+        marginBottom: 24,
+        flexDirection: 'row',
+        width: '100%',
     },
     mainButton: {
         backgroundColor: Colors.primaryBlue,

@@ -2,8 +2,8 @@ import { Inter_400Regular, Inter_700Bold, Inter_900Black, useFonts } from '@expo
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import Cadastro from './view/screens/Cadastro';
 import Login from './view/screens/Login';
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -12,6 +12,7 @@ export default function App() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Cadastro" component={Cadastro} />
             </Stack.Navigator>
         </NavigationContainer>
     );
