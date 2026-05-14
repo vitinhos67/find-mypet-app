@@ -9,7 +9,7 @@ const Stack = createNativeStackNavigator();
 
 
 export default function App() {
-    const [userLogado, setUserLogado] = useState(false);
+    const [userLogado, setUserLogado] = useState(true);
     useFonts({ 'Inter-Regular': Inter_400Regular, 'Inter-Bold': Inter_700Bold, 'Inter-Black': Inter_900Black, });
     return (
         <NavigationContainer>
