@@ -1,12 +1,12 @@
 import React from 'react';
 import {
     Image,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
     View,
 } from 'react-native';
+import { SafeAreaView, } from 'react-native-safe-area-context';
 
 import { Colors } from '../styles/color';
 
@@ -120,9 +120,9 @@ const styles = StyleSheet.create({
 
     sectionTitle: {
         fontSize: 30,
-        fontWeight: 'bold',
         color: 'black',
-        marginBottom: 25,
+        marginBottom: 20,
+        fontFamily: 'Inter-Bold'
     },
 
     petContainer: {
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         paddingVertical: 8,
         paddingHorizontal: 30,
-        borderRadius: 30,
+        borderRadius: 20,
         marginBottom: 20,
     },
 
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
 
     locationCard: {
         backgroundColor: Colors.primaryOrange,
-        borderRadius: 28,
+        borderRadius: 20,
         paddingVertical: 40,
         paddingHorizontal: 20,
         justifyContent: 'center',

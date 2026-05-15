@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView, } from 'react-native-safe-area-context';
 import { AuthStackParams } from '../../navigation/types';
+import { useLoginViewModel } from '../../viewmodels/useLoginViewModel';
 import { Colors } from "../styles/color";
-
 
 export default function Login() {
 
@@ -20,7 +20,9 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [manterConectado, setManterConectado] = useState(false);
+    const { realizarLogin, isLoading } = useLoginViewModel();
     function handleEntrar() {
+        realizarLogin(email, senha, manterConectado)
     }
     function handleCriarConta() {
         navigation.navigate('Cadastro');
@@ -73,12 +75,14 @@ export default function Login() {
                         />
                         <Text style={styles.checkboxText}>Manter conectado</Text>
                     </View>
-                    <Pressable
-                        onPress={handleEntrar}
-                        style={styles.mainButton}
-                    >
-                        <Text style={styles.mainButtonText}>Entrar</Text>
-                    </Pressable>
+                        <Pressable
+                            onPress={handleEntrar}
+                            style={styles.mainButton}
+                        >
+                            <Text style={styles.mainButtonText}>
+                                {isLoading ? 'Carregando...' : 'Entrar'}
+                            </Text>
+                        </Pressable>
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>Não tem uma conta? </Text>
                         <Pressable onPress={handleCriarConta}>
