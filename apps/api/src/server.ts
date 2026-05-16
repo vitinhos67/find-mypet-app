@@ -12,12 +12,5 @@ export async function buildServer() {
 
   await app.register(registerRoutes);
 
-  app.get("/health", async () => {
-    return {
-      status: "ok",
-      service: "find-mypet-api",
-    };
-  });
-
   return app;
 }
