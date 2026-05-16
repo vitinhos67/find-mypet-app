@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, } from 'react-native-safe-area-context';
 import { AuthStackParams } from '../../navigation/types';
+import { useCadastroViewModel } from '../../viewmodels/useCadastroViewModel';
 import { Colors } from "../styles/color";
 
 export default function Cadastro() {
@@ -23,12 +24,12 @@ export default function Cadastro() {
     const [confirmarSenha, setConfirmarSenha] = useState('');
     const [telefone, setTelefone] = useState('');
     const [genero, setGenero] = useState('Gênero');
-
-
+    const [showGeneros, setShowGeneros] = useState(false);
+    const opcoesGenero = ['Masculino', 'Feminino', 'Outro'];
+    const { realizarCadastro, isLoading } = useCadastroViewModel();
+    
     function handleEntrar() {
-    }
-
-    function abrirSeletorGenero() {
+        realizarCadastro(nome, email, senha, confirmarSenha, telefone, genero);
     }
     return(
         <SafeAreaView style={styles.container}>
@@ -40,66 +41,84 @@ export default function Cadastro() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                <View style={styles.header}>
-                    <Text style={styles.title}>Find my PET</Text>
-                    <Image 
-                        source={require("../../assets/images/logo-pet.png")}
-                        style={styles.logo} 
-                    />
-                </View>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Find my PET</Text>
+                        <Image 
+                            source={require("../../assets/images/logo-pet.png")}
+                            style={styles.logo} 
+                        />
+                    </View>
 
-                <View style={styles.formContainer}>
-                    <Text style={styles.welcomeTitle}>Cadastro</Text>
-                    <Text style={styles.welcomeSubtitle}>
-                        Preencha as informações corretamente
-                    </Text>
-                    
-                        <View style={styles.inputsSection}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Nome completo"
-                                placeholderTextColor="#888888"
-                                value={nome}
-                                onChangeText={setNome}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="E-mail"
-                                placeholderTextColor="#888888"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                value={email}
-                                onChangeText={setEmail}
-                            />
+                    <View style={styles.formContainer}>
+                        <Text style={styles.welcomeTitle}>Cadastro</Text>
+                        <Text style={styles.welcomeSubtitle}>
+                            Preencha as informações corretamente
+                        </Text>
+                        
+                            <View style={styles.inputsSection}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Nome completo"
+                                    placeholderTextColor="#888888"
+                                    value={nome}
+                                    onChangeText={setNome}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="E-mail"
+                                    placeholderTextColor="#888888"
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
 
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Senha"
-                                placeholderTextColor="#888888"
-                                secureTextEntry
-                                value={senha}
-                                onChangeText={setSenha}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Confirmar Senha"
-                                placeholderTextColor="#888888"
-                                secureTextEntry
-                                value={confirmarSenha}
-                                onChangeText={setConfirmarSenha}
-                            />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Senha"
+                                    placeholderTextColor="#888888"
+                                    secureTextEntry
+                                    value={senha}
+                                    onChangeText={setSenha}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Confirmar Senha"
+                                    placeholderTextColor="#888888"
+                                    secureTextEntry
+                                    value={confirmarSenha}
+                                    onChangeText={setConfirmarSenha}
+                                />
 
                             <View style={styles.inputMiniSection}>
-                                <Pressable
-                                    style={styles.inputMini}
-                                    onPress={abrirSeletorGenero}
-                                >
-                                    <Text>
-                                        {genero}
-                                    </Text>
-                                </Pressable>
+                                <View style={styles.generoContainer}>
+                                    <Pressable
+                                        style={styles.inputMini}
+                                        onPress={() => setShowGeneros(!showGeneros)}
+                                    >
+                                        <Text style={{ color: genero === 'Gênero' ? '#888888' : 'black', fontSize: 16 }}>
+                                            {genero} ▼
+                                        </Text>
+                                    </Pressable>
+                                    {showGeneros && (
+                                        <View style={styles.dropdownOverlay}>
+                                            {opcoesGenero.map((opcao) => (
+                                                <Pressable
+                                                    key={opcao}
+                                                    style={styles.dropdownItem}
+                                                    onPress={() => {
+                                                        setGenero(opcao);
+                                                        setShowGeneros(false);
+                                                    }}
+                                                >
+                                                    <Text style={styles.dropdownText}>{opcao}</Text>
+                                                </Pressable>
+                                            ))}
+                                        </View>
+                                    )}
+                                </View>
                                 <TextInput
-                                    style={styles.inputMini}
+                                    style={styles.inputMiniPhone}
                                     placeholder="Telefone"
                                     placeholderTextColor="#888888"
                                     keyboardType="phone-pad"
@@ -107,21 +126,23 @@ export default function Cadastro() {
                                     onChangeText={setTelefone}
                                 />
                             </View>
-                        </View>
+                            </View>
 
-                    <Pressable
-                        onPress={handleEntrar}
-                        style={styles.mainButton}
-                    >
-                        <Text style={styles.mainButtonText}>Cadastrar-se</Text>
-                    </Pressable>
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Não tem uma conta? </Text>
-                        <Pressable onPress={() => navigation.pop()}>
-                            <Text style={styles.footerLink}>Voltar</Text>
-                        </Pressable>
+                            <Pressable
+                                onPress={handleEntrar}
+                                style={styles.mainButton}
+                            >
+                                <Text style={styles.mainButtonText}>
+                                    {isLoading ? 'Cadastrando...' : 'Cadastrar-se'}
+                                </Text>
+                            </Pressable>
+                            <View style={styles.footer}>
+                                <Text style={styles.footerText}>Não tem uma conta? </Text>
+                                <Pressable onPress={() => navigation.pop()}>
+                                <Text style={styles.footerLink}>Voltar</Text>
+                            </Pressable>
+                        </View>
                     </View>
-                </View>
                 </ScrollView>
             </KeyboardAvoidingView >
         </SafeAreaView>
@@ -170,13 +191,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
         backgroundColor: Colors.secondaryOrange,
     },
-    inputMini:{
-        flex: 1,
+    inputMini: {
         borderRadius: 8,
-        padding: 10,
-        fontSize: 16,
+        padding: 15,
         backgroundColor: Colors.secondaryOrange,
-    },
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: 54,
+    },   
     welcomeTitle: {
         fontSize: 28,
         fontWeight: 'bold',
@@ -193,11 +216,49 @@ const styles = StyleSheet.create({
         gap: 16, 
         marginBottom: 24,
     },
-    inputMiniSection:{
-        gap: 5,
-        marginBottom: 24,
+    inputMiniSection: {
         flexDirection: 'row',
         width: '100%',
+        gap: 16,
+        marginBottom: 24,
+        zIndex: 10,
+        elevation: 10,
+    },
+    inputMiniPhone: {
+        flex: 1,
+        borderRadius: 8,
+        padding: 15,
+        fontSize: 16,
+        backgroundColor: Colors.secondaryOrange,
+        height: 54,
+    },
+    generoContainer: {
+        flex: 1,
+        position: 'relative',
+    },
+    dropdownOverlay: {
+        position: 'absolute',
+        top: 60,
+        left: 0,
+        right: 0,
+        backgroundColor: Colors.secondaryOrange,
+        borderRadius: 8,
+        padding: 4,
+        zIndex: 999,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
+        elevation: 8,
+    },
+    dropdownItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+    },
+    dropdownText: {
+        fontSize: 16,
+        color: 'black',
     },
     mainButton: {
         backgroundColor: Colors.primaryBlue,
