@@ -1,16 +1,16 @@
 import Fastify from "fastify";
 
-export function buildServer() {
+import { registerRoutes } from "./http/routes";
+import { registerErrorHandler } from "./shared/plugins/error-handler.plugin";
+
+export async function buildServer() {
   const app = Fastify({
     logger: true,
   });
 
-  app.get("/health", async () => {
-    return {
-      status: "ok",
-      service: "find-mypet-api",
-    };
-  });
+  registerErrorHandler(app);
+
+  await app.register(registerRoutes);
 
   return app;
 }

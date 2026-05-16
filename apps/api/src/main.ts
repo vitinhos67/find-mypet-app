@@ -2,7 +2,7 @@ import { buildServer } from "./server";
 import { env } from "./shared/env/env";
 
 async function bootstrap() {
-  const app = buildServer();
+  const app = await buildServer();
 
   try {
     await app.listen({
