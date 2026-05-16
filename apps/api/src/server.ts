@@ -1,9 +1,13 @@
 import Fastify from "fastify";
 
-export function buildServer() {
+import { registerRoutes } from "./http/routes";
+
+export async function buildServer() {
   const app = Fastify({
     logger: true,
   });
+
+  await app.register(registerRoutes);
 
   app.get("/health", async () => {
     return {
