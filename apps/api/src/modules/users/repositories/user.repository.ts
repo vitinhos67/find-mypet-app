@@ -1,7 +1,11 @@
 import { AppException } from "../../../shared/exceptions/app.exception";
 import { ErrorCodes } from "../../../shared/exceptions/error-codes";
 import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
-import type { CreateUserInput, User } from "../models/user.model";
+import type {
+  CreateUserInput,
+  User,
+  UserWithPassword,
+} from "../models/user.model";
 
 const USER_PUBLIC_FIELDS = "id, name, email, created_at";
 
@@ -16,6 +20,46 @@ export class UserRepository {
     if (error) {
       throw new AppException(
         "Não foi possível verificar o e-mail informado.",
+        500,
+        ErrorCodes.INTERNAL_ERROR,
+        error.message
+      );
+    }
+
+    return data ?? null;
+  }
+
+  async findById(id: string): Promise<User | null> {
+    const { data, error } = await supabaseAdmin
+      .from("users")
+      .select(USER_PUBLIC_FIELDS)
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      throw new AppException(
+        "Não foi possível buscar o usuário.",
+        500,
+        ErrorCodes.INTERNAL_ERROR,
+        error.message
+      );
+    }
+
+    return data ?? null;
+  }
+
+  async findByEmailWithPassword(
+    email: string
+  ): Promise<UserWithPassword | null> {
+    const { data, error } = await supabaseAdmin
+      .from("users")
+      .select(`${USER_PUBLIC_FIELDS}, password`)
+      .eq("email", email)
+      .maybeSingle();
+
+    if (error) {
+      throw new AppException(
+        "Não foi possível verificar as credenciais.",
         500,
         ErrorCodes.INTERNAL_ERROR,
         error.message
