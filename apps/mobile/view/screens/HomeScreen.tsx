@@ -6,38 +6,35 @@ import {
     Text,
     View,
 } from 'react-native';
-import { SafeAreaView, } from 'react-native-safe-area-context';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTheme } from '../../hooks/useTheme';
+import { useHomeViewModel } from '../../viewmodels/useHomeViewModel';
 import { Colors } from '../styles/color';
-
-type PetType = {
-    id: number;
-    nome: string;
-    ultimaLocalizacao: string;
-};
 
 export default function HomeScreen() {
 
-    //aqui mais pra frente terá a api do maps pra exibir a loc
-    const pets: PetType[] = [
-        {
-            id: 1,
-            nome: 'Rex',
-            ultimaLocalizacao: 'Avenida Brasil',
-        },
-        {
-            id: 2,
-            nome: 'Mel',
-            ultimaLocalizacao: 'Praça Central',
-        },
-    ];
+    const { darkMode } = useTheme();
+
+    const {
+        pets,
+        isLoading
+    } = useHomeViewModel();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                darkMode && styles.containerDark
+            ]}
+        >
+
             <ScrollView showsVerticalScrollIndicator={false}>
 
                 {/* HEADER */}
                 <View style={styles.header}>
+
                     <Text style={styles.logoText}>
                         Find My PET
                     </Text>
@@ -46,49 +43,90 @@ export default function HomeScreen() {
                         source={require('../../assets/images/logo-pet.png')}
                         style={styles.headerImage}
                     />
+
                 </View>
 
-                {/* PETS */}
+                {/* CONTENT */}
                 <View style={styles.content}>
 
-                    <Text style={styles.sectionTitle}>
+                    <Text
+                        style={[
+                            styles.sectionTitle,
+                            darkMode && styles.textDark
+                        ]}
+                    >
                         PET'S
                     </Text>
 
-                    {pets.map((pet) => (
-                        <View key={pet.id} style={styles.petContainer}>
+                    {isLoading ? (
 
-                            {/* NOME PET */}
-                            <View style={styles.petNameBox}>
-                                <Text style={styles.petName}>
-                                    {pet.nome}
-                                </Text>
+                        <Text
+                            style={[
+                                styles.loadingText,
+                                darkMode && styles.textDark
+                            ]}
+                        >
+                            Carregando pets...
+                        </Text>
+
+                    ) : (
+
+                        pets.map((pet) => (
+
+                            <View
+                                key={pet.id}
+                                style={styles.petContainer}
+                            >
+
+                                <View style={styles.petNameBox}>
+
+                                    <Text style={styles.petName}>
+                                        {pet.nome}
+                                    </Text>
+
+                                </View>
+
+                                <View
+                                    style={[
+                                        styles.locationCard,
+                                        darkMode &&
+                                        styles.locationCardDark
+                                    ]}
+                                >
+
+                                    <Text style={styles.locationText}>
+                                        Última localização:
+                                    </Text>
+
+                                    <Text style={styles.locationValue}>
+                                        {pet.ultimaLocalizacao}
+                                    </Text>
+
+                                </View>
+
                             </View>
 
-                            {/* CARD LOCALIZAÇÃO */}
-                            <View style={styles.locationCard}>
-                                <Text style={styles.locationText}>
-                                    Última localização:
-                                </Text>
+                        ))
 
-                                <Text style={styles.locationValue}>
-                                    {pet.ultimaLocalizacao}
-                                </Text>
-                            </View>
-
-                        </View>
-                    ))}
+                    )}
 
                 </View>
+
             </ScrollView>
+
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: '#F2F2F2',
+    },
+
+    containerDark: {
+        backgroundColor: '#121212',
     },
 
     header: {
@@ -122,7 +160,16 @@ const styles = StyleSheet.create({
         fontSize: 30,
         color: 'black',
         marginBottom: 20,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
+    },
+
+    textDark: {
+        color: 'white',
+    },
+
+    loadingText: {
+        fontSize: 18,
+        color: 'black',
     },
 
     petContainer: {
@@ -154,6 +201,10 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
 
+    locationCardDark: {
+        backgroundColor: Colors.secondaryBlue,
+    },
+
     locationText: {
         color: 'white',
         fontSize: 22,
@@ -168,4 +219,5 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center',
     },
+
 });
