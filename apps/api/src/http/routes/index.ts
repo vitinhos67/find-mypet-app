@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
+import { authRoutes } from "../../modules/auth/routes/auth.routes";
 import { healthRoutes } from "../../modules/health/routes/health.routes";
 import { userRoutes } from "../../modules/users/routes/user.routes";
 
@@ -12,6 +13,7 @@ export async function registerRoutes(app: FastifyInstance) {
       }));
 
       await api.register(healthRoutes, { prefix: "/health" });
+      await api.register(authRoutes, { prefix: "/auth" });
       await api.register(userRoutes, { prefix: "/users" });
     },
     { prefix: "/api" }
