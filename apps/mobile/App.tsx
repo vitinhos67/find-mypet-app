@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
+import { ThemeProvider } from './hooks/useTheme';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,8 +39,10 @@ export default function App() {
     }, []);
     
     return (
-        <NavigationContainer>
-            {userLogado ? <TabNavigator /> : <AuthNavigator />}
-        </NavigationContainer>
+        <ThemeProvider>
+            <NavigationContainer>
+                {userLogado ? <TabNavigator /> : <AuthNavigator />}
+            </NavigationContainer>
+        </ThemeProvider>
     );
 }
