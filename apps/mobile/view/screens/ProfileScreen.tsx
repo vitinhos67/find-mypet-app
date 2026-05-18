@@ -67,13 +67,36 @@ export default function ProfileScreen() {
     }
 
     async function carregarImagem() {
+        try {
+            setProfileImage(null);
 
-        const imagemSalva =
-            await AsyncStorage.getItem('@profile_image');
+            const { data, error } = await supabase.auth.getUser();
 
-        if (imagemSalva) {
+            if (error) {
+                console.log('Erro ao buscar usuário para imagem:', error.message);
+                return;
+            }
 
-            setProfileImage(imagemSalva);
+            const user = data.user;
+
+            if (!user) {
+                return;
+            }
+
+            const imagemSalva = await AsyncStorage.getItem(
+                `@profile_image_${user.id}`
+            );
+
+            if (imagemSalva) {
+                setProfileImage(imagemSalva);
+                return;
+            }
+
+            setProfileImage(null);
+
+        } catch (error) {
+            console.log('Erro ao carregar imagem de perfil:', error);
+            setProfileImage(null);
         }
     }
 
@@ -101,8 +124,14 @@ export default function ProfileScreen() {
 
             setProfileImage(imagemUri);
 
+            const { data } = await supabase.auth.getUser();
+
+            if (!data.user) {
+                return;
+            }
+
             await AsyncStorage.setItem(
-                '@profile_image',
+                `@profile_image_${data.user.id}`,
                 imagemUri
             );
         }
@@ -117,6 +146,7 @@ export default function ProfileScreen() {
             }
 
             await AsyncStorage.removeItem('@usuario');
+            await AsyncStorage.removeItem('@profile_image_${user.id}');
             await AsyncStorage.removeItem('@manter_conectado');
 
             const { error } = await supabase.auth.signOut();
