@@ -7,6 +7,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colors } from '../styles/color';
+import { supabase } from '../../src/shared/lib/supabase';
 
 type UsuarioType = {
     nome?: string;
@@ -31,16 +32,37 @@ export default function ProfileScreen() {
     }, []);
 
     async function carregarUsuario() {
+        try {
+            const { data, error } = await supabase.auth.getUser();
 
-        const usuarioSalvo =
-            await AsyncStorage.getItem('@usuario');
+            if (error) {
+                console.log('Erro ao buscar usuário:', error.message);
+                return;
+            }
 
-        if (usuarioSalvo) {
+            const user = data.user;
 
-            const usuarioConvertido =
-                JSON.parse(usuarioSalvo);
+            if (!user) {
+                return;
+            }
 
-            setUsuario(usuarioConvertido);
+            const usuarioAtual = {
+                nome:
+                  user.user_metadata?.nome_completo ||
+                  user.user_metadata?.name ||
+                  'Usuário',
+                email: user.email || 'email@email.com',
+            };
+
+            setUsuario(usuarioAtual);
+
+            await AsyncStorage.setItem(
+                `@usuario_${user.id}`,
+                JSON.stringify(usuarioAtual)
+            );
+
+        } catch (error) {
+            console.log('Erro ao carregar usuário:', error);
         }
     }
 
@@ -87,10 +109,29 @@ export default function ProfileScreen() {
     }
 
     async function handleLogout() {
+        try {
+            const { data } = await supabase.auth.getUser();
 
-        await AsyncStorage.removeItem('@usuario');
+            if (data.user) {
+                await AsyncStorage.removeItem(`@usuario_${data.user.id}`);
+            }
 
-        // futuramente aqui vai navegar pro login de voklta
+            await AsyncStorage.removeItem('@usuario');
+            await AsyncStorage.removeItem('@manter_conectado');
+
+            const { error } = await supabase.auth.signOut();
+
+            if (error) {
+                console.log('Erro ao sair da conta:', error.message);
+                return;
+            }
+
+            setUsuario({});
+            setProfileImage(null);
+
+        } catch (error) {
+            console.log('Erro ao realizar logout:', error);
+        }
     }
 
     return (
@@ -146,14 +187,34 @@ export default function ProfileScreen() {
 
             </View>
 
-            <Text
+            <View
                 style={[
-                    styles.emailText,
-                    darkMode && styles.textDark
+                styles.emailCard,
+                darkMode && styles.emailCardDark
                 ]}
             >
-                Email: {usuario.email || 'email@email.com'}
-            </Text>
+
+                <Text
+                    style={[
+                    styles.emailLabel,
+                    darkMode && styles.textDark
+                    ]}
+                >
+                    Email
+                </Text>
+
+                <Text
+                    style={[
+                    styles.emailValue,
+                            darkMode && styles.textDark
+                    ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                >
+                    {usuario.email || 'email@email.com'}
+                </Text>
+
+            </View>
 
             <View style={styles.configSection}>
 
@@ -273,12 +334,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter-Bold',
     },
 
-    emailText: {
-        fontSize: 22,
-        marginTop: 40,
-        fontFamily: 'Inter-Bold',
-    },
-
     configSection: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -338,5 +393,31 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignSelf: 'center',
         fontSize: 18,
+    },
+
+    emailCard: {
+        marginTop: 40,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        paddingVertical: 14,
+        paddingHorizontal: 18,
+        elevation: 2,
+    },
+
+    emailLabel: {
+        fontSize: 14,
+        color: '#666666',
+        fontFamily: 'Inter-Bold',
+        marginBottom: 4,
+    },
+
+    emailValue: {
+        fontSize: 18,
+        color: '#000000',
+        fontFamily: 'Inter-Bold',
+    },
+
+    emailCardDark: {
+        backgroundColor: '#1E1E1E',
     },
 });
