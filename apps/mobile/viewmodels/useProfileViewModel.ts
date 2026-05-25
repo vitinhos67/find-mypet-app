@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
 import { supabase } from "../src/shared/lib/supabase";
+import { ProfileService } from '../services/ProfileService';
 
 type UsuarioType = {
     nome?: string;
@@ -24,35 +25,17 @@ export function useProfileViewModel() {
 
     async function carregarUsuario() {
         try {
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log("Erro ao buscar usuário:", error.message);
+            const usuarioAtual =
+                await ProfileService.carregarUsuarioAtual();
+        
+            if (!usuarioAtual) {
                 return;
             }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const usuarioAtual = {
-                nome:
-                    user.user_metadata?.nome_completo ||
-                    user.user_metadata?.name ||
-                    "Usuário",
-                email: user.email || "email@email.com",
-            };
-
+        
             setUsuario(usuarioAtual);
-
-            await AsyncStorage.setItem(
-                `@usuario_${user.id}`,
-                JSON.stringify(usuarioAtual),
-            );
+        
         } catch (error) {
-            console.log("Erro ao carregar usuário:", error);
+            console.log('Erro ao carregar usuário:', error);
         }
     }
 
