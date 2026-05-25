@@ -1,7 +1,6 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
-import { supabase } from "../src/shared/lib/supabase";
+import { ProfileService } from '../services/ProfileService';
 
 type UsuarioType = {
     nome?: string;
@@ -24,35 +23,17 @@ export function useProfileViewModel() {
 
     async function carregarUsuario() {
         try {
-            const { data, error } = await supabase.auth.getUser();
+            const usuarioAtual =
+                await ProfileService.carregarUsuarioAtual();
 
-            if (error) {
-                console.log("Erro ao buscar usuário:", error.message);
+            if (!usuarioAtual) {
                 return;
             }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const usuarioAtual = {
-                nome:
-                    user.user_metadata?.nome_completo ||
-                    user.user_metadata?.name ||
-                    "Usuário",
-                email: user.email || "email@email.com",
-            };
 
             setUsuario(usuarioAtual);
 
-            await AsyncStorage.setItem(
-                `@usuario_${user.id}`,
-                JSON.stringify(usuarioAtual),
-            );
         } catch (error) {
-            console.log("Erro ao carregar usuário:", error);
+            console.log('Erro ao carregar usuário:', error);
         }
     }
 
@@ -60,84 +41,39 @@ export function useProfileViewModel() {
         try {
             setProfileImage(null);
 
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log(
-                    "Erro ao buscar usuário para imagem:",
-                    error.message,
-                );
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const imagemSalva = await AsyncStorage.getItem(
-                `@profile_image_${user.id}`,
-            );
+            const imagemSalva =
+                await ProfileService.carregarImagemPerfil();
 
             if (imagemSalva) {
                 setProfileImage(imagemSalva);
             }
+
         } catch (error) {
-            console.log("Erro ao carregar imagem de perfil:", error);
+            console.log('Erro ao carregar imagem de perfil:', error);
             setProfileImage(null);
         }
     }
 
     async function salvarImagemPerfil(imagemUri: string) {
         try {
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log(
-                    "Erro ao buscar usuário para salvar imagem:",
-                    error.message,
-                );
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
             setProfileImage(imagemUri);
-
-            await AsyncStorage.setItem(`@profile_image_${user.id}`, imagemUri);
+        
+            await ProfileService.salvarImagemPerfil(imagemUri);
+        
         } catch (error) {
-            console.log("Erro ao salvar imagem de perfil:", error);
+            console.log('Erro ao salvar imagem de perfil:', error);
         }
     }
 
     async function realizarLogout() {
         try {
-            const { data } = await supabase.auth.getUser();
-
-            if (data.user) {
-                await AsyncStorage.removeItem(`@usuario_${data.user.id}`);
-            }
-
-            await AsyncStorage.removeItem("@usuario");
-            await AsyncStorage.removeItem("@profile_image");
-            await AsyncStorage.removeItem("@manter_conectado");
-
-            const { error } = await supabase.auth.signOut();
-
-            if (error) {
-                console.log("Erro ao sair da conta:", error.message);
-                return;
-            }
+            await ProfileService.realizarLogout();
 
             setUsuario({});
             setProfileImage(null);
+
         } catch (error) {
-            console.log("Erro ao realizar logout:", error);
+            console.log('Erro ao realizar logout:', error);
         }
     }
 
