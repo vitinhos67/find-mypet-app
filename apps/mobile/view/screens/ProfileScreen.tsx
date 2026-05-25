@@ -1,104 +1,21 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
-
+import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { supabase } from '../../src/shared/lib/supabase';
 import { Colors } from '../styles/color';
-
-type UsuarioType = {
-    nome?: string;
-    email?: string;
-};
 
 export default function ProfileScreen() {
 
     const {darkMode, toggleTheme} = useTheme();
 
-    const [profileImage, setProfileImage] =
-        useState<string | null>(null);
-
-    const [usuario, setUsuario] =
-        useState<UsuarioType>({});
-
-    useEffect(() => {
-
-        carregarImagem();
-        carregarUsuario();
-
-    }, []);
-
-    async function carregarUsuario() {
-        try {
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log('Erro ao buscar usuário:', error.message);
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const usuarioAtual = {
-                nome:
-                  user.user_metadata?.nome_completo ||
-                  user.user_metadata?.name ||
-                  'Usuário',
-                email: user.email || 'email@email.com',
-            };
-
-            setUsuario(usuarioAtual);
-
-            await AsyncStorage.setItem(
-                `@usuario_${user.id}`,
-                JSON.stringify(usuarioAtual)
-            );
-
-        } catch (error) {
-            console.log('Erro ao carregar usuário:', error);
-        }
-    }
-
-    async function carregarImagem() {
-        try {
-            setProfileImage(null);
-
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log('Erro ao buscar usuário para imagem:', error.message);
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const imagemSalva = await AsyncStorage.getItem(
-                `@profile_image_${user.id}`
-            );
-
-            if (imagemSalva) {
-                setProfileImage(imagemSalva);
-                return;
-            }
-
-            setProfileImage(null);
-
-        } catch (error) {
-            console.log('Erro ao carregar imagem de perfil:', error);
-            setProfileImage(null);
-        }
-    }
+    const {
+        usuario,
+        profileImage,
+        salvarImagemPerfil,
+        realizarLogout,
+    } = useProfileViewModel();
 
     async function selecionarImagem() {
 
@@ -122,45 +39,7 @@ export default function ProfileScreen() {
             const imagemUri =
                 resultado.assets[0].uri;
 
-            setProfileImage(imagemUri);
-
-            const { data } = await supabase.auth.getUser();
-
-            if (!data.user) {
-                return;
-            }
-
-            await AsyncStorage.setItem(
-                `@profile_image_${data.user.id}`,
-                imagemUri
-            );
-        }
-    }
-
-    async function handleLogout() {
-        try {
-            const { data } = await supabase.auth.getUser();
-
-            if (data.user) {
-                await AsyncStorage.removeItem(`@usuario_${data.user.id}`);
-            }
-
-            await AsyncStorage.removeItem('@usuario');
-            await AsyncStorage.removeItem('@profile_image_${user.id}');
-            await AsyncStorage.removeItem('@manter_conectado');
-
-            const { error } = await supabase.auth.signOut();
-
-            if (error) {
-                console.log('Erro ao sair da conta:', error.message);
-                return;
-            }
-
-            setUsuario({});
-            setProfileImage(null);
-
-        } catch (error) {
-            console.log('Erro ao realizar logout:', error);
+            await salvarImagemPerfil(imagemUri);
         }
     }
 
@@ -284,7 +163,7 @@ export default function ProfileScreen() {
 
                 <Pressable
                     style={styles.logoutButton}
-                    onPress={handleLogout}
+                    onPress={realizarLogout}
                 >
 
                     <Text style={styles.logoutText}>
