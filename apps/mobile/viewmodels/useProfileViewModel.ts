@@ -27,13 +27,13 @@ export function useProfileViewModel() {
         try {
             const usuarioAtual =
                 await ProfileService.carregarUsuarioAtual();
-        
+
             if (!usuarioAtual) {
                 return;
             }
-        
+
             setUsuario(usuarioAtual);
-        
+
         } catch (error) {
             console.log('Erro ao carregar usuário:', error);
         }
@@ -43,58 +43,27 @@ export function useProfileViewModel() {
         try {
             setProfileImage(null);
 
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log(
-                    "Erro ao buscar usuário para imagem:",
-                    error.message,
-                );
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
-            const imagemSalva = await AsyncStorage.getItem(
-                `@profile_image_${user.id}`,
-            );
+            const imagemSalva =
+                await ProfileService.carregarImagemPerfil();
 
             if (imagemSalva) {
                 setProfileImage(imagemSalva);
             }
+
         } catch (error) {
-            console.log("Erro ao carregar imagem de perfil:", error);
+            console.log('Erro ao carregar imagem de perfil:', error);
             setProfileImage(null);
         }
     }
 
     async function salvarImagemPerfil(imagemUri: string) {
         try {
-            const { data, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.log(
-                    "Erro ao buscar usuário para salvar imagem:",
-                    error.message,
-                );
-                return;
-            }
-
-            const user = data.user;
-
-            if (!user) {
-                return;
-            }
-
             setProfileImage(imagemUri);
-
-            await AsyncStorage.setItem(`@profile_image_${user.id}`, imagemUri);
+        
+            await ProfileService.salvarImagemPerfil(imagemUri);
+        
         } catch (error) {
-            console.log("Erro ao salvar imagem de perfil:", error);
+            console.log('Erro ao salvar imagem de perfil:', error);
         }
     }
 

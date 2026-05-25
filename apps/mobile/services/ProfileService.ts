@@ -38,4 +38,45 @@ export class ProfileService {
 
         return usuarioAtual;
     }
+
+    static async carregarImagemPerfil(): Promise<string | null> {
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error) {
+            console.log('Erro ao buscar usuário para imagem:', error.message);
+            return null;
+        }
+
+        const user = data.user;
+
+        if (!user) {
+            return null;
+        }
+
+        const imagemSalva = await AsyncStorage.getItem(
+            `@profile_image_${user.id}`
+        );
+
+        return imagemSalva;
+    }
+
+    static async salvarImagemPerfil(imagemUri: string): Promise<void> {
+        const { data, error } = await supabase.auth.getUser();
+    
+        if (error) {
+            console.log('Erro ao buscar usuário para salvar imagem:', error.message);
+            return;
+        }
+    
+        const user = data.user;
+    
+        if (!user) {
+            return;
+        }
+    
+        await AsyncStorage.setItem(
+            `@profile_image_${user.id}`,
+            imagemUri
+        );
+    }
 }
