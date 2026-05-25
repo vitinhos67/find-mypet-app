@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     },
     title:{
         paddingLeft: 10,
-        color: Colors.primaryBlue,
+        color: Colors.brand.primaryBlue,
         fontSize: 28,
         fontFamily: 'Inter-Black'
     },
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     },
     formContainer:{
         width: '100%',
-        backgroundColor: Colors.primaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
         padding: 20,
         alignSelf: 'center',
         borderRadius: 20
@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         fontSize: 16,
-        backgroundColor: Colors.secondaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
     },
     inputMini: {
         borderRadius: 8,
         padding: 15,
-        backgroundColor: Colors.secondaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     
     welcomeSubtitle: {
         fontSize: 14,
-        color: Colors.secondaryBlue,
+        color: Colors.brand.primaryBlue,
         opacity: 0.9,
         marginBottom: 24,
     },
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         fontSize: 16,
-        backgroundColor: Colors.secondaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
         height: 54,
     },
     generoContainer: {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
         top: 60,
         left: 0,
         right: 0,
-        backgroundColor: Colors.secondaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
         borderRadius: 8,
         padding: 4,
         zIndex: 999,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         color: 'black',
     },
     mainButton: {
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     footerLink: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: Colors.primaryBlue,
+        color: Colors.brand.primaryBlue,
         textDecorationLine: 'underline',
     }
 });

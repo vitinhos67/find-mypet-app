@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
         width: '100%',
         height: 110,
         flexDirection: 'row',
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     },
 
     petNameBox: {
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
         alignSelf: 'flex-start',
         paddingVertical: 8,
         paddingHorizontal: 30,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     },
 
     locationCard: {
-        backgroundColor: Colors.primaryOrange,
+        backgroundColor: Colors.brand.primaryOrange,
         borderRadius: 20,
         paddingVertical: 40,
         paddingHorizontal: 20,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     },
 
     locationCardDark: {
-        backgroundColor: Colors.secondaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
     },
 
     locationText: {

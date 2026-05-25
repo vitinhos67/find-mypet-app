@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     },
     title:{
         paddingLeft: 20,
-        color: Colors.primaryBlue,
+        color: Colors.brand.primaryBlue,
         fontSize: 35,
         fontFamily: 'Inter-Black'
     },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     formContainer:{
         width: '100%',
-        backgroundColor: Colors.primaryOrange,
+        backgroundColor: Colors.brand.primaryOrange,
         padding: 20,
         alignSelf: 'center',
         borderRadius: 20
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         fontSize: 16,
-        backgroundColor: Colors.secondaryOrange,
+        backgroundColor: Colors.brand.secondaryOrange,
     },
     welcomeTitle: {
         fontSize: 28,
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     },
     welcomeSubtitle: {
         fontSize: 14,
-        color: Colors.secondaryBlue,
+        color: Colors.brand.secondaryBlue,
         opacity: 0.9,
         marginBottom: 24,
     },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     mainButton: {
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     footerLink: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: Colors.primaryBlue,
+        color: Colors.brand.primaryBlue,
         textDecorationLine: 'underline',
     }
 });

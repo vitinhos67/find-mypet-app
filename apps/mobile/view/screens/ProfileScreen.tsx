@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Switch, Text, View, } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors } from '../styles/color';
 import { supabase } from '../../src/shared/lib/supabase';
+import { Colors } from '../styles/color';
 
 type UsuarioType = {
     nome?: string;
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     },
 
     editButton: {
-        backgroundColor: Colors.primaryOrange,
+        backgroundColor: Colors.brand.primaryOrange,
         paddingVertical: 10,
         borderRadius: 20,
         alignItems: 'center',
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     },
 
     themeSwitchDark: {
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.brand.primaryBlue,
     },
 
     themeBall: {
