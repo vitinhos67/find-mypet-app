@@ -1,7 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
-import { supabase } from "../src/shared/lib/supabase";
 import { ProfileService } from '../services/ProfileService';
 
 type UsuarioType = {
@@ -69,27 +67,13 @@ export function useProfileViewModel() {
 
     async function realizarLogout() {
         try {
-            const { data } = await supabase.auth.getUser();
-
-            if (data.user) {
-                await AsyncStorage.removeItem(`@usuario_${data.user.id}`);
-            }
-
-            await AsyncStorage.removeItem("@usuario");
-            await AsyncStorage.removeItem("@profile_image");
-            await AsyncStorage.removeItem("@manter_conectado");
-
-            const { error } = await supabase.auth.signOut();
-
-            if (error) {
-                console.log("Erro ao sair da conta:", error.message);
-                return;
-            }
+            await ProfileService.realizarLogout();
 
             setUsuario({});
             setProfileImage(null);
+
         } catch (error) {
-            console.log("Erro ao realizar logout:", error);
+            console.log('Erro ao realizar logout:', error);
         }
     }
 

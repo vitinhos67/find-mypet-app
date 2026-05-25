@@ -79,4 +79,22 @@ export class ProfileService {
             imagemUri
         );
     }
+
+    static async realizarLogout(): Promise<void> {
+        const { data } = await supabase.auth.getUser();
+        
+        if (data.user) {
+            await AsyncStorage.removeItem(`@usuario_${data.user.id}`);
+        }
+    
+        await AsyncStorage.removeItem('@usuario');
+        await AsyncStorage.removeItem('@profile_image');
+        await AsyncStorage.removeItem('@manter_conectado');
+    
+        const { error } = await supabase.auth.signOut();
+    
+        if (error) {
+            console.log('Erro ao sair da conta:', error.message);
+        }
+    }
 }
