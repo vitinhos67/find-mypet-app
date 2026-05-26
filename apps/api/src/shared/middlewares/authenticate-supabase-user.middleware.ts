@@ -1,13 +1,9 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { User } from "@supabase/supabase-js";
 
 import { AppException } from "../exceptions/app.exception";
 import { ErrorCodes } from "../exceptions/error-codes";
 import { supabaseAdmin } from "../supabase/supabaseAdmin";
 
-type RequestWithSupabaseUser = FastifyRequest & {
-    supabaseUser?: User;
-};
 
 export async function authenticateSupabaseUser(
     request: FastifyRequest,
@@ -44,5 +40,5 @@ export async function authenticateSupabaseUser(
         );
     }
 
-    (request as RequestWithSupabaseUser).supabaseUser = data.user;
+    request.supabaseUser = data.user;
 }
