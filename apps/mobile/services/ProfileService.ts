@@ -27,28 +27,67 @@ type MeResponse = {
 export class ProfileService {
 
     static async carregarUsuarioAtual(): Promise<UserProfile | null> {
-        const response =
-        await ApiService.get<ApiResponse<MeResponse>>('/me');
+        try{
+            const response =
+            await ApiService.get<ApiResponse<MeResponse>>('/me');
 
-        const user = response.data;
+            const user = response.data;
 
+            if (!user) {
+                return null;
+            }
+
+            const usuarioAtual = {
+                nome:
+                    user.metadata?.nome_completo ||
+                    user.metadata?.name ||
+                    'Usuário',
+                email: user.email || 'email@email.com',
+            };
+
+            await AsyncStorage.setItem(
+                `@usuario_${user.id}`,
+                JSON.stringify(usuarioAtual)
+            );
+
+            return usuarioAtual;
+        } catch (error) {
+            console.log('Erro ao carregar usuário pela API:', error);
+
+            return this.carregarUsuarioLocal();
+        }
+    }
+
+    private static async carregarUsuarioLocal(): Promise<UserProfile | null> {
+        const { data } = await supabase.auth.getSession();
+        
+        const user = data.session?.user;
+        
         if (!user) {
             return null;
         }
-
+    
+        const usuarioSalvo = await AsyncStorage.getItem(
+            `@usuario_${user.id}`
+        );
+    
+        if (usuarioSalvo) {
+            return JSON.parse(usuarioSalvo);
+        }
+    
         const usuarioAtual = {
             nome:
-                user.metadata?.nome_completo ||
-                user.metadata?.name ||
+                user.user_metadata?.nome_completo ||
+                user.user_metadata?.name ||
                 'Usuário',
             email: user.email || 'email@email.com',
         };
-
+    
         await AsyncStorage.setItem(
             `@usuario_${user.id}`,
             JSON.stringify(usuarioAtual)
         );
-
+    
         return usuarioAtual;
     }
 
