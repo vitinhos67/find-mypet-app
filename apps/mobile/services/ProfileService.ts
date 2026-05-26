@@ -1,23 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { supabase } from '../src/shared/lib/supabase';
+import { ApiService } from './ApiService';
 
 export type UserProfile = {
     nome: string;
     email: string;
 };
 
+type ApiResponse<T> = {
+    success: boolean;
+    data: T;
+    message?: string;
+};
+
+type MeResponse = {
+    id: string;
+    email?: string;
+    metadata?: {
+        nome_completo?: string;
+        name?: string;
+        [key: string]: unknown;
+    };
+};
+
 export class ProfileService {
 
     static async carregarUsuarioAtual(): Promise<UserProfile | null> {
-        const { data, error } = await supabase.auth.getUser();
+        const response =
+        await ApiService.get<ApiResponse<MeResponse>>('/me');
 
-        if (error) {
-            console.log('Erro ao buscar usuário:', error.message);
-            return null;
-        }
-
-        const user = data.user;
+        const user = response.data;
 
         if (!user) {
             return null;
@@ -25,8 +38,8 @@ export class ProfileService {
 
         const usuarioAtual = {
             nome:
-                user.user_metadata?.nome_completo ||
-                user.user_metadata?.name ||
+                user.metadata?.nome_completo ||
+                user.metadata?.name ||
                 'Usuário',
             email: user.email || 'email@email.com',
         };
