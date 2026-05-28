@@ -137,9 +137,9 @@ export default function Cadastro() {
                                 </Text>
                             </Pressable>
                             <View style={styles.footer}>
-                                <Text style={styles.footerText}>Não tem uma conta? </Text>
+                                <Text style={styles.footerText}>Já tem uma conta? </Text>
                                 <Pressable onPress={() => navigation.pop()}>
-                                <Text style={styles.footerLink}>Voltar</Text>
+                                <Text style={styles.footerLink}>Login</Text>
                             </Pressable>
                         </View>
                     </View>
@@ -180,10 +180,10 @@ const styles = StyleSheet.create({
     },
     formContainer:{
         width: '100%',
-        backgroundColor: Colors.brand.secondaryOrange,
+        backgroundColor: Colors.brand.primaryOrange,
         padding: 20,
         alignSelf: 'center',
-        borderRadius: 20
+        borderRadius: 10
     },
     input: {
         borderRadius: 8,

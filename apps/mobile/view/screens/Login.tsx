@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.brand.primaryOrange,
         padding: 20,
         alignSelf: 'center',
-        borderRadius: 20
+        borderRadius: 10
     },
     input: {
         borderRadius: 8,

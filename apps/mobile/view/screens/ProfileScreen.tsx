@@ -1,9 +1,9 @@
-import React from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../styles/color';
 
 export default function ProfileScreen() {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F2',
+        backgroundColor: Colors.light.background,
         padding: 30,
     },
 
@@ -211,8 +211,8 @@ const styles = StyleSheet.create({
     },
 
     profilePlaceholderText: {
-        fontSize: 28,
-        fontFamily: 'Inter-Bold',
+        fontSize: 20,
+        fontFamily: 'Inter-Regular',
     },
 
     profileImage: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     },
 
     userName: {
-        fontSize: 30,
+        fontSize: 20,
         fontFamily: 'Inter-Bold',
         marginBottom: 10,
     },
@@ -234,12 +234,12 @@ const styles = StyleSheet.create({
     editButton: {
         backgroundColor: Colors.brand.primaryOrange,
         paddingVertical: 10,
-        borderRadius: 20,
+        borderRadius: 10,
         alignItems: 'center',
     },
 
     editButtonText: {
-        fontSize: 20,
+        fontSize: 14,
         fontFamily: 'Inter-Bold',
     },
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     },
 
     configTitle: {
-        fontSize: 28,
+        fontSize: 20,
         fontFamily: 'Inter-Bold',
     },
 
@@ -266,18 +266,18 @@ const styles = StyleSheet.create({
         backgroundColor: '#FF3B30',
         paddingVertical: 16,
         paddingHorizontal: 40,
-        borderRadius: 20,
+        borderRadius: 10,
     },
 
     logoutText: {
         color: 'white',
-        fontSize: 22,
+        fontSize: 14,
         fontFamily: 'Inter-Bold',
     },
     themeSwitch: {
         width: 90,
         height: 42,
-        borderRadius: 30,
+        borderRadius: 10,
         backgroundColor: '#D9D9D9',
         justifyContent: 'center',
         paddingHorizontal: 5,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     themeBall: {
         width: 32,
         height: 32,
-        borderRadius: 16,
+        borderRadius: 10,
         backgroundColor: 'white',
     },
 
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     emailCard: {
         marginTop: 40,
         backgroundColor: '#FFFFFF',
-        borderRadius: 16,
+        borderRadius: 10,
         paddingVertical: 14,
         paddingHorizontal: 18,
         elevation: 2,
@@ -321,9 +321,9 @@ const styles = StyleSheet.create({
     },
 
     emailValue: {
-        fontSize: 18,
+        fontSize: 14,
         color: '#000000',
-        fontFamily: 'Inter-Bold',
+        fontFamily: 'Inter-Regular',
     },
 
     emailCardDark: {
