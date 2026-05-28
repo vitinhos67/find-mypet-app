@@ -1,26 +1,90 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { supabase } from '../src/shared/lib/supabase';
+import { ApiService } from './ApiService';
 
 export type UserProfile = {
     nome: string;
     email: string;
 };
 
+type ProfileResponse = {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+    gender: string | null;
+    avatar_url: string | null;
+    updated_at: string | null;
+};
+
+type ApiResponse<T> = {
+    success: boolean;
+    data: T;
+    message?: string;
+};
+
+type MeResponse = {
+    id: string;
+    email?: string;
+    metadata?: {
+        nome_completo?: string;
+        name?: string;
+        [key: string]: unknown;
+    };
+    profile?: ProfileResponse | null;
+};
+
 export class ProfileService {
 
     static async carregarUsuarioAtual(): Promise<UserProfile | null> {
-        const { data, error } = await supabase.auth.getUser();
+        try{
+            const response =
+            await ApiService.get<ApiResponse<MeResponse>>('/me');
 
-        if (error) {
-            console.log('Erro ao buscar usuário:', error.message);
-            return null;
+            const user = response.data;
+
+            if (!user) {
+                return null;
+            }
+
+            const usuarioAtual = {
+                nome:
+                    user.profile?.full_name ||
+                    user.metadata?.nome_completo ||
+                    user.metadata?.name ||
+                    'Usuário',
+                email: user.profile?.email || user.email || 'email@email.com',
+            };
+
+            await AsyncStorage.setItem(
+                `@usuario_${user.id}`,
+                JSON.stringify(usuarioAtual)
+            );
+
+            return usuarioAtual;
+        } catch (error) {
+            console.log('Erro ao carregar usuário pela API:', error);
+
+            return this.carregarUsuarioLocal();
         }
+    }
 
-        const user = data.user;
+    private static async carregarUsuarioLocal(): Promise<UserProfile | null> {
+        const { data } = await supabase.auth.getSession();
+
+        const user = data.session?.user;
 
         if (!user) {
             return null;
+        }
+
+        const usuarioSalvo = await AsyncStorage.getItem(
+            `@usuario_${user.id}`
+        );
+
+        if (usuarioSalvo) {
+            return JSON.parse(usuarioSalvo);
         }
 
         const usuarioAtual = {
