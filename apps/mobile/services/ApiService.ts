@@ -2,10 +2,20 @@ import { API_BASE_URL } from '@env';
 
 import { supabase } from '../src/shared/lib/supabase';
 
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
 type ApiRequestOptions = {
-    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method?: HttpMethod;
     body?: unknown;
     authenticated?: boolean;
+};
+
+type ApiErrorResponse = {
+    message?: string;
+    error?: {
+        message?: string;
+        code?: string;
+    };
 };
 
 export class ApiService {
@@ -25,29 +35,29 @@ export class ApiService {
         };
 
         if (authenticated) {
-            const { data } = await supabase.auth.getSession();
-
-            const token = data.session?.access_token;
-
-            if (!token) {
-                throw new Error('Usuário não autenticado.');
-            }
+            const token = await this.getAccessToken();
 
             headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : undefined,
-        });
+        let response: Response;
 
-        const responseData = await response.json();
+        try { 
+            response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined,
+            });
+        } catch {
+            throw new Error(
+                'Não foi possível conectar à API. Verifique sua conexão ou tente novamente mais tarde.'
+            );
+        }
+        const responseData = await this.parseResponse(response);
 
         if (!response.ok) {
             throw new Error(
-                responseData?.message ||
-                'Erro ao comunicar com a API.'
+                this.getErrorMessage(responseData)
             );
         }
 
@@ -74,5 +84,45 @@ export class ApiService {
             body,
             authenticated,
         });
+    }
+
+    private static async getAccessToken(): Promise<string> {
+        const { data } = await supabase.auth.getSession();
+
+        const token = data.session?.access_token;
+
+        if (!token) {
+            throw new Error('Usuário não autenticado.');
+        }
+
+        return token;
+    }
+
+    private static async parseResponse(
+        response: Response
+    ): Promise<unknown> {
+        const text = await response.text();
+
+        if (!text) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            return {
+                message: 'Resposta inválida recebida da API.',
+            };
+        }
+    }
+
+    private static getErrorMessage(responseData: unknown): string {
+        const data = responseData as ApiErrorResponse | null;
+
+        return (
+            data?.error?.message ||
+            data?.message ||
+            'Erro ao comunicar com a API.'
+        );
     }
 }
