@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     },
 
     containerDark: {
-        backgroundColor: '#121212',
+        backgroundColor: Colors.dark.background,
     },
 
     textDark: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     configSection: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 40,
+        marginTop: 25,
         gap: 20,
     },
 
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     },
 
     emailCard: {
-        marginTop: 40,
+        marginTop: 20,
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         paddingVertical: 14,

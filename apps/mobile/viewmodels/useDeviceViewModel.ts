@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-
+export type ComportamentoSemWifi = 'PERGUNTAR' | 'RASTREIO_ATIVO' | 'PEGAR_LOCAL_E_DORMIR' | 'IGNORAR';
 export interface CollarDevice {
     id: string;
     nome: string;       
@@ -9,6 +9,8 @@ export interface CollarDevice {
     wifiSenha: string;  
     petId: string | null;
     status: 'ONLINE' | 'OFFLINE';
+    intervaloAcordarMinutos: number;
+    comportamentoSemWifi: ComportamentoSemWifi;
 }
 
 let fakeDatabase: CollarDevice[] = [];
@@ -19,7 +21,7 @@ export function useDeviceViewModel() {
     const carregarColeiras = useCallback(() => {
         setDevices([...fakeDatabase]);
     }, []);
-    async function adicionarNovaColeira(nome: string, serialNumber: string, wifiSsid: string, wifiSenha: string) {
+    async function adicionarNovaColeira(nome: string, serialNumber: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: ComportamentoSemWifi) {
         if (!nome.trim() || !serialNumber.trim()) {
             Alert.alert('Erro', 'Nome e Serial são obrigatórios.');
             return false;
@@ -32,7 +34,9 @@ export function useDeviceViewModel() {
             wifiSsid,
             wifiSenha,
             petId: null,
-            status: 'ONLINE'
+            status: 'ONLINE',
+            intervaloAcordarMinutos,
+            comportamentoSemWifi
         };
 
         fakeDatabase.push(novaColeira);
@@ -40,12 +44,12 @@ export function useDeviceViewModel() {
         Alert.alert('Sucesso', 'Coleira registrada com sucesso!');
         return true;
     }
-    async function atualizarColeira(id: string, nome: string, wifiSsid: string, wifiSenha: string) {
+    async function atualizarColeira(id: string, nome: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: ComportamentoSemWifi) {
         fakeDatabase = fakeDatabase.map(device =>
-            device.id === id ? { ...device, nome, wifiSsid, wifiSenha } : device
+            device.id === id ? {...device, nome, wifiSsid, wifiSenha, intervaloAcordarMinutos, comportamentoSemWifi} : device
         );
         carregarColeiras();
-        Alert.alert('Sucesso', 'Configurações atualizadas!');
+        Alert.alert('Sucesso', 'Configurações atualizadas e enviadas ao dispositivo!');
         return true;
     }
     async function excluirColeira(id: string) {

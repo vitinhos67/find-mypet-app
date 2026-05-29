@@ -41,7 +41,8 @@ export default function DeviceListScreen() {
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <View style={styles.cardInfo}>
-                            <Text style={styles.serialText}>S/N: {item.serialNumber}</Text>
+                            <Text style={styles.nomeText}>{item.nome}</Text>
+                            <Text style={styles.serialText}>S/N: {item.serialNumber}</Text> 
                             <Text style={item.petId ? styles.statusVinculado : styles.statusLivre}>
                                 {item.petId ? 'Vinculado a um Pet' : 'Pronto para uso'}
                             </Text>
@@ -117,19 +118,26 @@ const styles = StyleSheet.create({
     cardInfo: { 
         flex: 1 
     },
+    nomeText: {
+        fontSize: 14,
+        fontFamily: 'Inter-Bold',
+        color: '#1e293b',
+        marginBottom: 2
+    },
     serialText: { 
-        fontSize: 16, 
-        fontFamily: 'Inter-Bold', 
+        fontSize: 14, 
+        fontFamily: 'Inter-Regular', 
         color: '#black', 
         marginBottom: 4 
     },
     statusVinculado: { 
         fontSize: 14, 
         color: '#black',        
-        fontFamily: 'Inter-Bold', },
+        fontFamily: 'Inter-Bold', 
+    },
     statusLivre: { 
         fontSize: 14, 
-        color: Colors.brand.primaryOrange, 
+        color: "#5cb86b", 
         fontFamily: 'Inter-Bold',
     },
     btnConfigurar: { 
