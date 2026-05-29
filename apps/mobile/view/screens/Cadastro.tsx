@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
@@ -27,7 +28,8 @@ export default function Cadastro() {
     const [showGeneros, setShowGeneros] = useState(false);
     const opcoesGenero = ['Masculino', 'Feminino', 'Outro'];
     const { realizarCadastro, isLoading } = useCadastroViewModel();
-    
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
     function handleEntrar() {
         realizarCadastro(nome, email, senha, confirmarSenha, telefone, genero);
     }
@@ -72,24 +74,47 @@ export default function Cadastro() {
                                     value={email}
                                     onChangeText={setEmail}
                                 />
-
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Senha"
-                                    placeholderTextColor="#888888"
-                                    secureTextEntry
-                                    value={senha}
-                                    onChangeText={setSenha}
-                                />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Confirmar Senha"
-                                    placeholderTextColor="#888888"
-                                    secureTextEntry
-                                    value={confirmarSenha}
-                                    onChangeText={setConfirmarSenha}
-                                />
-
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="Senha"
+                                        placeholderTextColor="#888888"
+                                        secureTextEntry={!mostrarSenha}
+                                        value={senha}
+                                        onChangeText={setSenha}
+                                    />
+                                    <Pressable
+                                        onPress={() => setMostrarSenha(!mostrarSenha)}
+                                        style={styles.eyeIcon}
+                                    >
+                                        <Ionicons
+                                            name={mostrarSenha ? 'eye-off' : 'eye'}
+                                            size={24}
+                                            color="#888888"
+                                        />
+                                    </Pressable>
+                                </View>
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="Confirmar Senha"
+                                        placeholderTextColor="#888888"
+                                        secureTextEntry={!mostrarConfirmarSenha}
+                                        value={confirmarSenha}
+                                        onChangeText={setConfirmarSenha}
+                                    />
+                                    <Pressable
+                                    onPress={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                                        style={styles.eyeIcon}
+                                    >
+                                        <Ionicons
+                                            name={mostrarConfirmarSenha ? 'eye-off' : 'eye'}
+                                            size={24}
+                                            color="#888888"
+                                        />
+                                    </Pressable>
+                                </View>
+                                
                             <View style={styles.inputMiniSection}>
                                 <View style={styles.generoContainer}>
                                     <Pressable
@@ -295,5 +320,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Colors.brand.primaryBlue,
         textDecorationLine: 'underline',
-    }
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.brand.secondaryOrange,
+        borderRadius: 8,
+    },
+    passwordInput: {
+        flex: 1,
+        padding: 15,
+        fontSize: 16,
+    },
+    eyeIcon: {
+        padding: 15,
+    },
 });
