@@ -8,6 +8,16 @@ export type UserProfile = {
     email: string;
 };
 
+type ProfileResponse = {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+    gender: string | null;
+    avatar_url: string | null;
+    updated_at: string | null;
+};
+
 type ApiResponse<T> = {
     success: boolean;
     data: T;
@@ -22,6 +32,7 @@ type MeResponse = {
         name?: string;
         [key: string]: unknown;
     };
+    profile?: ProfileResponse | null;
 };
 
 export class ProfileService {
@@ -39,10 +50,11 @@ export class ProfileService {
 
             const usuarioAtual = {
                 nome:
+                    user.profile?.full_name ||
                     user.metadata?.nome_completo ||
                     user.metadata?.name ||
                     'Usuário',
-                email: user.email || 'email@email.com',
+                email: user.profile?.email || user.email || 'email@email.com',
             };
 
             await AsyncStorage.setItem(
@@ -60,21 +72,21 @@ export class ProfileService {
 
     private static async carregarUsuarioLocal(): Promise<UserProfile | null> {
         const { data } = await supabase.auth.getSession();
-        
+
         const user = data.session?.user;
-        
+
         if (!user) {
             return null;
         }
-    
+
         const usuarioSalvo = await AsyncStorage.getItem(
             `@usuario_${user.id}`
         );
-    
+
         if (usuarioSalvo) {
             return JSON.parse(usuarioSalvo);
         }
-    
+
         const usuarioAtual = {
             nome:
                 user.user_metadata?.nome_completo ||
@@ -82,12 +94,12 @@ export class ProfileService {
                 'Usuário',
             email: user.email || 'email@email.com',
         };
-    
+
         await AsyncStorage.setItem(
             `@usuario_${user.id}`,
             JSON.stringify(usuarioAtual)
         );
-    
+
         return usuarioAtual;
     }
 
