@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CollarStackParamList } from '../../navigation/types';
-import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { ComportamentoSemWifi, useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 
 type ConfigureRouteProp = RouteProp<CollarStackParamList, 'DeviceConfigure'>;
@@ -19,12 +19,16 @@ export default function DeviceConfigureScreen() {
     const [nome, setNome] = useState('');
     const [wifiSsid, setWifiSsid] = useState('');
     const [wifiSenha, setWifiSenha] = useState('');
+    const [intervalo, setIntervalo] = useState('10');
+    const [comportamento, setComportamento] = useState<ComportamentoSemWifi>('PEGAR_LOCAL_E_DORMIR');
 
     useEffect(() => {
         if (coleiraAtual) {
             setNome(coleiraAtual.nome);
             setWifiSsid(coleiraAtual.wifiSsid);
             setWifiSenha(coleiraAtual.wifiSenha);
+            setIntervalo(coleiraAtual.intervaloAcordarMinutos.toString());
+            setComportamento(coleiraAtual.comportamentoSemWifi);
         }
     }, [coleiraAtual]);
 
@@ -33,7 +37,8 @@ export default function DeviceConfigureScreen() {
     }
 
     async function handleSalvarAlteracoes() {
-        await atualizarColeira(collarId, nome, wifiSsid, wifiSenha);
+        const numIntervalo = parseInt(intervalo) || 10;
+        await atualizarColeira(collarId, nome, wifiSsid, wifiSenha, numIntervalo, comportamento);
         navigation.goBack();
     }
 
@@ -52,6 +57,17 @@ export default function DeviceConfigureScreen() {
             ]
         );
     }
+    function OptionChip({ label, value }: { label: string, value: ComportamentoSemWifi }) {
+        const isSelected = comportamento === value;
+        return (
+            <Pressable
+                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => setComportamento(value)}
+            >
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{label}</Text>
+            </Pressable>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -59,7 +75,7 @@ export default function DeviceConfigureScreen() {
                 <Pressable onPress={() => navigation.goBack()} style={styles.btnVoltar}>
                     <Text style={styles.btnVoltarText}>← Voltar</Text>
                 </Pressable>
-                <Text style={styles.title}>Configurações</Text>
+                <Text style={styles.title}>Configurar Hardware</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -69,6 +85,29 @@ export default function DeviceConfigureScreen() {
                 <Text style={styles.label}>Apelido</Text>
                 <TextInput style={styles.input} value={nome} onChangeText={setNome} />
 
+                <View style={styles.divider} />
+
+                <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
+
+                <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={intervalo}
+                    onChangeText={setIntervalo}
+                />
+
+                <Text style={styles.label}>Comportamento ao sair da zona Wi-Fi:</Text>
+                <View style={styles.chipContainer}>
+                    <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                    <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
+                    <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
+                    <OptionChip label="Apenas Manual" value="IGNORAR" />
+                </View>
+
+                <View style={styles.divider} />
+
+                <Text style={styles.sectionTitle}>Rede Wi-Fi (Modo AP)</Text>
                 <Text style={styles.label}>Rede Wi-Fi (SSID)</Text>
                 <TextInput style={styles.input} value={wifiSsid} onChangeText={setWifiSsid} />
 
@@ -76,7 +115,7 @@ export default function DeviceConfigureScreen() {
                 <TextInput style={styles.input} value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
 
                 <Pressable style={styles.btnSalvar} onPress={handleSalvarAlteracoes}>
-                    <Text style={styles.btnSalvarText}>Salvar Alterações</Text>
+                    <Text style={styles.btnSalvarText}>Sincronizar com a Coleira</Text>
                 </Pressable>
 
                 <View style={styles.divider} />
@@ -98,7 +137,7 @@ export default function DeviceConfigureScreen() {
 
                 <View style={styles.divider} />
                 <Pressable style={styles.btnExcluir} onPress={handleExcluir}>
-                    <Text style={styles.btnExcluirText}>Excluir Coleira</Text>
+                    <Text style={styles.btnExcluirText}>Excluir Coleira do App</Text>
                 </Pressable>
 
             </ScrollView>
@@ -225,5 +264,29 @@ const styles = StyleSheet.create({
         color: 'white', 
         fontFamily: 'Inter-Bold',
         fontSize: 14 
+    },
+    chipContainer: {
+        flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 15
+    },
+    chip: {
+        backgroundColor: Colors.light.background,
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 10
+    },
+    chipSelected: {
+        backgroundColor: Colors.brand.primaryBlue,
+        borderColor: Colors.brand.primaryBlue
+    },
+    chipText: {
+        fontFamily: 'Inter-Regular',
+        color: '#64748b',
+        fontSize: 14
+    },
+    chipTextSelected: {
+        fontFamily: 'Inter-Bold',
+        color: 'white'
     }
 });

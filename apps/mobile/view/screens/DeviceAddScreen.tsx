@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { ComportamentoSemWifi, useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 
 export default function DeviceAddScreen() {
@@ -13,12 +13,24 @@ export default function DeviceAddScreen() {
     const [serial, setSerial] = useState('');
     const [wifiSsid, setWifiSsid] = useState('');
     const [wifiSenha, setWifiSenha] = useState('');
-
+    const [intervalo, setIntervalo] = useState('10');
+    const [comportamento, setComportamento] = useState<ComportamentoSemWifi>('PEGAR_LOCAL_E_DORMIR');
     async function handleSalvar() {
-        const sucesso = await adicionarNovaColeira(nome, serial, wifiSsid, wifiSenha);
+        const numIntervalo = parseInt(intervalo) || 10;
+        const sucesso = await adicionarNovaColeira(nome, serial, wifiSsid, wifiSenha, numIntervalo, comportamento);
         if (sucesso) navigation.goBack();
     }
-
+    function OptionChip({ label, value }: { label: string, value: ComportamentoSemWifi }) {
+        const isSelected = comportamento === value;
+        return (
+            <Pressable
+                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => setComportamento(value)}
+            >
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{label}</Text>
+            </Pressable>
+        );
+    }
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -39,14 +51,34 @@ export default function DeviceAddScreen() {
 
                 <View style={styles.divider} />
 
-                <Text style={styles.sectionTitle}>Configuração de Rede (Opcional)</Text>
+                <Text style={styles.sectionTitle}>Configuração de Rede Doméstica</Text>
 
                 <Text style={styles.label}>Nome da Rede Wi-Fi (SSID)</Text>
                 <TextInput style={styles.input} placeholder="Sua rede Wi-Fi" value={wifiSsid} onChangeText={setWifiSsid} />
 
                 <Text style={styles.label}>Senha do Wi-Fi</Text>
                 <TextInput style={styles.input} placeholder="Senha da rede" value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
+                
+                <View style={styles.divider} />
+                <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
+                <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    placeholder="Ex: 10"
+                    value={intervalo}
+                    onChangeText={setIntervalo}
+                />
 
+                <Text style={styles.label}>Se a coleira sair do Wi-Fi da casa:</Text>
+                <View style={styles.chipContainer}>
+                    <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                    <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
+                    <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
+                    <OptionChip label="Apenas Manual" value="IGNORAR" />
+                </View>
+
+                <View style={styles.divider} />
                 <Pressable style={styles.btnSalvar} onPress={handleSalvar}>
                     <Text style={styles.btnSalvarText}>Registrar Dispositivo</Text>
                 </Pressable>
@@ -122,5 +154,29 @@ const styles = StyleSheet.create({
         color: 'white', 
         fontFamily: 'Inter-Bold',
         fontSize: 16 
+    },
+    chipContainer: { 
+        flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 15 
+    },
+    chip: { 
+        backgroundColor: Colors.light.background, 
+        borderWidth: 1, 
+        borderColor: '#cbd5e1', 
+        paddingVertical: 10, 
+        paddingHorizontal: 15, 
+        borderRadius: 10 
+    },
+    chipSelected: { 
+        backgroundColor: Colors.brand.primaryBlue, 
+        borderColor: Colors.brand.primaryBlue 
+    },
+    chipText: { 
+        fontFamily: 'Inter-Regular', 
+        color: '#64748b', 
+        fontSize: 14 
+    },
+    chipTextSelected: { 
+        fontFamily: 'Inter-Bold', 
+        color: 'white' 
     }
 });
