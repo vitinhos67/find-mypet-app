@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
@@ -15,11 +16,12 @@ import { useLoginViewModel } from '../../viewmodels/useLoginViewModel';
 import { Colors } from "../styles/color";
 
 export default function Login() {
-
+    
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParams>>();
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [manterConectado, setManterConectado] = useState(false);
+    const [mostrarSenha, setMostrarSenha] = useState(false);
     const { realizarLogin, isLoading } = useLoginViewModel();
     function handleEntrar() {
         realizarLogin(email, senha, manterConectado)
@@ -59,14 +61,26 @@ export default function Login() {
                                 onChangeText={setEmail}
                             />
 
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Senha"
-                                placeholderTextColor="#888888"
-                                secureTextEntry
-                                value={senha}
-                                onChangeText={setSenha}
-                            />
+                            <View style={styles.passwordContainer}>
+                                <TextInput
+                                    style={styles.passwordInput}
+                                    placeholder="Senha"
+                                    placeholderTextColor="#888888"
+                                    secureTextEntry={!mostrarSenha}
+                                    value={senha}
+                                    onChangeText={setSenha}
+                                />
+                                <Pressable
+                                    onPress={() => setMostrarSenha(!mostrarSenha)}
+                                    style={styles.eyeIcon}
+                                >
+                                    <Ionicons
+                                        name={mostrarSenha ? 'eye-off' : 'eye'}
+                                        size={24}
+                                        color="#888888"
+                                    />
+                                </Pressable>
+                            </View>
                         </View>
                     <View style={styles.checkboxContainer}>
                         <Switch
@@ -183,5 +197,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Colors.brand.primaryBlue,
         textDecorationLine: 'underline',
-    }
+    },
+    passwordInput: {
+        flex: 1,
+        padding: 15,
+        fontSize: 16,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.brand.secondaryOrange,
+        borderRadius: 8,
+    },
+    eyeIcon: {
+        padding: 15,
+    },
 });
