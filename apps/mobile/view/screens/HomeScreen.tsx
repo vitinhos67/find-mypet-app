@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F2',
+        backgroundColor: Colors.light.background,
     },
 
     containerDark: {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
 
     logoText: {
         color: 'white',
-        fontSize: 34,
+        fontSize: 24,
         fontFamily: 'Inter-Black',
         width: '55%',
     },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     },
 
     sectionTitle: {
-        fontSize: 30,
+        fontSize: 20,
         color: 'black',
         marginBottom: 20,
         fontFamily: 'Inter-Bold',
@@ -181,20 +181,20 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         paddingVertical: 8,
         paddingHorizontal: 30,
-        borderRadius: 20,
-        marginBottom: 20,
+        borderRadius: 10,
+        marginBottom: 10,
     },
 
     petName: {
         color: 'white',
-        fontSize: 26,
+        fontSize: 16,
         fontWeight: 'bold',
     },
 
     locationCard: {
         backgroundColor: Colors.brand.primaryOrange,
-        borderRadius: 20,
-        paddingVertical: 40,
+        borderRadius: 10,
+        paddingVertical: 20,
         paddingHorizontal: 20,
         justifyContent: 'center',
         alignItems: 'center',
@@ -207,16 +207,16 @@ const styles = StyleSheet.create({
 
     locationText: {
         color: 'white',
-        fontSize: 22,
-        fontWeight: 'bold',
+        fontSize: 16,
+        fontFamily: 'Inter-Bold',
         textAlign: 'center',
     },
 
     locationValue: {
         color: 'white',
-        fontSize: 20,
+        fontSize: 14,
         marginTop: 10,
-        fontWeight: '600',
+        fontFamily: 'Inter-Regular',
         textAlign: 'center',
     },
 
