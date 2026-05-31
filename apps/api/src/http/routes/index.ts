@@ -9,10 +9,6 @@ import { userRoutes } from "../../modules/users/routes/user.routes";
 export async function registerRoutes(app: FastifyInstance) {
   await app.register(
     async (api) => {
-      api.get("/health", async () => ({
-        status: "ok",
-        service: "find-mypet-api",
-      }));
       
       await api.register(healthRoutes, { prefix: "/health" });
       await api.register(authRoutes, { prefix: "/auth" });
