@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Image,
     ScrollView,
@@ -7,8 +7,8 @@ import {
     View,
 } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useTheme } from '../../hooks/useTheme';
 import { useHomeViewModel } from '../../viewmodels/useHomeViewModel';
 import { Colors } from '../styles/color';
@@ -17,11 +17,12 @@ export default function HomeScreen() {
 
     const { darkMode } = useTheme();
 
-    const {
-        pets,
-        isLoading
-    } = useHomeViewModel();
-
+    const { pets, isLoading, carregarPets } = useHomeViewModel();
+    useFocusEffect(
+        useCallback(() => {
+            carregarPets();
+        }, [])
+    );
     return (
         <SafeAreaView
             style={[
@@ -33,9 +34,9 @@ export default function HomeScreen() {
             <ScrollView showsVerticalScrollIndicator={false}>
 
                 {/* HEADER */}
-                <View style={styles.header}>
+                <View style={[styles.header ,darkMode && styles.headerDark]}>
 
-                    <Text style={styles.logoText}>
+                    <Text style={[styles.logoText, darkMode && styles.logoTextDark] }>
                         Find My PET
                     </Text>
 
@@ -130,7 +131,16 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        backgroundColor: Colors.brand.primaryBlue,
+        backgroundColor: 'white',
+        width: '100%',
+        height: 110,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+    },
+    headerDark:{
+        backgroundColor:  Colors.dark.surface,
         width: '100%',
         height: 110,
         flexDirection: 'row',
@@ -140,7 +150,13 @@ const styles = StyleSheet.create({
     },
 
     logoText: {
-        color: 'white',
+        color: Colors.brand.primaryBlue,
+        fontSize: 24,
+        fontFamily: 'Inter-Black',
+        width: '55%',
+    }, 
+    logoTextDark: {
+        color: Colors.brand.primaryOrange,
         fontSize: 24,
         fontFamily: 'Inter-Black',
         width: '55%',

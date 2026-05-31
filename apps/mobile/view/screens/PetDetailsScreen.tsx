@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { PetStackParamList } from '../../navigation/types';
 import { useTheme } from '../../hooks/useTheme';
+import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 
 import { Colors } from '../styles/color';
@@ -34,7 +34,9 @@ export default function PetDetailsScreen() {
     const {
         getPetById,
         atualizarPet,
-        excluirPet
+        excluirPet,
+        carregarPets,
+        isLoading
     } = usePetViewModel();
 
     const { darkMode } =
@@ -66,7 +68,9 @@ export default function PetDetailsScreen() {
         useState<'MACHO' | 'FEMEA'>(
             'MACHO'
         );
-
+    React.useEffect(() => {
+        carregarPets();
+    }, [carregarPets]);
     useEffect(() => {
 
         if (pet) {
