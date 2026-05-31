@@ -1,12 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { UpdateProfileInput, UserProfile } from '../models/profile.model';
 import { supabase } from '../src/shared/lib/supabase';
 import { ApiService } from './ApiService';
-
-export type UserProfile = {
-    nome: string;
-    email: string;
-};
 
 type ProfileResponse = {
     id: string;
@@ -55,6 +51,9 @@ export class ProfileService {
                     user.metadata?.name ||
                     'Usuário',
                 email: user.profile?.email || user.email || 'email@email.com',
+                telefone: user.profile?.phone ?? null,
+                genero: user.profile?.gender ?? null,
+                avatarUrl: user.profile?.avatar_url ?? null,
             };
 
             await AsyncStorage.setItem(
@@ -93,10 +92,45 @@ export class ProfileService {
                 user.user_metadata?.name ||
                 'Usuário',
             email: user.email || 'email@email.com',
+            telefone: user.user_metadata?.telefone ?? null,
+            genero: user.user_metadata?.genero ?? null,
+            avatarUrl: null,
         };
 
         await AsyncStorage.setItem(
             `@usuario_${user.id}`,
+            JSON.stringify(usuarioAtual)
+        );
+
+        return usuarioAtual;
+    }
+
+    static async atualizarPerfil(
+        input: UpdateProfileInput
+    ): Promise<UserProfile> {
+        const response =
+            await ApiService.patch<ApiResponse<ProfileResponse>>(
+                '/me/profile',
+                {
+                    full_name: input.nome,
+                    phone: input.telefone || null,
+                    gender: input.genero || null,
+                    avatar_url: input.avatarUrl || null,
+                }
+            );
+
+        const profile = response.data;
+
+        const usuarioAtual = {
+            nome: profile.full_name || 'Usuário',
+            email: profile.email || 'email@email.com',
+            telefone: profile.phone,
+            genero: profile.gender,
+            avatarUrl: profile.avatar_url,
+        };
+
+        await AsyncStorage.setItem(
+            `@usuario_${profile.id}`,
             JSON.stringify(usuarioAtual)
         );
 

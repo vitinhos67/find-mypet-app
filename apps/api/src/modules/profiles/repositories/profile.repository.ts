@@ -21,6 +21,13 @@ type CreateProfileInput = {
     avatar_url?: string | null;
 };
 
+type UpdateProfileInput = {
+    full_name?: string | null;
+    phone?: string | null;
+    gender?: string | null;
+    avatar_url?: string | null;
+};
+
 const PROFILE_FIELDS =
     "id, full_name, email, phone, gender, avatar_url, updated_at";
 
@@ -62,6 +69,29 @@ export class ProfileRepository {
         if (error) {
             throw new AppException(
                 "Não foi possível criar o perfil do usuário.",
+                500,
+                ErrorCodes.INTERNAL_ERROR,
+                error.message,
+            );
+        }
+
+        return data;
+    }
+
+    async updateById(id: string, input: UpdateProfileInput): Promise<Profile> {
+        const { data, error } = await supabaseAdmin
+            .from("profiles")
+            .update({
+                ...input,
+                updated_at: new Date().toISOString(),
+            })
+            .eq("id", id)
+            .select(PROFILE_FIELDS)
+            .single();
+
+        if (error) {
+            throw new AppException(
+                "Não foi possível atualizar o perfil do usuário.",
                 500,
                 ErrorCodes.INTERNAL_ERROR,
                 error.message,
