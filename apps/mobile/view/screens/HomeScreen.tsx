@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -41,6 +41,8 @@ function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean 
         ? Colors.brand.primaryBlue
         : '#94a3b8';
     const size = isSelected ? 54 : 42;
+    // Descontamos os 3px de borda de cada lado para a imagem preencher corretamente
+    const imgSize = size - 6;
 
     return (
         <View style={markerStyles.wrapper} pointerEvents="none">
@@ -52,25 +54,30 @@ function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean 
                     </Text>
                 </View>
             )}
-            <View
-                style={[
-                    markerStyles.pin,
-                    {
-                        width: size,
-                        height: size,
-                        borderRadius: size / 2,
-                        borderColor,
-                    },
-                ]}
-            >
-                {pet.foto ? (
-                    <Image
-                        source={{ uri: pet.foto }}
-                        style={markerStyles.photo}
-                    />
-                ) : (
-                    <Ionicons name="paw" size={isSelected ? 22 : 18} color="white" />
-                )}
+
+            {/* Wrapper relativo: o statusDot fica fora do overflow do pin */}
+            <View style={{ width: size, height: size }}>
+                <View
+                    style={[
+                        markerStyles.pin,
+                        { width: size, height: size, borderRadius: size / 2, borderColor },
+                    ]}
+                >
+                    {pet.foto ? (
+                        <Image
+                            source={{ uri: pet.foto }}
+                            style={{
+                                width: imgSize,
+                                height: imgSize,
+                                borderRadius: imgSize / 2,
+                            }}
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <Ionicons name="paw" size={isSelected ? 22 : 18} color="white" />
+                    )}
+                </View>
+
                 <View
                     style={[
                         markerStyles.statusDot,
@@ -79,7 +86,6 @@ function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean 
                 />
             </View>
 
-            {/* Cauda do balão */}
             <View style={[markerStyles.tail, { borderTopColor: borderColor }]} />
         </View>
     );
@@ -88,6 +94,7 @@ function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean 
 export default function HomeScreen() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
+    const [panelOpen, setPanelOpen] = useState(true);
     const { pets, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
         useHomeViewModel();
 
@@ -178,12 +185,25 @@ export default function HomeScreen() {
                     style={[styles.bottomPanel, darkMode && styles.bottomPanelDark]}
                     pointerEvents="auto"
                 >
-                    <View style={styles.handleBar} />
-                    <Text style={[styles.panelTitle, darkMode && { color: Colors.dark.textPrimary }]}>
-                        Rastreamento
-                    </Text>
+                    <TouchableOpacity
+                        onPress={() => setPanelOpen(o => !o)}
+                        activeOpacity={0.7}
+                        style={styles.handleTouchable}
+                    >
+                        <View style={styles.handleBar} />
+                        <View style={styles.panelHeaderRow}>
+                            <Text style={[styles.panelTitle, darkMode && { color: Colors.dark.textPrimary }]}>
+                                Rastreamento
+                            </Text>
+                            <Ionicons
+                                name={panelOpen ? 'chevron-down' : 'chevron-up'}
+                                size={18}
+                                color={darkMode ? Colors.dark.textSecondary : Colors.light.textSecondary}
+                            />
+                        </View>
+                    </TouchableOpacity>
 
-                    {isLoading ? (
+                    {panelOpen && isLoading ? (
                         <View style={styles.loaderRow}>
                             <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />
                             <Text
@@ -192,7 +212,7 @@ export default function HomeScreen() {
                                 Buscando localização...
                             </Text>
                         </View>
-                    ) : (
+                    ) : panelOpen ? (
                         <FlatList
                             horizontal
                             data={pets}
@@ -309,7 +329,7 @@ export default function HomeScreen() {
                                 </View>
                             }
                         />
-                    )}
+                    ) : null}
                 </View>
             </View>
         </View>
@@ -336,6 +356,9 @@ const markerStyles = StyleSheet.create({
         flexShrink: 1,
     },
     pin: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 3,
@@ -345,20 +368,14 @@ const markerStyles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.35,
         shadowRadius: 4,
-        overflow: 'hidden',
-    },
-    photo: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
     },
     statusDot: {
         position: 'absolute',
-        bottom: 2,
-        right: 2,
-        width: 11,
-        height: 11,
-        borderRadius: 6,
+        bottom: 0,
+        right: 0,
+        width: 13,
+        height: 13,
+        borderRadius: 7,
         borderWidth: 2,
         borderColor: 'white',
     },
@@ -479,20 +496,28 @@ const styles = StyleSheet.create({
     bottomPanelDark: {
         backgroundColor: Colors.dark.surface,
     },
+    handleTouchable: {
+        paddingBottom: 4,
+    },
     handleBar: {
         width: 40,
         height: 4,
         borderRadius: 2,
         backgroundColor: Colors.light.border,
         alignSelf: 'center',
+        marginBottom: 10,
+    },
+    panelHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
         marginBottom: 14,
     },
     panelTitle: {
         fontSize: 16,
         fontFamily: 'Inter-Bold',
         color: Colors.light.textPrimary,
-        paddingHorizontal: 20,
-        marginBottom: 14,
     },
 
     loaderRow: {
