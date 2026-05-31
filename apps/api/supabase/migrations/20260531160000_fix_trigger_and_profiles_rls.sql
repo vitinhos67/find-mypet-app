@@ -65,3 +65,6 @@ DELETE FROM public.pets WHERE owner_id IS NULL;
 
 ALTER TABLE public.pets
   ALTER COLUMN owner_id SET NOT NULL;
+
+ALTER TABLE public.devices
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
