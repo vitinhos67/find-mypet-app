@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
@@ -39,10 +40,12 @@ export default function App() {
     }, []);
     
     return (
-        <ThemeProvider>
-            <NavigationContainer>
-                {userLogado ? <TabNavigator /> : <AuthNavigator />}
-            </NavigationContainer>
-        </ThemeProvider>
+        <SafeAreaProvider>
+            <ThemeProvider>
+                <NavigationContainer>
+                    {userLogado ? <TabNavigator /> : <AuthNavigator />}
+                </NavigationContainer>
+            </ThemeProvider>
+        </SafeAreaProvider>
     );
 }
