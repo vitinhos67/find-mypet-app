@@ -86,6 +86,18 @@ export class ApiService {
         });
     }
 
+    static async patch<T>(
+        endpoint: string,
+        body?: unknown,
+        authenticated = true
+    ): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'PATCH',
+            body,
+            authenticated,
+        });
+    }
+
     private static async getAccessToken(): Promise<string> {
         const { data } = await supabase.auth.getSession();
 
