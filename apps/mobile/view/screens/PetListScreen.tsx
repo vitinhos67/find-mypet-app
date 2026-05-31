@@ -32,7 +32,7 @@ export default function PetListScreen() {
 
     const { pets, carregarPets } =
         usePetViewModel();
-
+    console.log(pets)
     const { darkMode } = useTheme();
 
     const theme = darkMode
@@ -221,15 +221,7 @@ export default function PetListScreen() {
                     </View>
                 )}
                 ListEmptyComponent={
-                    <Text
-                        style={[
-                            styles.emptyText,
-                            {
-                                color:
-                                    theme.textSecondary
-                            }
-                        ]}
-                    >
+                    <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                         Nenhum pet cadastrado.
                     </Text>
                 }

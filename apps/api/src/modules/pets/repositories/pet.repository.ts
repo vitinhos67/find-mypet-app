@@ -29,6 +29,7 @@ export class PetRepository {
   }
 
   async findManyByOwnerId(ownerId: string): Promise<Pet[]> {
+    console.log("Buscando pets para o owner_id:", ownerId);
     const { data, error } = await supabaseAdmin
       .from("pets")
       .select(PET_PUBLIC_FIELDS)
@@ -39,7 +40,7 @@ export class PetRepository {
       console.error("Erro Supabase (List):", error);
       throw new AppException("Não foi possível listar os pets.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
     }
-    return data;
+    return data || [];
   }
   async update(id: string, ownerId: string, data: Partial<CreatePetInput>): Promise<Pet> {
     const { data: updatedData, error } = await supabaseAdmin

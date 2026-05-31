@@ -2,18 +2,24 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ComportamentoSemWifi } from '../../models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
-import { ComportamentoSemWifi, useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type ConfigureRouteProp = RouteProp<CollarStackParamList, 'DeviceConfigure'>;
 
 export default function DeviceConfigureScreen() {
+    const { pets, carregarPets } = usePetViewModel();
+    useEffect(() => {
+        carregarPets(); // Força a busca dos pets na API ao abrir a tela de configurar coleira
+    }, []); 
     const navigation = useNavigation();
     const route = useRoute<ConfigureRouteProp>();
     const { collarId } = route.params;
 
-    const { getColeiraById, atualizarColeira, excluirColeira, desvincularColeira } = useDeviceViewModel();
+    const { getColeiraById, atualizarColeira, vincularColeiraAoPet, excluirColeira, desvincularColeira } = useDeviceViewModel();
 
     const coleiraAtual = getColeiraById(collarId);
     const [nome, setNome] = useState('');

@@ -1,77 +1,123 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { CollarDevice, ComportamentoSemWifi } from '../models/device.model';
-
-let fakeDatabase: CollarDevice[] = [];
+import { DeviceService } from '../services/DeviceService';
 
 export function useDeviceViewModel() {
-    const [devices, setDevices] = useState<CollarDevice[]>([]);
+    const [devices, setDevices] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const carregarColeiras = useCallback(() => {
-        setDevices([...fakeDatabase]);
+    const carregarColeiras = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await DeviceService.getDevices();
+
+            if (Array.isArray(data)) {
+                // O adapter que garante que a tela não crasha com colunas do banco
+                const devicesFormatados = data.map((dbDevice: any) => ({
+                    id: dbDevice.id,
+                    nome: dbDevice.name || 'Sem Nome',
+                    serialNumber: dbDevice.serial_number,
+                    wifiSsid: dbDevice.wifi_ssid,
+                    wifiSenha: dbDevice.wifi_password,
+                    intervaloAcordarMinutos: dbDevice.wake_interval || 15,
+                    comportamentoSemWifi: dbDevice.behavior_no_wifi || 'STORE',
+                    petId: dbDevice.pet_id,
+                    status: dbDevice.status || 'ONLINE'
+                }));
+                setDevices(devicesFormatados);
+            } else {
+                setDevices([]);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar coleiras:', error);
+            setDevices([]);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
-    async function adicionarNovaColeira(nome: string, serialNumber: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: ComportamentoSemWifi) {
-        if (!nome.trim() || !serialNumber.trim()) {
-            Alert.alert('Erro', 'Nome e Serial são obrigatórios.');
+
+    // RESTAURADA A ASSINATURA ORIGINAL PARA NÃO QUEBRAR A TELA
+    async function adicionarNovaColeira(nome: string, serialNumber: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: string) {
+        setIsLoading(true);
+        try {
+            // O Controller espera essas chaves exatas em português
+            await DeviceService.create({
+                nome,
+                serialNumber,
+                wifiSsid,
+                wifiSenha,
+                intervaloAcordarMinutos,
+                comportamentoSemWifi
+            });
+            await carregarColeiras();
+            Alert.alert('Sucesso', 'Coleira registrada na nuvem!');
+            return true;
+        } catch (error) {
+            Alert.alert('Erro', 'Falha ao registrar coleira.');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    async function atualizarColeira(id: string, nome: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: string) {
+        try {
+            await DeviceService.update(id, {
+                name: nome,
+                wifi_ssid: wifiSsid,
+                wifi_password: wifiSenha,
+                wake_interval: intervaloAcordarMinutos,
+                behavior_no_wifi: comportamentoSemWifi
+            });
+            await carregarColeiras();
+            Alert.alert('Sucesso', 'Configurações atualizadas na nuvem!');
+            return true;
+        } catch (error) {
+            console.error('CRASH NA ATUALIZAÇÃO DO FRONTEND:', error);
+            Alert.alert('Erro', 'Falha ao atualizar a coleira.');
             return false;
         }
-
-        const novaColeira: CollarDevice = {
-            id: Math.random().toString(36).substring(7),
-            nome,
-            serialNumber,
-            wifiSsid,
-            wifiSenha,
-            petId: null,
-            status: 'ONLINE',
-            intervaloAcordarMinutos,
-            comportamentoSemWifi
-        };
-
-        fakeDatabase.push(novaColeira);
-        carregarColeiras();
-        Alert.alert('Sucesso', 'Coleira registrada com sucesso!');
-        return true;
-    }
-    async function atualizarColeira(id: string, nome: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: ComportamentoSemWifi) {
-        fakeDatabase = fakeDatabase.map(device =>
-            device.id === id ? {...device, nome, wifiSsid, wifiSenha, intervaloAcordarMinutos, comportamentoSemWifi} : device
-        );
-        carregarColeiras();
-        Alert.alert('Sucesso', 'Configurações atualizadas e enviadas ao dispositivo!');
-        return true;
-    }
-    async function excluirColeira(id: string) {
-        fakeDatabase = fakeDatabase.filter(device => device.id !== id);
-        carregarColeiras();
-        Alert.alert('Sucesso', 'Dispositivo removido da sua conta.');
-        return true;
     }
 
-    async function vincularColeiraAoPet(collarId: string, petId: string) {
-        fakeDatabase = fakeDatabase.map(device =>
-            device.id === collarId ? { ...device, petId } : device
-        );
-        carregarColeiras();
-        Alert.alert('Sucesso', 'Coleira vinculada ao Pet!');
-        return true;
+    async function vincularColeiraAoPet(collarId: string, petId: string | null) {
+        try {
+            await DeviceService.linkPet(collarId, petId);
+            await carregarColeiras();
+            Alert.alert('Sucesso', petId ? 'Coleira vinculada ao Pet!' : 'Coleira desvinculada com sucesso.');
+            return true;
+        } catch (error) {
+            Alert.alert('Erro', 'Falha ao alterar o vínculo da coleira.');
+            return false;
+        }
     }
 
     async function desvincularColeira(collarId: string) {
-        fakeDatabase = fakeDatabase.map(device =>
-            device.id === collarId ? { ...device, petId: null } : device
-        );
-        carregarColeiras();
-        Alert.alert('Sucesso', 'Coleira desvinculada.');
-        return true;
+        return await vincularColeiraAoPet(collarId, null);
+    }
+
+    async function excluirColeira(id: string) {
+        try {
+            await DeviceService.delete(id);
+            await carregarColeiras();
+            Alert.alert('Sucesso', 'Dispositivo removido da sua conta.');
+            return true;
+        } catch (error) {
+            Alert.alert('Erro', 'Falha ao excluir a coleira.');
+            return false;
+        }
     }
 
     function getColeiraById(id: string) {
-        return fakeDatabase.find(d => d.id === id);
+        return devices.find(d => d.id === id);
     }
+
+    useEffect(() => {
+        carregarColeiras();
+    }, [carregarColeiras]);
 
     return {
         devices,
+        isLoading,
         carregarColeiras,
         adicionarNovaColeira,
         atualizarColeira,

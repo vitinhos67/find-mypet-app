@@ -2,9 +2,9 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ComportamentoSemWifi, useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { ComportamentoSemWifi } from '../../models/device.model';
+import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
-
 export default function DeviceAddScreen() {
     const navigation = useNavigation();
     const { adicionarNovaColeira } = useDeviceViewModel();

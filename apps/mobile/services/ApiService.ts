@@ -32,6 +32,7 @@ export class ApiService {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
+            
         };
 
         if (authenticated) {

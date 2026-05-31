@@ -1,55 +1,149 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import { supabaseAdmin } from '../../../shared/supabase/supabaseAdmin';
+import { FastifyReply, FastifyRequest } from "fastify";
+import { DeviceService } from "../services/device.services";
+export interface CreateDeviceBody {
+    nome: string;
+    serialNumber: string;
+    wifiSsid: string;
+    wifiSenha: string;
+    intervaloAcordarMinutos: number;
+    comportamentoSemWifi: string;
+}
+
+export interface UpdateDeviceBody {
+    name: string;
+    wifi_ssid: string;
+    wifi_password: string;
+    wake_interval: number;
+    behavior_no_wifi: string;
+}
+
+export interface LinkPetBody {
+    pet_id: string | null;
+}
 
 export class DeviceController {
+    private deviceService: DeviceService;
 
-    async create(request: FastifyRequest, reply: FastifyReply) {
-        const userId = request.supabaseUser?.id;
+    constructor() {
+        this.deviceService = new DeviceService();
+    }
 
-        if (!userId) {
-            return reply.status(401).send({ message: 'Sessão inválida ou não autorizada.' });
+    create = async (
+        request: FastifyRequest<{ Body: CreateDeviceBody }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+
+        if (!ownerId) {
+            return reply.status(401).send({ message: "Sessão inválida ou não autorizada." });
         }
 
-        const { nome, serialNumber, wifiSsid, wifiSenha, intervaloAcordarMinutos, comportamentoSemWifi } = request.body as any;
-
-        const { data, error } = await supabaseAdmin.from('devices').insert([{
-            owner_id: userId,
+        const {
             nome,
-            serial_number: serialNumber,
-            wifi_ssid: wifiSsid,
-            wifi_senha: wifiSenha,
-            intervalo_acordar_minutos: intervaloAcordarMinutos,
-            comportamento_sem_wifi: comportamentoSemWifi,
-            status: 'ONLINE'
-        }]).select().single();
+            serialNumber,
+            wifiSsid,
+            wifiSenha,
+            intervaloAcordarMinutos,
+            comportamentoSemWifi,
+        } = request.body;
 
-        if (error) {
-            if (error.code === '23505') {
-                return reply.status(409).send({ message: 'Este hardware já se encontra registado numa conta.' });
+        try {
+            const device = await this.deviceService.create({
+                name: nome,
+                serial_number: serialNumber,
+                wifi_ssid: wifiSsid,
+                wifi_password: wifiSenha,
+                wake_interval: intervaloAcordarMinutos,
+                behavior_no_wifi: comportamentoSemWifi,
+                owner_id: ownerId,
+            });
+
+            return reply.status(201).send(device);
+        } catch (error: any) {
+            if (error?.code === "23505") {
+                return reply.status(409).send({ message: "Este hardware já se encontra registrado numa conta." });
             }
-            return reply.status(500).send({ message: 'Erro interno ao registar a coleira.', error });
+            console.error("Erro no controller de device (Create):", error);
+            return reply.status(500).send({ message: "Erro interno ao registrar a coleira.", error });
+        }
+    };
+
+    list = async (
+        request: FastifyRequest,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+
+        if (!ownerId) {
+            return reply.status(401).send({ message: "Sessão inválida ou não autorizada." });
         }
 
-        return reply.status(201).send(data);
-    }
+        try {
+            // Assumindo que seu DeviceService tem o método findManyByOwnerId
+            const devices = await this.deviceService.findManyByOwnerId(ownerId);
+            return reply.status(200).send(devices);
+        } catch (error) {
+            console.error("Erro no controller de device (List):", error);
+            return reply.status(500).send({ message: "Erro ao buscar dispositivos.", error });
+        }
+    };
 
-    async list(request: FastifyRequest, reply: FastifyReply) {
-        const userId = request.supabaseUser?.id;
+    update = async (
+        request: FastifyRequest<{ Params: { id: string }; Body: UpdateDeviceBody }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+        const { id } = request.params;
 
-        if (!userId) {
-            return reply.status(401).send({ message: 'Sessão inválida ou não autorizada.' });
+        if (!ownerId) {
+            return reply.status(401).send({ message: "Sessão inválida ou não autorizada." });
         }
 
-        const { data, error } = await supabaseAdmin
-            .from('devices')
-            .select('*')
-            .eq('owner_id', userId)
-            .order('created_at', { ascending: false });
+        try {
+            const updatedDevice = await this.deviceService.update(id, ownerId, request.body);
+            return reply.status(200).send(updatedDevice);
+        } catch (error) {
+            console.error("Erro no controller de device (Update):", error);
+            return reply.status(500).send({ message: "Erro ao atualizar dispositivo.", error });
+        }
+    };
+    delete = async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+        const { id } = request.params;
 
-        if (error) {
-            return reply.status(500).send({ message: 'Erro ao carregar a lista de dispositivos.', error });
+        if (!ownerId) {
+            return reply.status(401).send({ message: "Sessão inválida ou não autorizada." });
         }
 
-        return reply.status(200).send(data);
-    }
+        try {
+            await this.deviceService.delete(id, ownerId);
+            return reply.status(200).send({ message: "Dispositivo removido com sucesso." });
+        } catch (error) {
+            console.error("Erro no controller de device (Delete):", error);
+            return reply.status(500).send({ message: "Erro ao deletar dispositivo.", error });
+        }
+    };
+    linkPet = async (
+        request: FastifyRequest<{ Params: { id: string }; Body: LinkPetBody }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+        const { id } = request.params;
+        const { pet_id } = request.body;
+
+        if (!ownerId) {
+            return reply.status(401).send({ message: "Sessão inválida ou não autorizada." });
+        }
+
+        try {
+            await this.deviceService.linkPet(id, pet_id, ownerId);
+            return reply.status(200).send({ message: "Vínculo atualizado com sucesso." });
+        } catch (error) {
+            console.error("Erro no controller de device (Link):", error);
+            return reply.status(500).send({ message: "Erro ao vincular dispositivo ao pet.", error });
+        }
+    };
 }
