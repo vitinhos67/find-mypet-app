@@ -13,7 +13,7 @@ export class DatabaseHealthService {
     const checkedAt = new Date().toISOString();
 
     const { error } = await supabaseAdmin
-      .from("users")
+      .from("profiles")
       .select("id", { count: "exact", head: true });
 
     const latencyMs = Date.now() - startedAt;

@@ -80,6 +80,9 @@ alter table "public"."devices" add constraint "devices_serial_number_key" UNIQUE
 
 alter table "public"."users" add constraint "users_id_fkey" FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE not valid;
 
+
+DELETE FROM public.users WHERE id NOT IN (SELECT id FROM auth.users);
+
 alter table "public"."users" validate constraint "users_id_fkey";
 
 
