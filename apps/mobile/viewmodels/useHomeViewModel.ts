@@ -1,41 +1,116 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import MapView from 'react-native-maps';
 import { DeviceService } from '../services/DeviceService';
+import { LocationService } from '../services/LocationService';
 import { PetService } from '../services/PetService';
 
-type PetHomeType = {
+export type PetStatus = 'ONLINE' | 'OFFLINE' | 'SEM_COLEIRA';
+
+export type PetHomeType = {
     id: string;
     nome: string;
-    ultimaLocalizacao: string;
     foto?: string;
-    nomeColeira?: string | null; 
+    nomeColeira?: string | null;
+    deviceId?: string | null;
+    status: PetStatus;
+    latitude?: number;
+    longitude?: number;
+    ultimaAtualizacao?: string;
+};
+
+type MapRegion = {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+};
+
+const DEFAULT_REGION: MapRegion = {
+    latitude: -23.5505,
+    longitude: -46.6333,
+    latitudeDelta: 0.08,
+    longitudeDelta: 0.08,
+};
+
+export function formatUpdatedAt(dateStr?: string): string {
+    if (!dateStr) return 'Localização desconhecida';
+    const date = new Date(dateStr);
+    const diffMs = Date.now() - date.getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'Agora mesmo';
+    if (mins < 60) return `Há ${mins} min`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `Há ${hours}h`;
+    return `Há ${Math.floor(hours / 24)} dias`;
 }
+
 export function useHomeViewModel() {
     const [pets, setPets] = useState<PetHomeType[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+    const [mapRegion, setMapRegion] = useState<MapRegion>(DEFAULT_REGION);
+    const mapRef = useRef<MapView>(null);
 
     const carregarPets = useCallback(async () => {
         try {
             setIsLoading(true);
-            const [petsResponse, devicesResponse]: [any, any] = await Promise.all([
+
+            const [petsResponse, devicesResponse] = await Promise.all([
                 PetService.getPets(),
-                DeviceService.getDevices()
+                DeviceService.getDevices(),
             ]);
 
-            const petsData = Array.isArray(petsResponse) ? petsResponse : (petsResponse?.data || []);
-            const devicesData = Array.isArray(devicesResponse) ? devicesResponse : (devicesResponse?.data || []);
+            const petsData = Array.isArray(petsResponse)
+                ? petsResponse
+                : (petsResponse?.data ?? []);
 
-            const petsFormatados = petsData.map((pet: any) => {
-                const coleiraVinculada = devicesData.find((d: any) => d.pet_id === pet.id);
+            const devicesData = Array.isArray(devicesResponse)
+                ? devicesResponse
+                : (devicesResponse?.data ?? []);
+
+            const petsBase: PetHomeType[] = petsData.map((pet: any) => {
+                const device = devicesData.find((d: any) => d.pet_id === pet.id);
+                const status: PetStatus = device
+                    ? (device.status === 'ONLINE' ? 'ONLINE' : 'OFFLINE')
+                    : 'SEM_COLEIRA';
 
                 return {
                     id: pet.id,
-                    nome: pet.name || pet.nome,
-                    foto: pet.image_href || pet.foto,
-                    ultimaLocalizacao: 'Localização Desconhecida',
-                    nomeColeira: coleiraVinculada ? coleiraVinculada.name : null
+                    nome: pet.name ?? pet.nome,
+                    foto: pet.image_href ?? pet.foto,
+                    nomeColeira: device?.name ?? null,
+                    deviceId: device?.id ?? null,
+                    status,
                 };
             });
-            setPets(petsFormatados);
+
+            const petsWithLocations = await Promise.all(
+                petsBase.map(async (pet) => {
+                    const location = await LocationService.getLastLocation(pet.id);
+                    if (!location) return pet;
+                    return {
+                        ...pet,
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                        ultimaAtualizacao: location.updatedAt,
+                    };
+                })
+            );
+
+            setPets(petsWithLocations);
+
+            const firstWithCoords = petsWithLocations.find(
+                (p) => p.latitude != null && p.longitude != null
+            );
+            if (firstWithCoords?.latitude != null && firstWithCoords?.longitude != null) {
+                setSelectedPetId(firstWithCoords.id);
+                setMapRegion({
+                    latitude: firstWithCoords.latitude,
+                    longitude: firstWithCoords.longitude,
+                    latitudeDelta: 0.04,
+                    longitudeDelta: 0.04,
+                });
+            }
         } catch (error) {
             console.error('Erro na Home:', error);
         } finally {
@@ -43,13 +118,36 @@ export function useHomeViewModel() {
         }
     }, []);
 
-    useEffect(() => {
-        carregarPets();
-    }, [carregarPets]);
+    const selectPet = useCallback(
+        (petId: string) => {
+            setSelectedPetId(petId);
+            const pet = pets.find((p) => p.id === petId);
+            if (pet?.latitude != null && pet?.longitude != null && mapRef.current) {
+                mapRef.current.animateToRegion(
+                    {
+                        latitude: pet.latitude,
+                        longitude: pet.longitude,
+                        latitudeDelta: 0.005,
+                        longitudeDelta: 0.005,
+                    },
+                    600
+                );
+            }
+        },
+        [pets]
+    );
 
     return {
         pets,
         isLoading,
-        carregarPets
+        carregarPets,
+        selectedPetId,
+        selectedPet: pets.find((p) => p.id === selectedPetId) ?? null,
+        selectPet,
+        mapRegion,
+        mapRef,
+        petsComLocalizacao: pets.filter(
+            (p) => p.latitude != null && p.longitude != null
+        ),
     };
 }
