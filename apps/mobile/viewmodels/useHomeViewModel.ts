@@ -1,45 +1,39 @@
 import { useEffect, useState } from 'react';
 import { PetService } from '../services/PetService';
 
-type PetType = {
-    id: number;
+type PetHomeType = {
+    id: string;
     nome: string;
     ultimaLocalizacao: string;
+    foto?: string;
 };
-
 export function useHomeViewModel() {
-
-    const [pets, setPets] =
-        useState<PetType[]>([]);
-
-    const [isLoading, setIsLoading] =
-        useState(false);
-
+    const [pets, setPets] = useState<PetHomeType[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
         carregarPets();
     }, []);
 
     async function carregarPets() {
-
         try {
-
             setIsLoading(true);
+            const resposta: any = await PetService.getPets();
+            const petsData = Array.isArray(resposta) ? resposta : (resposta?.data || []);
 
-            const resposta =
-                await PetService.listarPets();
-
-            setPets(resposta);
+            const petsFormatados = petsData.map((pet: any) => ({
+                id: pet.id,
+                nome: pet.name || pet.nome, 
+                foto: pet.image_href || pet.foto, 
+                ultimaLocalizacao: 'Localização Desconhecida'
+            }));
+            setPets(petsFormatados);
 
         } catch (error) {
-
-            console.log(error);
-
+            console.error('Erro na Home:', error);
         } finally {
-
             setIsLoading(false);
         }
     }
-
     return {
         pets,
         isLoading,

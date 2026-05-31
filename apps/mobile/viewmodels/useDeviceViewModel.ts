@@ -1,17 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-export type ComportamentoSemWifi = 'PERGUNTAR' | 'RASTREIO_ATIVO' | 'PEGAR_LOCAL_E_DORMIR' | 'IGNORAR';
-export interface CollarDevice {
-    id: string;
-    nome: string;       
-    serialNumber: string;
-    wifiSsid: string;   
-    wifiSenha: string;  
-    petId: string | null;
-    status: 'ONLINE' | 'OFFLINE';
-    intervaloAcordarMinutos: number;
-    comportamentoSemWifi: ComportamentoSemWifi;
-}
+import { CollarDevice, ComportamentoSemWifi } from '../models/device.model';
 
 let fakeDatabase: CollarDevice[] = [];
 

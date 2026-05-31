@@ -1,16 +1,22 @@
 import type { FastifyInstance } from "fastify";
 
-import { authenticate } from "../../../shared/middlewares/authenticate.middleware";
+import { authenticateSupabaseUser } from "../../../shared/middlewares/authenticate-supabase-user.middleware";
 import { validateBody } from "../../../shared/middlewares/validate.middleware";
 import { PetController } from "../controllers/pet.controller";
-import { createPetBodySchema } from "../validators/create.validator";
+import { createPetBodySchema, type CreatePetBody } from "../validators/create.validator";
 
 export async function petRoutes(app: FastifyInstance) {
   const petController = new PetController();
 
-  app.post(
+  app.get(
     "/",
-    { preHandler: [authenticate(), validateBody(createPetBodySchema)] },
+    { preHandler: [authenticateSupabaseUser] },
+    petController.list
+  );
+
+  app.post<{ Body: CreatePetBody }>(
+    "/",
+    { preHandler: [authenticateSupabaseUser, validateBody(createPetBodySchema)] },
     petController.create
   );
 }

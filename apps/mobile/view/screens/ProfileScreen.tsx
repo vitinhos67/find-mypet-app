@@ -44,138 +44,148 @@ export default function ProfileScreen() {
     }
 
     return (
-
-        <SafeAreaView
-            style={[
-                styles.container,
-                darkMode && styles.containerDark
-            ]}
-        >
-            <View style={styles.profileSection}>
-
-                <Pressable onPress={selecionarImagem}>
-
-                    {profileImage ? (
-
-                        <Image
-                            source={{ uri: profileImage }}
-                            style={styles.profileImage}
-                        />
-
-                    ) : (
-
-                        <View style={styles.profilePlaceholder}>
-                            <Text style={styles.profilePlaceholderText}>
-                                Foto
-                            </Text>
-                        </View>
-                    )}
-
-                </Pressable>
-
-                <View style={styles.userInfo}>
-
-                    <Text
-                        style={[
-                            styles.userName,
-                            darkMode && styles.textDark
-                        ]}
-                    >
-                        {usuario.nome || 'Usuário'}
-                    </Text>
-
-                    <Pressable style={styles.editButton}>
-
-                        <Text style={styles.editButtonText}>
-                            Editar Perfil
-                        </Text>
-
-                    </Pressable>
-
-                </View>
-
-            </View>
-
-            <View
+    <SafeAreaView
+        style={[
+            styles.container,
+            darkMode && styles.containerDark
+        ]}
+    >
+        <View style={styles.header}>
+            <Text
                 style={[
-                styles.emailCard,
-                darkMode && styles.emailCardDark
+                    styles.headerTitle,
+                    darkMode && styles.textDark
                 ]}
             >
+                Meu Perfil
+            </Text>
 
-                <Text
-                    style={[
-                    styles.emailLabel,
-                    darkMode && styles.textDark
-                    ]}
-                >
-                    Email
+            <Text
+                style={[
+                    styles.headerSubtitle,
+                    darkMode && styles.subtitleDark
+                ]}
+            >
+                Gerencie sua conta e preferências
+            </Text>
+        </View>
+
+        <View
+            style={[
+                styles.profileCard,
+                darkMode && styles.cardDark
+            ]}
+        >
+            <Pressable onPress={selecionarImagem}>
+                {profileImage ? (
+                    <Image
+                        source={{ uri: profileImage }}
+                        style={styles.profileImage}
+                    />
+                ) : (
+                <View style={styles.profilePlaceholder}>
+                <Text style={styles.profilePlaceholderText}>
+                    Foto
                 </Text>
+                </View>
+                )}
+            </Pressable>
 
+            <View style={styles.userInfo}>
                 <Text
                     style={[
-                    styles.emailValue,
-                            darkMode && styles.textDark
-                    ]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                >
-                    {usuario.email || 'email@email.com'}
-                </Text>
-
-            </View>
-
-            <View style={styles.configSection}>
-
-                <Text
-                    style={[
-                        styles.configTitle,
+                        styles.userName,
                         darkMode && styles.textDark
                     ]}
                 >
-                    Tema:
+                    {usuario.nome || 'Usuário'}
                 </Text>
 
-                <Pressable
-                    style={[
-                        styles.themeSwitch,
-                        darkMode && styles.themeSwitchDark
-                    ]}
-                    onPress={toggleTheme}
-                >
-
-                    <View
-                        style={[
-                            styles.themeBall,
-                            darkMode && styles.themeBallDark
-                        ]}
-                    />
-
-                    <Text style={styles.themeIcon}>
-                        {darkMode ? '🌙' : '☀️'}
+                <Pressable style={styles.editButton}>
+                    <Text style={styles.editButtonText}>
+                        Editar Perfil
                     </Text>
-
                 </Pressable>
-
             </View>
+        </View>
+
+        <View
+            style={[
+                styles.emailCard,
+                darkMode && styles.emailCardDark
+            ]}
+        >
+            <Text
+                style={[
+                    styles.emailLabel,
+                    darkMode && styles.textDark
+                ]}
+            >
+                Email
+            </Text>
+
+            <Text
+                style={[
+                    styles.emailValue,
+                    darkMode && styles.textDark
+                ]}
+                numberOfLines={1}
+            >
+                {usuario.email || 'email@email.com'}
+            </Text>
+        </View>
+
+        <View
+            style={[
+            styles.settingsCard,
+            darkMode && styles.cardDark
+            ]}
+>
+        <View>
+        <Text
+            style={[
+                styles.configTitle,
+                darkMode && styles.textDark
+            ]}
+        >
+            Tema
+        </Text>
+
+        <Text
+            style={[
+                styles.configSubtitle,
+                darkMode && styles.subtitleDark
+            ]}
+        >
+            {darkMode ? 'Modo Escuro Ativado' : 'Modo Claro Ativado'}
+        </Text>
+        </View>
+
+            <Pressable
+                style={[
+                    styles.themeButton,
+                    darkMode && styles.themeButtonDark
+                ]}
+                onPress={toggleTheme}
+            >
+            <Text style={styles.themeButtonText}>
+                {darkMode ? '🌙 Escuro' : '☀️ Claro'}
+            </Text>
+        </Pressable>
+        </View>
 
             <View style={styles.logoutContainer}>
-
                 <Pressable
                     style={styles.logoutButton}
                     onPress={realizarLogout}
                 >
-
                     <Text style={styles.logoutText}>
                         Sair da Conta
                     </Text>
-
                 </Pressable>
-
             </View>
-
-        </SafeAreaView>
-    );
+    </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -208,6 +218,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#D9D9D9',
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 4,
+        borderColor: Colors.brand.primaryBlue,
     },
 
     profilePlaceholderText: {
@@ -219,6 +231,8 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
+        borderWidth: 4,
+        borderColor: Colors.brand.primaryBlue,
     },
 
     userInfo: {
@@ -268,7 +282,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 40,
         borderRadius: 10,
     },
-
     logoutText: {
         color: 'white',
         fontSize: 14,
@@ -303,12 +316,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         fontSize: 18,
     },
-
     emailCard: {
         marginTop: 20,
-        backgroundColor: '#FFFFFF',
         borderRadius: 10,
         paddingVertical: 14,
+        backgroundColor: Colors.light.surface,
         paddingHorizontal: 18,
         elevation: 2,
     },
@@ -327,6 +339,74 @@ const styles = StyleSheet.create({
     },
 
     emailCardDark: {
-        backgroundColor: '#1E1E1E',
+        backgroundColor: Colors.dark.surface,
+    },
+    header: {
+        marginBottom: 25,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontFamily: 'Inter-Bold',
+        color: Colors.brand.primaryBlue,
+    },
+
+    headerSubtitle: {
+        marginTop: 4,
+        fontSize: 14,
+        color: Colors.light.textSecondary,
+        fontFamily: 'Inter-Regular',
+    },
+
+    subtitleDark: {
+        color: Colors.dark.textSecondary,
+    },
+
+    profileCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 20,
+        backgroundColor: Colors.light.surface,
+        padding: 20,
+        marginTop: 10,
+        elevation: 3,
+        borderRadius: 10
+    },
+
+    cardDark: {
+        backgroundColor: Colors.dark.surface,
+    },
+
+    settingsCard: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: Colors.light.surface,
+        marginTop: 25,
+        padding: 20,
+        elevation: 2,
+        borderRadius: 10
+    },
+    configSubtitle: {
+        fontSize: 13,
+        marginTop: 4,
+        color: Colors.light.textSecondary,
+        fontFamily: 'Inter-Regular',
+    },
+
+    themeButton: {
+        backgroundColor: Colors.brand.primaryOrange,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+    },
+
+    themeButtonDark: {
+        backgroundColor: Colors.brand.primaryBlue,
+    },
+
+    themeButtonText: {
+        color: 'white',
+        fontSize: 14,
+        fontFamily: 'Inter-Bold',
     },
 });

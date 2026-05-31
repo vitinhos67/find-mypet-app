@@ -1,18 +1,12 @@
 import { z } from "zod";
 
 export const createPetBodySchema = z.object({
-  image_href: z
-    .string()
-    .trim()
-    .max(2048, "URL da imagem muito longa.")
-    .optional()
-    .nullable(),
-  name: z
-    .string({ error: "Informe o nome do pet." })
-    .trim()
-    .min(1, "O nome do pet não pode ser vazio.")
-    .max(120, "O nome do pet deve ter no máximo 120 caracteres."),
-  birth_date: z.string().trim().optional().nullable(),
+  foto: z.string().optional(),
+  nome: z.string().min(1, "O nome é obrigatório"),
+  raca: z.string(),
+  cor: z.string(),
+  sexo: z.enum(["MACHO", "FEMEA"]),
+  descricao: z.string(),
 });
 
 export type CreatePetBody = z.infer<typeof createPetBodySchema>;

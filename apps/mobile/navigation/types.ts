@@ -7,8 +7,16 @@ export type CollarStackParamList = {
     DeviceConfigure: { collarId: string; currentPetId?: string | null };
     DeviceAdd: undefined;
 }
+export type PetStackParamList = {
+    PetList: undefined;
+    PetAdd: undefined;
+    PetDetails: {
+        petId: string;
+    };
+}
 export type TabParamList = {
     Home: undefined;
-    Dispositivos: undefined; 
+    Dispositivos: undefined;
+    Pets: undefined;
     Perfil: undefined;
 };

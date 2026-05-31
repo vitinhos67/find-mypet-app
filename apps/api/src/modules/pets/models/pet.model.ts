@@ -4,8 +4,11 @@ export type Pet = {
   name: string;
   created_at: string;
   birth_date?: string | null;
-  // id do usuário que criou/cadastrou o pet
   owner_id: string;
+  raca: string;
+  cor: string;
+  sexo: string;
+  descricao: string;
 };
 
 export type CreatePetInput = {
@@ -13,6 +16,10 @@ export type CreatePetInput = {
   name: string;
   birth_date?: string | null;
   owner_id: string;
+  raca: string;
+  cor: string;
+  sexo: string;
+  descricao: string;
 };
 
 export type UpdatePetInput = Partial<CreatePetInput> & { id: string };
