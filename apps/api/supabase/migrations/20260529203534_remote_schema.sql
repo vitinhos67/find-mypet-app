@@ -54,17 +54,17 @@ drop index if exists "public"."sessions_user_id_idx";
 
 drop table "public"."sessions";
 
-alter table "public"."devices" add column "comportamento_sem_wifi" text not null default 'PEGAR_LOCAL_E_DORMIR'::text;
+alter table "public"."devices" add column if not exists "comportamento_sem_wifi" text not null default 'PEGAR_LOCAL_E_DORMIR'::text;
 
-alter table "public"."devices" add column "intervalo_acordar_minutos" integer not null default 10;
+alter table "public"."devices" add column if not exists "intervalo_acordar_minutos" integer not null default 10;
 
-alter table "public"."devices" add column "serial_number" text;
+alter table "public"."devices" add column if not exists "serial_number" text;
 
-alter table "public"."devices" add column "status" text not null default 'ONLINE'::text;
+alter table "public"."devices" add column if not exists "status" text not null default 'ONLINE'::text;
 
-alter table "public"."devices" add column "wifi_senha" text;
+alter table "public"."devices" add column if not exists "wifi_senha" text;
 
-alter table "public"."devices" add column "wifi_ssid" text;
+alter table "public"."devices" add column if not exists "wifi_ssid" text;
 
 alter table "public"."users" drop column "password";
 
