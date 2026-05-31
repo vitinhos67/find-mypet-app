@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComportamentoSemWifi } from '../../models/device.model';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
@@ -39,50 +39,55 @@ export default function DeviceAddScreen() {
                 </Pressable>
                 <Text style={styles.title}>Nova Coleira</Text>
             </View>
+            <KeyboardAvoidingView
+                style={styles.keyboardContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Text style={styles.sectionTitle}>Identificação</Text>
+                <ScrollView contentContainerStyle={styles.content}>
+                    <Text style={styles.sectionTitle}>Identificação</Text>
 
-                <Text style={styles.label}>Apelido do Dispositivo</Text>
-                <TextInput style={styles.input} placeholder="Ex: Coleira Laranja" value={nome} onChangeText={setNome} />
+                    <Text style={styles.label}>Apelido do Dispositivo</Text>
+                    <TextInput style={styles.input} placeholder="Ex: Coleira Laranja" value={nome} onChangeText={setNome} />
 
-                <Text style={styles.label}>Número de Série / PIN</Text>
-                <TextInput style={styles.input} placeholder="Ex: KODA-89A1" value={serial} onChangeText={setSerial} autoCapitalize="characters" />
+                    <Text style={styles.label}>Número de Série / PIN</Text>
+                    <TextInput style={styles.input} placeholder="Ex: KODA-89A1" value={serial} onChangeText={setSerial} autoCapitalize="characters" />
 
-                <View style={styles.divider} />
+                    <View style={styles.divider} />
 
-                <Text style={styles.sectionTitle}>Configuração de Rede Doméstica</Text>
+                    <Text style={styles.sectionTitle}>Configuração de Rede Doméstica</Text>
 
-                <Text style={styles.label}>Nome da Rede Wi-Fi (SSID)</Text>
-                <TextInput style={styles.input} placeholder="Sua rede Wi-Fi" value={wifiSsid} onChangeText={setWifiSsid} />
+                    <Text style={styles.label}>Nome da Rede Wi-Fi (SSID)</Text>
+                    <TextInput style={styles.input} placeholder="Sua rede Wi-Fi" value={wifiSsid} onChangeText={setWifiSsid} />
 
-                <Text style={styles.label}>Senha do Wi-Fi</Text>
-                <TextInput style={styles.input} placeholder="Senha da rede" value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
-                
-                <View style={styles.divider} />
-                <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
-                <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
-                <TextInput
-                    style={styles.input}
-                    keyboardType="numeric"
-                    placeholder="Ex: 10"
-                    value={intervalo}
-                    onChangeText={setIntervalo}
-                />
+                    <Text style={styles.label}>Senha do Wi-Fi</Text>
+                    <TextInput style={styles.input} placeholder="Senha da rede" value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
+                    
+                    <View style={styles.divider} />
+                    <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
+                    <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
+                    <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        placeholder="Ex: 10"
+                        value={intervalo}
+                        onChangeText={setIntervalo}
+                    />
 
-                <Text style={styles.label}>Se a coleira sair do Wi-Fi da casa:</Text>
-                <View style={styles.chipContainer}>
-                    <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
-                    <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
-                    <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
-                    <OptionChip label="Apenas Manual" value="IGNORAR" />
-                </View>
+                    <Text style={styles.label}>Se a coleira sair do Wi-Fi da casa:</Text>
+                    <View style={styles.chipContainer}>
+                        <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                        <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
+                        <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
+                        <OptionChip label="Apenas Manual" value="IGNORAR" />
+                    </View>
 
-                <View style={styles.divider} />
-                <Pressable style={styles.btnSalvar} onPress={handleSalvar}>
-                    <Text style={styles.btnSalvarText}>Registrar Dispositivo</Text>
-                </Pressable>
-            </ScrollView>
+                    <View style={styles.divider} />
+                    <Pressable style={styles.btnSalvar} onPress={handleSalvar}>
+                        <Text style={styles.btnSalvarText}>Registrar Dispositivo</Text>
+                    </Pressable>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -113,6 +118,15 @@ const styles = StyleSheet.create({
         fontSize: 20, 
         fontFamily: 'Inter-Bold',
         color: '#1e293b' 
+    },
+    keyboardContainer: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    scrollContent: {
+        flexGrow: 1, 
+        padding: 20,
+        paddingBottom: 40,
     },
     content: { 
         padding: 20, 

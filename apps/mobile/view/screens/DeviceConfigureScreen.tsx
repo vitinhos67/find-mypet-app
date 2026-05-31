@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ComportamentoSemWifi } from '../../models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
@@ -13,7 +13,7 @@ type ConfigureRouteProp = RouteProp<CollarStackParamList, 'DeviceConfigure'>;
 export default function DeviceConfigureScreen() {
     const { pets, carregarPets } = usePetViewModel();
     useEffect(() => {
-        carregarPets(); // Força a busca dos pets na API ao abrir a tela de configurar coleira
+        carregarPets();
     }, []); 
     const navigation = useNavigation();
     const route = useRoute<ConfigureRouteProp>();
@@ -83,70 +83,74 @@ export default function DeviceConfigureScreen() {
                 </Pressable>
                 <Text style={styles.title}>Configurar Hardware</Text>
             </View>
+            <KeyboardAvoidingView
+                style={styles.keyboardContainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <ScrollView contentContainerStyle={styles.content}>
+                    <Text style={styles.sectionTitle}>Detalhes do Dispositivo</Text>
+                    <Text style={styles.serial}>S/N: {coleiraAtual.serialNumber}</Text>
 
-            <ScrollView contentContainerStyle={styles.content}>
-                <Text style={styles.sectionTitle}>Detalhes do Dispositivo</Text>
-                <Text style={styles.serial}>S/N: {coleiraAtual.serialNumber}</Text>
+                    <Text style={styles.label}>Apelido</Text>
+                    <TextInput style={styles.input} value={nome} onChangeText={setNome} />
 
-                <Text style={styles.label}>Apelido</Text>
-                <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+                    <View style={styles.divider} />
 
-                <View style={styles.divider} />
+                    <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
 
-                <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
+                    <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
+                    <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={intervalo}
+                        onChangeText={setIntervalo}
+                    />
 
-                <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
-                <TextInput
-                    style={styles.input}
-                    keyboardType="numeric"
-                    value={intervalo}
-                    onChangeText={setIntervalo}
-                />
-
-                <Text style={styles.label}>Comportamento ao sair da zona Wi-Fi:</Text>
-                <View style={styles.chipContainer}>
-                    <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
-                    <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
-                    <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
-                    <OptionChip label="Apenas Manual" value="IGNORAR" />
-                </View>
-
-                <View style={styles.divider} />
-
-                <Text style={styles.sectionTitle}>Rede Wi-Fi (Modo AP)</Text>
-                <Text style={styles.label}>Rede Wi-Fi (SSID)</Text>
-                <TextInput style={styles.input} value={wifiSsid} onChangeText={setWifiSsid} />
-
-                <Text style={styles.label}>Senha do Wi-Fi</Text>
-                <TextInput style={styles.input} value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
-
-                <Pressable style={styles.btnSalvar} onPress={handleSalvarAlteracoes}>
-                    <Text style={styles.btnSalvarText}>Sincronizar com a Coleira</Text>
-                </Pressable>
-
-                <View style={styles.divider} />
-
-                <Text style={styles.sectionTitle}>Vínculo com Pet</Text>
-                {coleiraAtual.petId ? (
-                    <View style={styles.actionBox}>
-                        <Text style={styles.infoText}>Protegendo o Pet: {coleiraAtual.petId}</Text>
-                        <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
-                            <Text style={styles.btnText}>Desvincular</Text>
-                        </Pressable>
+                    <Text style={styles.label}>Comportamento ao sair da zona Wi-Fi:</Text>
+                    <View style={styles.chipContainer}>
+                        <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                        <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
+                        <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
+                        <OptionChip label="Apenas Manual" value="IGNORAR" />
                     </View>
-                ) : (
-                    <View style={styles.actionBox}>
-                        <Text style={styles.infoText}>Você ainda não possui nenhum Pet cadastrado no seu perfil.</Text>
-                        <Text style={styles.subInfoText}>Vá na aba "Perfil" para adicionar um animal antes de vinculá-lo à coleira.</Text>
-                    </View>
-                )}
 
-                <View style={styles.divider} />
-                <Pressable style={styles.btnExcluir} onPress={handleExcluir}>
-                    <Text style={styles.btnExcluirText}>Excluir Coleira do App</Text>
-                </Pressable>
+                    <View style={styles.divider} />
 
-            </ScrollView>
+                    <Text style={styles.sectionTitle}>Rede Wi-Fi (Modo AP)</Text>
+                    <Text style={styles.label}>Rede Wi-Fi (SSID)</Text>
+                    <TextInput style={styles.input} value={wifiSsid} onChangeText={setWifiSsid} />
+
+                    <Text style={styles.label}>Senha do Wi-Fi</Text>
+                    <TextInput style={styles.input} value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
+
+                    <Pressable style={styles.btnSalvar} onPress={handleSalvarAlteracoes}>
+                        <Text style={styles.btnSalvarText}>Sincronizar com a Coleira</Text>
+                    </Pressable>
+
+                    <View style={styles.divider} />
+
+                    <Text style={styles.sectionTitle}>Vínculo com Pet</Text>
+                    {coleiraAtual.petId ? (
+                        <View style={styles.actionBox}>
+                            <Text style={styles.infoText}>Protegendo o Pet: {coleiraAtual.petId}</Text>
+                            <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
+                                <Text style={styles.btnText}>Desvincular</Text>
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <View style={styles.actionBox}>
+                            <Text style={styles.infoText}>Você ainda não possui nenhum Pet cadastrado no seu perfil.</Text>
+                            <Text style={styles.subInfoText}>Vá na aba "Perfil" para adicionar um animal antes de vinculá-lo à coleira.</Text>
+                        </View>
+                    )}
+
+                    <View style={styles.divider} />
+                    <Pressable style={styles.btnExcluir} onPress={handleExcluir}>
+                        <Text style={styles.btnExcluirText}>Excluir Coleira do App</Text>
+                    </Pressable>
+
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -187,6 +191,15 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter-Bold',
         color: Colors.brand.primaryOrange, 
         marginBottom: 15 
+    },
+    keyboardContainer: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    scrollContent: {
+        flexGrow: 1,
+        padding: 20,
+        paddingBottom: 40,
     },
     serial: { 
         fontSize: 14, 
