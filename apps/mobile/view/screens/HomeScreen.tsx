@@ -1,3 +1,5 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback } from 'react';
 import {
     Image,
@@ -6,8 +8,6 @@ import {
     Text,
     View,
 } from 'react-native';
-
-import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { useHomeViewModel } from '../../viewmodels/useHomeViewModel';
@@ -73,40 +73,33 @@ export default function HomeScreen() {
                     ) : (
 
                         pets.map((pet) => (
-
-                            <View
-                                key={pet.id}
-                                style={styles.petContainer}
-                            >
-
-                                <View style={styles.petNameBox}>
-
-                                    <Text style={styles.petName}>
-                                        {pet.nome}
-                                    </Text>
-
+                            <View key={pet.id} style={styles.petContainer}>
+                                <View style={styles.petHeader}>
+                                    <View style={styles.petNameBox}>
+                                        <Text style={styles.petName} numberOfLines={1}>{pet.nome}</Text>
+                                    </View>
+                                    {pet.nomeColeira ? (
+                                        <View style={styles.badgeRastreado}>
+                                            <Ionicons name="hardware-chip" size={14} color={Colors.brand.primaryBlue} />
+                                            <Text style={styles.badgeRastreadoText} numberOfLines={1} ellipsizeMode="tail">
+                                                {pet.nomeColeira}
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        <View style={styles.badgeSemColeira}>
+                                            <Ionicons name="alert-circle-outline" size={14} color="#94a3b8" />
+                                            <Text style={styles.badgeSemColeiraText}>
+                                                Sem coleira
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
 
-                                <View
-                                    style={[
-                                        styles.locationCard,
-                                        darkMode &&
-                                        styles.locationCardDark
-                                    ]}
-                                >
-
-                                    <Text style={styles.locationText}>
-                                        Última localização:
-                                    </Text>
-
-                                    <Text style={styles.locationValue}>
-                                        {pet.ultimaLocalizacao}
-                                    </Text>
-
+                                <View style={[styles.locationCard, darkMode && styles.locationCardDark]}>
+                                    <Text style={styles.locationText}>Última localização:</Text>
+                                    <Text style={styles.locationValue}>{pet.ultimaLocalizacao}</Text>
                                 </View>
-
                             </View>
-
                         ))
 
                     )}
@@ -198,17 +191,15 @@ const styles = StyleSheet.create({
 
     petNameBox: {
         backgroundColor: Colors.brand.primaryBlue,
-        alignSelf: 'flex-start',
-        paddingVertical: 8,
-        paddingHorizontal: 30,
-        borderRadius: 10,
-        marginBottom: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 10, 
+        flexShrink: 1,
     },
-
     petName: {
         color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Inter-Bold',
+        fontSize: 14,
     },
 
     locationCard: {
@@ -238,6 +229,47 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontFamily: 'Inter-Regular',
         textAlign: 'center',
+    },
+    petHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+        gap: 10,
+    },
+    badgeRastreado: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f0f9ff', 
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.brand.primaryBlue,
+        gap: 4, 
+        flexShrink: 1,
+    },
+    badgeRastreadoText: {
+        color: Colors.brand.primaryBlue,
+        fontFamily: 'Inter-Bold',
+        fontSize: 12,
+        flexShrink: 1,
+    },
+    badgeSemColeira: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8fafc',
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        gap: 4,
+    },
+    badgeSemColeiraText: {
+        color: '#64748b',
+        fontFamily: 'Inter-Medium',
+        fontSize: 12,
     },
 
 });
