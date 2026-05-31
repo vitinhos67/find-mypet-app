@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { UserProfile } from '../models/profile.model';
 import { ProfileService } from '../services/ProfileService';
 
+const GENEROS_PERMITIDOS = ['Masculino', 'Feminino', 'Outro'];
+
 export function useProfileViewModel() {
     const [profileImage, setProfileImage] = useState<string | null>(null);
 
@@ -21,8 +23,12 @@ export function useProfileViewModel() {
 
     function preencherFormulario(usuarioAtual: Partial<UserProfile>) {
         setNome(usuarioAtual.nome || '');
-        setTelefone(usuarioAtual.telefone || '');
+        setTelefone((usuarioAtual.telefone || '').replace(/\D/g, '').slice(0, 11));
         setGenero(usuarioAtual.genero || '');
+    }
+
+    function atualizarTelefone(valor: string) {
+        setTelefone(valor.replace(/\D/g, '').slice(0, 11));
     }
 
     async function carregarPerfil() {
@@ -97,6 +103,16 @@ export function useProfileViewModel() {
             return false;
         }
 
+        if (telefone && telefone.length !== 11) {
+            setErrorMessage('Informe o telefone com DDD e 9 números.');
+            return false;
+        }
+
+        if (genero && !GENEROS_PERMITIDOS.includes(genero)) {
+            setErrorMessage('Selecione um gênero válido.');
+            return false;
+        }
+
         try {
             setIsSaving(true);
             setMessage(null);
@@ -148,7 +164,7 @@ export function useProfileViewModel() {
         message,
         errorMessage,
         setNome,
-        setTelefone,
+        setTelefone: atualizarTelefone,
         setGenero,
         iniciarEdicao,
         cancelarEdicao,
