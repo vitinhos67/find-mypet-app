@@ -32,4 +32,35 @@ export class PetController {
 
     return reply.status(201).send(apiSuccess(pet, "Pet criado com sucesso."));
   };
+  update = async (
+    request: FastifyRequest<{ Params: { id: string }, Body: CreatePetBody }>,
+    reply: FastifyReply
+  ) => {
+    const ownerId = request.supabaseUser!.id;
+    const { id } = request.params;
+
+    const pet = await this.petService.update(id, ownerId, {
+      image_href: request.body.foto,
+      name: request.body.nome,
+      raca: request.body.raca,
+      cor: request.body.cor,
+      sexo: request.body.sexo,
+      descricao: request.body.descricao,
+      owner_id: ownerId,
+    });
+
+    return reply.status(200).send(apiSuccess(pet, "Pet atualizado com sucesso."));
+  };
+
+  delete = async (
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) => {
+    const ownerId = request.supabaseUser!.id;
+    const { id } = request.params;
+
+    await this.petService.delete(id, ownerId);
+
+    return reply.status(200).send(apiSuccess(null, "Pet removido com sucesso."));
+  };
 }

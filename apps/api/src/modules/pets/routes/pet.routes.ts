@@ -7,6 +7,11 @@ import { createPetBodySchema, type CreatePetBody } from "../validators/create.va
 
 export async function petRoutes(app: FastifyInstance) {
   const petController = new PetController();
+  app.addHook("onRequest", async (request) => {
+    if (request.method === "DELETE" || request.method === "GET") {
+      delete request.headers["content-type"];
+    }
+  });
 
   app.get(
     "/",
@@ -18,5 +23,17 @@ export async function petRoutes(app: FastifyInstance) {
     "/",
     { preHandler: [authenticateSupabaseUser, validateBody(createPetBodySchema)] },
     petController.create
+  );
+
+  app.put<{ Params: { id: string }, Body: CreatePetBody }>(
+    "/:id",
+    { preHandler: [authenticateSupabaseUser, validateBody(createPetBodySchema)] },
+    petController.update
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    "/:id",
+    { preHandler: [authenticateSupabaseUser] },
+    petController.delete
   );
 }

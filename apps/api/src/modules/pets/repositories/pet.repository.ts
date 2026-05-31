@@ -41,4 +41,39 @@ export class PetRepository {
     }
     return data;
   }
+  async update(id: string, ownerId: string, data: Partial<CreatePetInput>): Promise<Pet> {
+    const { data: updatedData, error } = await supabaseAdmin
+      .from("pets")
+      .update({
+        image_href: data.image_href,
+        name: data.name,
+        raca: data.raca,
+        cor: data.cor,
+        sexo: data.sexo,
+        descricao: data.descricao
+      })
+      .eq("id", id)
+      .eq("owner_id", ownerId) 
+      .select(PET_PUBLIC_FIELDS)
+      .single();
+
+    if (error) {
+      console.error("Erro Supabase (Update):", error);
+      throw new AppException("Não foi possível atualizar o pet.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
+    }
+    return updatedData;
+  }
+
+  async delete(id: string, ownerId: string): Promise<void> {
+    const { error } = await supabaseAdmin
+      .from("pets")
+      .delete()
+      .eq("id", id)
+      .eq("owner_id", ownerId);
+
+    if (error) {
+      console.error("Erro Supabase (Delete):", error);
+      throw new AppException("Não foi possível excluir o pet.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
+    }
+  }
 }
