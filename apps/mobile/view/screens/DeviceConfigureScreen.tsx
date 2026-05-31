@@ -130,12 +130,30 @@ export default function DeviceConfigureScreen() {
                     <View style={styles.divider} />
 
                     <Text style={styles.sectionTitle}>Vínculo com Pet</Text>
-                    {coleiraAtual.petId ? (
+                    {pets && pets.length > 0 ? (
                         <View style={styles.actionBox}>
-                            <Text style={styles.infoText}>Protegendo o Pet: {coleiraAtual.petId}</Text>
-                            <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
-                                <Text style={styles.btnText}>Desvincular</Text>
-                            </Pressable>
+                            <Text style={styles.label}>Selecione o pet para usar esta coleira:</Text>
+                            <View style={styles.chipContainer}>
+                                {pets.map(pet => {
+                                    const isVinculado = coleiraAtual.petId === pet.id;
+                                    return (
+                                        <Pressable
+                                            key={pet.id}
+                                            style={[styles.chip, isVinculado && styles.chipSelected]}
+                                            onPress={() => vincularColeiraAoPet(collarId, pet.id)}
+                                        >
+                                            <Text style={[styles.chipText, isVinculado && styles.chipTextSelected]}>
+                                                {pet.nome || 'Sem nome'}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
+                            {coleiraAtual.petId && (
+                                <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
+                                    <Text style={styles.btnText}>Desvincular Pet Atual</Text>
+                                </Pressable>
+                            )}
                         </View>
                     ) : (
                         <View style={styles.actionBox}>
