@@ -13,7 +13,7 @@ export async function registerRoutes(app: FastifyInstance) {
       await api.register(petRoutes, { prefix: "/pets" });
       await api.register(locationRoutes, { prefix: "/pets" });
       await api.register(meRoutes, { prefix: "/me" });
-      await app.register(deviceRoutes, { prefix: '/devices' });
+      await api.register(deviceRoutes, { prefix: '/devices' });
     },
     { prefix: "/api" }
   );

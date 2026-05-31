@@ -1,11 +1,14 @@
-import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin"; // Ajuste o caminho se o seu supabaseAdmin ficar em outro lugar
+import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
+
+const DEVICE_FIELDS =
+    "id, owner_id, name, serial_number, wifi_ssid, wifi_password, wake_interval, behavior_no_wifi, pet_id, status, updated_at";
 
 export class DeviceRepository {
     async create(data: any): Promise<any> {
         const { data: newDevice, error } = await supabaseAdmin
             .from("devices")
             .insert(data)
-            .select()
+            .select(DEVICE_FIELDS)
             .single();
 
         if (error) throw error;
@@ -15,9 +18,9 @@ export class DeviceRepository {
     async findManyByOwnerId(ownerId: string): Promise<any[]> {
         const { data, error } = await supabaseAdmin
             .from("devices")
-            .select("*")
+            .select(DEVICE_FIELDS)
             .eq("owner_id", ownerId)
-            .order("created_at", { ascending: false }); // Garante que a coluna que criamos agora é usada
+            .order("updated_at", { ascending: false });
 
         if (error) throw error;
         return data || [];
@@ -27,15 +30,15 @@ export class DeviceRepository {
         const { data: updatedDevice, error } = await supabaseAdmin
             .from("devices")
             .update({
-                name: data.name, // Ajustado para 'name'
+                name: data.name,
                 wifi_ssid: data.wifi_ssid,
-                wifi_password: data.wifi_password, // Ajustado para 'wifi_password'
-                wake_interval: data.wake_interval, // Ajustado para 'wake_interval'
-                behavior_no_wifi: data.behavior_no_wifi, // Ajustado para 'behavior_no_wifi'
+                wifi_password: data.wifi_password,
+                wake_interval: data.wake_interval,
+                behavior_no_wifi: data.behavior_no_wifi,
             })
             .eq("id", id)
             .eq("owner_id", ownerId)
-            .select()
+            .select(DEVICE_FIELDS)
             .single();
 
         if (error) {
