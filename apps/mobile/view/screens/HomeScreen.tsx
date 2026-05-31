@@ -75,7 +75,7 @@ export default function HomeScreen() {
                         pets.map((pet) => (
                             <View key={pet.id} style={styles.petContainer}>
                                 <View style={styles.petHeader}>
-                                    <View style={styles.petNameBox}>
+                                    <View style={[styles.petNameBox, darkMode && styles.petNameBoxDark]}>
                                         <Text style={styles.petName} numberOfLines={1}>{pet.nome}</Text>
                                     </View>
                                     {pet.nomeColeira ? (
@@ -196,6 +196,13 @@ const styles = StyleSheet.create({
         borderRadius: 10, 
         flexShrink: 1,
     },
+    petNameBoxDark: {
+        backgroundColor: Colors.brand.secondaryBlue,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        flexShrink: 1,
+    },
     petName: {
         color: 'white',
         fontFamily: 'Inter-Bold',
@@ -213,9 +220,9 @@ const styles = StyleSheet.create({
     },
 
     locationCardDark: {
-        backgroundColor: Colors.brand.primaryBlue,
+        backgroundColor: Colors.dark.surface,
     },
-
+    
     locationText: {
         color: 'white',
         fontSize: 16,

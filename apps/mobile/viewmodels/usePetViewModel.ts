@@ -2,12 +2,13 @@ import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { Pet, PetPayload, SexoPet } from '../models/pet.model';
 import { PetService } from '../services/PetService';
+import { StorageService } from '../services/StorageService';
 
 function mapDbToPet(dbPet: any): Pet {
     return {
         id: dbPet.id,
         foto: dbPet.image_href || dbPet.foto,
-        nome: dbPet.name || dbPet.nome,     
+        nome: dbPet.name || dbPet.nome,
         raca: dbPet.raca,
         cor: dbPet.cor,
         sexo: dbPet.sexo as SexoPet,
@@ -48,7 +49,13 @@ export function usePetViewModel() {
         }
         setIsLoading(true);
         try {
-            const payload: PetPayload = { foto, nome, raca, cor, sexo, descricao };
+            let fotoUrl = foto;
+            if (foto && foto.startsWith('file://')) {
+                const urlNaNuvem = await StorageService.uploadPetImage(foto);
+                fotoUrl = urlNaNuvem || '';
+            }
+
+            const payload: PetPayload = { foto: fotoUrl, nome, raca, cor, sexo, descricao };
             await PetService.createPet(payload);
             await carregarPets();
             Alert.alert('Sucesso', 'Pet cadastrado com sucesso!');
@@ -73,7 +80,13 @@ export function usePetViewModel() {
     ) {
         setIsLoading(true);
         try {
-            const payload: PetPayload = { foto, nome, raca, cor, sexo, descricao };
+            let fotoUrl = foto;
+            if (foto && foto.startsWith('file://')) {
+                const urlNaNuvem = await StorageService.uploadPetImage(foto);
+                fotoUrl = urlNaNuvem || '';
+            }
+
+            const payload: PetPayload = { foto: fotoUrl, nome, raca, cor, sexo, descricao };
             await PetService.updatePet(id, payload);
             await carregarPets();
             Alert.alert('Sucesso', 'Pet atualizado com sucesso!');
