@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PetAddScreen from '../view/screens/PetAddScreen';
 import PetDetailsScreen from '../view/screens/PetDetailsScreen';
 import PetListScreen from '../view/screens/PetListScreen';
-
+import { CollarNavigator } from './CollarNavigator';
 import { PetStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<PetStackParamList>();
@@ -29,6 +29,10 @@ export function PetNavigator() {
             <Stack.Screen
                 name="PetDetails"
                 component={PetDetailsScreen}
+            />
+            <Stack.Screen 
+                name="Collar" 
+                component={CollarNavigator} 
             />
         </Stack.Navigator>
     );

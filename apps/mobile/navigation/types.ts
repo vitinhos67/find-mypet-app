@@ -1,3 +1,4 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
 export type AuthStackParams = {
     Login: undefined;    
     Cadastro: undefined;
@@ -13,6 +14,7 @@ export type PetStackParamList = {
     PetDetails: {
         petId: string;
     };
+    Collar: NavigatorScreenParams<CollarStackParamList>;
 }
 export type TabParamList = {
     Home: undefined;

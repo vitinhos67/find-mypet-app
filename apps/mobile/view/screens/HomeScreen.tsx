@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     },
 
     containerDark: {
-        backgroundColor: '#121212',
+        backgroundColor: Colors.dark.background,
     },
 
     header: {
@@ -138,6 +138,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderColor: Colors.brand.primaryOrange,
     },
     headerDark:{
         backgroundColor:  Colors.dark.surface,
@@ -147,6 +149,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderColor: Colors.brand.primaryBlue,
     },
 
     logoText: {

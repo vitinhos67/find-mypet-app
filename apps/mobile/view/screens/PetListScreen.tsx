@@ -14,13 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 
+import { useTheme } from '../../hooks/useTheme';
 import { Colors } from '../styles/color';
-import { useTheme } from '../../hooks/useTheme';;
+;
 
 type NavigationProp =
     NativeStackNavigationProp<
         PetStackParamList,
-        'PetList'
+        'PetList',
+        'Colar'
     >;
 
 export default function PetListScreen() {
@@ -59,8 +61,6 @@ export default function PetListScreen() {
                     {
                         backgroundColor:
                             theme.surface,
-                        borderColor:
-                            Colors.brand.primaryBlue
                     }
                 ]}
             >
@@ -90,20 +90,31 @@ export default function PetListScreen() {
                     </Text>
                 </View>
 
-                <Pressable
-                    style={styles.btnAdd}
-                    onPress={() =>
-                        navigation.navigate(
-                            'PetAdd'
-                        )
-                    }
-                >
-                    <Text
-                        style={styles.btnAddText}
+                <View style={{ flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
+                    <Pressable
+                        style={styles.btnAdd}
+                        onPress={() =>
+                            navigation.navigate(
+                                'PetAdd'
+                            )
+                        }
                     >
-                        + Novo
-                    </Text>
-                </Pressable>
+                        <Text
+                            style={styles.btnAddText}
+                        >
+                            + Novo
+                        </Text>
+                    </Pressable>
+
+                    <Pressable
+                        style={[styles.btnAdd, { backgroundColor: Colors.brand.primaryBlue }]}
+                        onPress={() => navigation.navigate('Collar' as any)}
+                    >
+                        <Text style={styles.btnAddText}>
+                            Coleiras
+                        </Text>
+                    </Pressable>
+                </View>
             </View>
 
             <FlatList
@@ -238,7 +249,8 @@ const styles = StyleSheet.create({
         justifyContent:
             'space-between',
         alignItems: 'center',
-        borderBottomWidth: 1
+        borderBottomWidth: 1,
+        borderColor: Colors.brand.primaryOrange
     },
 
     title: {

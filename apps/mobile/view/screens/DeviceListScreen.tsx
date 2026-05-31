@@ -81,6 +81,15 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: Colors.brand.primaryBlue,
     },
+    headerDark: {
+        padding: 20,
+        backgroundColor: Colors.dark.surface,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderColor: Colors.brand.primaryBlue,
+    },
     title: { 
         fontSize: 20, 
         fontFamily: 'Inter-Bold',
