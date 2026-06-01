@@ -1,5 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authenticateSupabaseUser } from "../../../shared/middlewares/authenticate-supabase-user.middleware";
+import { validateBody } from "../../../shared/middlewares/validate.middleware";
+import { LocationController } from "../../locations/controllers/location.controller";
+import { saveLocationBodySchema, type SaveLocationBody } from "../../locations/validators/save.validator";
 import {
     CreateDeviceBody,
     DeviceController,
@@ -9,6 +12,8 @@ import {
 
 export async function deviceRoutes(app: FastifyInstance) {
     const deviceController = new DeviceController();
+    const locationController = new LocationController();
+
     app.addHook("onRequest", async (request) => {
         if (request.method === "DELETE" || request.method === "GET") {
             delete request.headers["content-type"];
@@ -43,5 +48,12 @@ export async function deviceRoutes(app: FastifyInstance) {
         "/:id/link",
         { preHandler: [authenticateSupabaseUser] },
         deviceController.linkPet
+    );
+
+    // ESP32 envia coordenadas GPS da coleira
+    app.post<{ Params: { id: string }; Body: SaveLocationBody }>(
+        "/:id/location",
+        { preHandler: [validateBody(saveLocationBodySchema)] },
+        locationController.saveForDevice
     );
 }

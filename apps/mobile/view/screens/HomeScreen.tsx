@@ -1,282 +1,612 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
+    ActivityIndicator,
+    FlatList,
     Image,
-    ScrollView,
+    Platform,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
-import { useHomeViewModel } from '../../viewmodels/useHomeViewModel';
+import { PetHomeType, formatUpdatedAt, useHomeViewModel } from '../../viewmodels/useHomeViewModel';
 import { Colors } from '../styles/color';
 
-export default function HomeScreen() {
+const DARK_MAP_STYLE = [
+    { elementType: 'geometry', stylers: [{ color: '#1d2c4d' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#8ec3b9' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a3646' }] },
+    { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#023e58' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#304a7d' }] },
+    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#98a5be' }] },
+    { featureType: 'road', elementType: 'labels.text.stroke', stylers: [{ color: '#1d2c4d' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2c6675' }] },
+    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#b0d5ce' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e1626' }] },
+    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#4e6d70' }] },
+];
 
-    const { darkMode } = useTheme();
+function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean }) {
+    const isOnline = pet.status === 'ONLINE';
+    const borderColor = isSelected
+        ? Colors.brand.primaryOrange
+        : isOnline
+        ? Colors.brand.primaryBlue
+        : '#94a3b8';
+    const size = isSelected ? 54 : 42;
+    // Descontamos os 3px de borda de cada lado para a imagem preencher corretamente
+    const imgSize = size - 6;
 
-    const { pets, isLoading, carregarPets } = useHomeViewModel();
-    useFocusEffect(
-        useCallback(() => {
-            carregarPets();
-        }, [])
-    );
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                darkMode && styles.containerDark
-            ]}
-        >
-
-            <ScrollView showsVerticalScrollIndicator={false}>
-
-                {/* HEADER */}
-                <View style={[styles.header ,darkMode && styles.headerDark]}>
-
-                    <Text style={[styles.logoText, darkMode && styles.logoTextDark] }>
-                        Find My PET
+        <View style={markerStyles.wrapper} pointerEvents="none">
+            {isSelected && (
+                <View style={[markerStyles.callout, { backgroundColor: borderColor }]}>
+                    <Ionicons name="paw" size={10} color="white" style={{ marginRight: 3 }} />
+                    <Text style={markerStyles.calloutText} numberOfLines={1}>
+                        {pet.nome}
                     </Text>
-
-                    <Image
-                        source={require('../../assets/images/logo-pet.png')}
-                        style={styles.headerImage}
-                    />
-
                 </View>
+            )}
 
-                {/* CONTENT */}
-                <View style={styles.content}>
-
-                    <Text
-                        style={[
-                            styles.sectionTitle,
-                            darkMode && styles.textDark
-                        ]}
-                    >
-                        PET'S
-                    </Text>
-
-                    {isLoading ? (
-
-                        <Text
-                            style={[
-                                styles.loadingText,
-                                darkMode && styles.textDark
-                            ]}
-                        >
-                            Carregando pets...
-                        </Text>
-
+            {/* Wrapper relativo: o statusDot fica fora do overflow do pin */}
+            <View style={{ width: size, height: size }}>
+                <View
+                    style={[
+                        markerStyles.pin,
+                        { width: size, height: size, borderRadius: size / 2, borderColor },
+                    ]}
+                >
+                    {pet.foto ? (
+                        <Image
+                            source={{ uri: pet.foto }}
+                            style={{
+                                width: imgSize,
+                                height: imgSize,
+                                borderRadius: imgSize / 2,
+                            }}
+                            resizeMode="cover"
+                        />
                     ) : (
-
-                        pets.map((pet) => (
-                            <View key={pet.id} style={styles.petContainer}>
-                                <View style={styles.petHeader}>
-                                    <View style={[styles.petNameBox, darkMode && styles.petNameBoxDark]}>
-                                        <Text style={styles.petName} numberOfLines={1}>{pet.nome}</Text>
-                                    </View>
-                                    {pet.nomeColeira ? (
-                                        <View style={styles.badgeRastreado}>
-                                            <Ionicons name="hardware-chip" size={14} color={Colors.brand.primaryBlue} />
-                                            <Text style={styles.badgeRastreadoText} numberOfLines={1} ellipsizeMode="tail">
-                                                {pet.nomeColeira}
-                                            </Text>
-                                        </View>
-                                    ) : (
-                                        <View style={styles.badgeSemColeira}>
-                                            <Ionicons name="alert-circle-outline" size={14} color="#94a3b8" />
-                                            <Text style={styles.badgeSemColeiraText}>
-                                                Sem coleira
-                                            </Text>
-                                        </View>
-                                    )}
-                                </View>
-
-                                <View style={[styles.locationCard, darkMode && styles.locationCardDark]}>
-                                    <Text style={styles.locationText}>Última localização:</Text>
-                                    <Text style={styles.locationValue}>{pet.ultimaLocalizacao}</Text>
-                                </View>
-                            </View>
-                        ))
-
+                        <Ionicons name="paw" size={isSelected ? 22 : 18} color="white" />
                     )}
-
                 </View>
 
-            </ScrollView>
+                <View
+                    style={[
+                        markerStyles.statusDot,
+                        { backgroundColor: isOnline ? '#22c55e' : '#94a3b8' },
+                    ]}
+                />
+            </View>
 
-        </SafeAreaView>
+            <View style={[markerStyles.tail, { borderTopColor: borderColor }]} />
+        </View>
     );
 }
 
-const styles = StyleSheet.create({
+export default function HomeScreen() {
+    const { darkMode } = useTheme();
+    const insets = useSafeAreaInsets();
+    const [panelOpen, setPanelOpen] = useState(true);
+    const { pets, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
+        useHomeViewModel();
 
-    container: {
+    useFocusEffect(
+        useCallback(() => {
+            carregarPets();
+        }, [carregarPets])
+    );
+
+    const handlePetPress = useCallback(
+        (pet: PetHomeType) => {
+            selectPet(pet.id);
+        },
+        [selectPet]
+    );
+
+    return (
+        <View style={styles.root}>
+            {/* MAP */}
+            <MapView
+                ref={mapRef}
+                style={StyleSheet.absoluteFillObject}
+                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                initialRegion={mapRegion}
+                showsUserLocation
+                showsMyLocationButton={false}
+                showsCompass={false}
+                customMapStyle={darkMode ? DARK_MAP_STYLE : []}
+            >
+                {pets
+                    .filter((p) => p.latitude != null && p.longitude != null)
+                    .map((pet) => (
+                        <Marker
+                            key={pet.id}
+                            coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
+                            onPress={() => handlePetPress(pet)}
+                            tracksViewChanges={selectedPetId === pet.id}
+                        >
+                            <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
+                        </Marker>
+                    ))}
+            </MapView>
+
+            <View style={[styles.headerSafe, { top: insets.top }]} pointerEvents="box-none">
+                <View style={[styles.header, darkMode && styles.headerDark]}>
+                    <View>
+                        <Text
+                            style={[
+                                styles.headerSub,
+                                darkMode && { color: Colors.dark.textSecondary },
+                            ]}
+                        >
+                            Find My
+                        </Text>
+                        <Text style={styles.headerTitle}>PET</Text>
+                    </View>
+                    <View style={styles.headerRight}>
+                        <View style={[styles.countBadge, darkMode && styles.countBadgeDark]}>
+                            <Ionicons name="paw" size={12} color={Colors.brand.primaryOrange} />
+                            <Text
+                                style={[styles.countText, darkMode && { color: Colors.dark.textSecondary }]}
+                            >
+                                {pets.length} {pets.length === 1 ? 'pet' : 'pets'}
+                            </Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={carregarPets}
+                            style={[styles.refreshBtn, darkMode && styles.refreshBtnDark]}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />
+                            ) : (
+                                <Ionicons
+                                    name="refresh-outline"
+                                    size={20}
+                                    color={Colors.brand.primaryBlue}
+                                />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+
+            {/* BOTTOM PANEL */}
+            <View style={styles.bottomSafe} pointerEvents="box-none">
+                <View
+                    style={[styles.bottomPanel, darkMode && styles.bottomPanelDark]}
+                    pointerEvents="auto"
+                >
+                    <TouchableOpacity
+                        onPress={() => setPanelOpen(o => !o)}
+                        activeOpacity={0.7}
+                        style={styles.handleTouchable}
+                    >
+                        <View style={styles.handleBar} />
+                        <View style={styles.panelHeaderRow}>
+                            <Text style={[styles.panelTitle, darkMode && { color: Colors.dark.textPrimary }]}>
+                                Rastreamento
+                            </Text>
+                            <Ionicons
+                                name={panelOpen ? 'chevron-down' : 'chevron-up'}
+                                size={18}
+                                color={darkMode ? Colors.dark.textSecondary : Colors.light.textSecondary}
+                            />
+                        </View>
+                    </TouchableOpacity>
+
+                    {panelOpen && isLoading ? (
+                        <View style={styles.loaderRow}>
+                            <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />
+                            <Text
+                                style={[styles.loaderText, darkMode && { color: Colors.dark.textSecondary }]}
+                            >
+                                Buscando localização...
+                            </Text>
+                        </View>
+                    ) : panelOpen ? (
+                        <FlatList
+                            horizontal
+                            data={pets}
+                            keyExtractor={(item) => item.id}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.cardList}
+                            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+                            renderItem={({ item }) => {
+                                const isActive = selectedPetId === item.id;
+                                const onlineColor = '#22c55e';
+                                const offlineColor = '#94a3b8';
+                                const statusColor =
+                                    item.status === 'ONLINE' ? onlineColor : offlineColor;
+                                const avatarColor =
+                                    item.status === 'ONLINE'
+                                        ? Colors.brand.primaryBlue
+                                        : '#94a3b8';
+
+                                return (
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.petCard,
+                                            darkMode && styles.petCardDark,
+                                            isActive && styles.petCardActive,
+                                        ]}
+                                        onPress={() => handlePetPress(item)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <View
+                                            style={[styles.avatar, { backgroundColor: avatarColor }]}
+                                        >
+                                            <Ionicons name="paw" size={24} color="white" />
+                                        </View>
+
+                                        <Text
+                                            style={[
+                                                styles.cardName,
+                                                darkMode && { color: Colors.dark.textPrimary },
+                                            ]}
+                                            numberOfLines={1}
+                                        >
+                                            {item.nome}
+                                        </Text>
+
+                                        <View style={styles.statusRow}>
+                                            <View
+                                                style={[
+                                                    styles.statusDot,
+                                                    { backgroundColor: statusColor },
+                                                ]}
+                                            />
+                                            <Text style={[styles.statusLabel, { color: statusColor }]}>
+                                                {item.status === 'ONLINE'
+                                                    ? 'Online'
+                                                    : item.status === 'OFFLINE'
+                                                    ? 'Offline'
+                                                    : 'Sem coleira'}
+                                            </Text>
+                                        </View>
+
+                                        {item.nomeColeira != null && (
+                                            <View style={styles.deviceRow}>
+                                                <Ionicons
+                                                    name="hardware-chip-outline"
+                                                    size={11}
+                                                    color={
+                                                        darkMode
+                                                            ? Colors.dark.textSecondary
+                                                            : Colors.light.textSecondary
+                                                    }
+                                                />
+                                                <Text
+                                                    style={[
+                                                        styles.deviceText,
+                                                        darkMode && {
+                                                            color: Colors.dark.textSecondary,
+                                                        },
+                                                    ]}
+                                                    numberOfLines={1}
+                                                >
+                                                    {item.nomeColeira}
+                                                </Text>
+                                            </View>
+                                        )}
+
+                                        <Text
+                                            style={[
+                                                styles.timeText,
+                                                darkMode && { color: Colors.dark.textSecondary },
+                                            ]}
+                                        >
+                                            {item.ultimaAtualizacao
+                                                ? formatUpdatedAt(item.ultimaAtualizacao)
+                                                : 'Sem localização'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            }}
+                            ListEmptyComponent={
+                                <View style={styles.emptyRow}>
+                                    <Ionicons
+                                        name="paw-outline"
+                                        size={28}
+                                        color={Colors.light.textSecondary}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.emptyText,
+                                            darkMode && { color: Colors.dark.textSecondary },
+                                        ]}
+                                    >
+                                        Nenhum pet cadastrado
+                                    </Text>
+                                </View>
+                            }
+                        />
+                    ) : null}
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const markerStyles = StyleSheet.create({
+    wrapper: {
+        alignItems: 'center',
+    },
+    callout: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
+        marginBottom: 4,
+        maxWidth: 130,
+    },
+    calloutText: {
+        color: 'white',
+        fontSize: 11,
+        fontFamily: 'Inter-Bold',
+        flexShrink: 1,
+    },
+    pin: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 3,
+        backgroundColor: Colors.brand.primaryBlue,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 4,
+    },
+    statusDot: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 13,
+        height: 13,
+        borderRadius: 7,
+        borderWidth: 2,
+        borderColor: 'white',
+    },
+    pinLarge: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+    },
+    tail: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 6,
+        borderRightWidth: 6,
+        borderTopWidth: 9,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        marginTop: -1,
+    },
+});
+
+const styles = StyleSheet.create({
+    root: {
         flex: 1,
         backgroundColor: Colors.light.background,
     },
 
-    containerDark: {
+    // FLOATING HEADER
+    headerSafe: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        paddingHorizontal: 16,
+    },
+    header: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.12,
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    headerDark: {
+        backgroundColor: Colors.dark.surface,
+    },
+    headerSub: {
+        fontSize: 11,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
+    },
+    headerTitle: {
+        fontSize: 24,
+        fontFamily: 'Inter-Black',
+        color: Colors.brand.primaryBlue,
+        letterSpacing: -0.5,
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    countBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.light.background,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 12,
+        gap: 5,
+    },
+    countBadgeDark: {
+        backgroundColor: Colors.dark.background,
+    },
+    countText: {
+        fontSize: 12,
+        fontFamily: 'Inter-Medium',
+        color: Colors.light.textSecondary,
+    },
+    refreshBtn: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: Colors.light.background,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    refreshBtnDark: {
         backgroundColor: Colors.dark.background,
     },
 
-    header: {
+    bottomSafe: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+    },
+    bottomPanel: {
         backgroundColor: 'white',
-        width: '100%',
-        height: 110,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryOrange,
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        paddingTop: 12,
+        paddingBottom: 28,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 12,
     },
-    headerDark:{
-        backgroundColor:  Colors.dark.surface,
-        width: '100%',
-        height: 110,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryBlue,
-    },
-
-    logoText: {
-        color: Colors.brand.primaryBlue,
-        fontSize: 24,
-        fontFamily: 'Inter-Black',
-        width: '55%',
-    }, 
-    logoTextDark: {
-        color: Colors.brand.primaryOrange,
-        fontSize: 24,
-        fontFamily: 'Inter-Black',
-        width: '55%',
-    },
-
-    headerImage: {
-        width: 140,
-        height: 100,
-        resizeMode: 'contain',
-    },
-
-    content: {
-        padding: 20,
-    },
-
-    sectionTitle: {
-        fontSize: 20,
-        color: 'black',
-        marginBottom: 20,
-        fontFamily: 'Inter-Bold',
-    },
-
-    textDark: {
-        color: 'white',
-    },
-
-    loadingText: {
-        fontSize: 18,
-        color: 'black',
-    },
-
-    petContainer: {
-        marginBottom: 35,
-    },
-
-    petNameBox: {
-        backgroundColor: Colors.brand.primaryBlue,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 10, 
-        flexShrink: 1,
-    },
-    petNameBoxDark: {
-        backgroundColor: Colors.brand.secondaryBlue,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 10,
-        flexShrink: 1,
-    },
-    petName: {
-        color: 'white',
-        fontFamily: 'Inter-Bold',
-        fontSize: 14,
-    },
-
-    locationCard: {
-        backgroundColor: Colors.brand.primaryOrange,
-        borderRadius: 10,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 4,
-    },
-
-    locationCardDark: {
+    bottomPanelDark: {
         backgroundColor: Colors.dark.surface,
     },
-    
-    locationText: {
-        color: 'white',
+    handleTouchable: {
+        paddingBottom: 4,
+    },
+    handleBar: {
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: Colors.light.border,
+        alignSelf: 'center',
+        marginBottom: 10,
+    },
+    panelHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        marginBottom: 14,
+    },
+    panelTitle: {
         fontSize: 16,
         fontFamily: 'Inter-Bold',
-        textAlign: 'center',
+        color: Colors.light.textPrimary,
     },
 
-    locationValue: {
-        color: 'white',
-        fontSize: 14,
-        marginTop: 10,
-        fontFamily: 'Inter-Regular',
-        textAlign: 'center',
-    },
-    petHeader: {
+    loaderRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        paddingHorizontal: 20,
+        paddingBottom: 16,
         gap: 10,
     },
-    badgeRastreado: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f0f9ff', 
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderRadius: 8,
-        borderWidth: 1,
+    loaderText: {
+        fontSize: 14,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
+    },
+    cardList: {
+        paddingHorizontal: 16,
+        paddingBottom: 4,
+    },
+    petCard: {
+        width: 136,
+        backgroundColor: Colors.light.background,
+        borderRadius: 18,
+        padding: 14,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    petCardDark: {
+        backgroundColor: Colors.dark.background,
+    },
+    petCardActive: {
         borderColor: Colors.brand.primaryBlue,
-        gap: 4, 
-        flexShrink: 1,
     },
-    badgeRastreadoText: {
-        color: Colors.brand.primaryBlue,
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
+    cardName: {
+        fontSize: 14,
         fontFamily: 'Inter-Bold',
-        fontSize: 12,
-        flexShrink: 1,
+        color: Colors.light.textPrimary,
+        marginBottom: 5,
     },
-    badgeSemColeira: {
+    statusRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        gap: 4,
+        gap: 5,
+        marginBottom: 6,
     },
-    badgeSemColeiraText: {
-        color: '#64748b',
-        fontFamily: 'Inter-Medium',
+    statusDot: {
+        width: 7,
+        height: 7,
+        borderRadius: 4,
+    },
+    statusLabel: {
         fontSize: 12,
+        fontFamily: 'Inter-Medium',
+    },
+    deviceRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginBottom: 4,
+    },
+    deviceText: {
+        fontSize: 11,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
+        flexShrink: 1,
+    },
+    timeText: {
+        fontSize: 10,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
     },
 
+    emptyRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+        paddingBottom: 8,
+        gap: 10,
+    },
+    emptyText: {
+        fontSize: 14,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
+    },
 });
