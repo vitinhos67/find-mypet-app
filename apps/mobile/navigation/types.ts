@@ -14,6 +14,7 @@ export type PetStackParamList = {
     PetProfile: { petId: string };
     PetDetails: { petId: string };
     PetShare: { petId: string; petNome: string };
+    SafeZone: { petId: string; petNome: string };
     Collar: NavigatorScreenParams<CollarStackParamList>;
 }
 export type TabParamList = {

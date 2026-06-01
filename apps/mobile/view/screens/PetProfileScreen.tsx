@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -17,7 +17,9 @@ import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/useTheme';
+import { SafeZone } from '../../models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
+import { SafeZoneService } from '../../services/SafeZoneService';
 import { useLocationViewModel } from '../../viewmodels/useLocationViewModel';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
@@ -36,7 +38,17 @@ export default function PetProfileScreen() {
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
 
+    const [safeZone, setSafeZone] = useState<SafeZone | null>(null);
+
     useEffect(() => { carregarPets(); }, [carregarPets]);
+
+    useFocusEffect(useCallback(() => {
+        SafeZoneService.get(petId).then((resp: any) => {
+            // A API envolve a resposta em { data, message } — desempacota corretamente
+            const unwrapped = resp && typeof resp === 'object' && 'message' in resp ? resp.data : resp;
+            setSafeZone(unwrapped ?? null);
+        }).catch(() => setSafeZone(null));
+    }, [petId]));
 
     const pet = getPetById(petId);
 
@@ -166,6 +178,38 @@ export default function PetProfileScreen() {
                         </>
                     )}
                 </View>
+
+                {/* Zona Segura */}
+                {isOwner && (
+                    <Pressable
+                        style={[styles.card, styles.zoneCard, { backgroundColor: theme.surface }]}
+                        onPress={() => navigation.navigate('SafeZone', { petId, petNome: pet.nome })}
+                    >
+                        <View style={styles.zoneLeft}>
+                            <View style={[styles.zoneIcon, { backgroundColor: safeZone?.is_active ? Colors.brand.primaryBlue + '18' : theme.border + '60' }]}>
+                                <Ionicons
+                                    name="shield-checkmark-outline"
+                                    size={22}
+                                    color={safeZone?.is_active ? Colors.brand.primaryBlue : theme.textSecondary}
+                                />
+                            </View>
+                            <View style={styles.zoneInfo}>
+                                <Text style={[styles.zoneTitle, { color: theme.textPrimary }]}>
+                                    Zona Segura
+                                </Text>
+                                <Text style={[styles.zoneSub, { color: theme.textSecondary }]}>
+                                    {safeZone
+                                        ? safeZone.is_active
+                                            ? `${safeZone.name} · ${safeZone.radius_meters >= 1000 ? `${(safeZone.radius_meters / 1000).toFixed(1)}km` : `${safeZone.radius_meters}m`} · Ativa`
+                                            : `${safeZone.name} · Desativada`
+                                        : 'Não configurada — toque para configurar'
+                                    }
+                                </Text>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color={theme.textSecondary} />
+                    </Pressable>
+                )}
 
                 {/* Localização */}
                 <View style={[styles.card, { backgroundColor: theme.surface }]}>
@@ -344,6 +388,42 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: 18,
         overflow: 'hidden',
+    },
+
+    zoneCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+    },
+
+    zoneLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        flex: 1,
+    },
+
+    zoneIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    zoneInfo: { flex: 1 },
+
+    zoneTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+    },
+
+    zoneSub: {
+        fontSize: 12,
+        fontFamily: 'Inter-Regular',
+        marginTop: 2,
     },
 
     infoRow: {

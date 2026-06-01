@@ -1,8 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import MapView from 'react-native-maps';
+import { Alert, SafeZone } from '../models/safe-zone.model';
 import { DeviceService } from '../services/DeviceService';
 import { LocationService } from '../services/LocationService';
 import { PetService } from '../services/PetService';
+import { SafeZoneService } from '../services/SafeZoneService';
 
 export type PetStatus = 'ONLINE' | 'OFFLINE' | 'SEM_COLEIRA';
 
@@ -46,6 +48,8 @@ export function formatUpdatedAt(dateStr?: string): string {
 
 export function useHomeViewModel() {
     const [pets, setPets] = useState<PetHomeType[]>([]);
+    const [safeZones, setSafeZones] = useState<SafeZone[]>([]);
+    const [alerts, setAlerts] = useState<Alert[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
     const [mapRegion, setMapRegion] = useState<MapRegion>(DEFAULT_REGION);
@@ -99,6 +103,24 @@ export function useHomeViewModel() {
 
             setPets(petsWithLocations);
 
+            // Carrega zonas seguras e alertas em paralelo, sem bloquear o mapa
+            const petIds = petsBase.map(p => p.id);
+            Promise.all([
+                Promise.all(
+                    petIds.map(id =>
+                        SafeZoneService.get(id)
+                            .then((r: any) => r?.data ?? r ?? null)
+                            .catch(() => null)
+                    )
+                ),
+                SafeZoneService.getAlerts()
+                    .then((r: any) => Array.isArray(r) ? r : (r?.data ?? []))
+                    .catch(() => []),
+            ]).then(([zones, alertList]) => {
+                setSafeZones((zones as (SafeZone | null)[]).filter(Boolean) as SafeZone[]);
+                setAlerts(alertList);
+            });
+
             const firstWithCoords = petsWithLocations.find(
                 (p) => p.latitude != null && p.longitude != null
             );
@@ -139,6 +161,9 @@ export function useHomeViewModel() {
 
     return {
         pets,
+        safeZones,
+        alerts,
+        unreadCount: alerts.filter(a => !a.read_at).length,
         isLoading,
         carregarPets,
         selectedPetId,

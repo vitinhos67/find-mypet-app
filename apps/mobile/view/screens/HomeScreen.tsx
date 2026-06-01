@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { PetHomeType, formatUpdatedAt, useHomeViewModel } from '../../viewmodels/useHomeViewModel';
@@ -95,7 +95,7 @@ export default function HomeScreen() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
     const [panelOpen, setPanelOpen] = useState(true);
-    const { pets, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
+    const { pets, safeZones, unreadCount, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
         useHomeViewModel();
 
     useFocusEffect(
@@ -124,6 +124,20 @@ export default function HomeScreen() {
                 showsCompass={false}
                 customMapStyle={darkMode ? DARK_MAP_STYLE : []}
             >
+                {/* Zonas seguras */}
+                {safeZones
+                    .filter(z => z.is_active)
+                    .map(zone => (
+                        <Circle
+                            key={zone.id}
+                            center={{ latitude: zone.latitude, longitude: zone.longitude }}
+                            radius={zone.radius_meters}
+                            strokeColor={Colors.brand.primaryBlue + '90'}
+                            fillColor={Colors.brand.primaryBlue + '18'}
+                            strokeWidth={1.5}
+                        />
+                    ))}
+
                 {pets
                     .filter((p) => p.latitude != null && p.longitude != null)
                     .map((pet) => (
@@ -160,6 +174,24 @@ export default function HomeScreen() {
                                 {pets.length} {pets.length === 1 ? 'pet' : 'pets'}
                             </Text>
                         </View>
+
+                        {/* Badge de alertas */}
+                        {unreadCount > 0 && (
+                            <View style={styles.alertBtnWrap}>
+                                <TouchableOpacity
+                                    style={[styles.refreshBtn, darkMode && styles.refreshBtnDark]}
+                                    onPress={carregarPets}
+                                >
+                                    <Ionicons name="warning-outline" size={20} color="#EF4444" />
+                                </TouchableOpacity>
+                                <View style={styles.alertDot}>
+                                    <Text style={styles.alertDotText}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+
                         <TouchableOpacity
                             onPress={carregarPets}
                             style={[styles.refreshBtn, darkMode && styles.refreshBtnDark]}
@@ -472,6 +504,28 @@ const styles = StyleSheet.create({
     },
     refreshBtnDark: {
         backgroundColor: Colors.dark.background,
+    },
+    alertBtnWrap: {
+        position: 'relative',
+    },
+    alertDot: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: '#EF4444',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 3,
+        borderWidth: 1.5,
+        borderColor: 'white',
+    },
+    alertDotText: {
+        fontSize: 9,
+        fontFamily: 'Inter-Bold',
+        color: '#fff',
     },
 
     bottomSafe: {
