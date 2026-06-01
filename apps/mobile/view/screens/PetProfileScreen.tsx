@@ -89,6 +89,9 @@ export default function PetProfileScreen() {
     const sexoCor = pet.sexo === 'MACHO' ? Colors.brand.primaryBlue : '#ec4899';
     const sexoBg = pet.sexo === 'MACHO' ? '#dbeafe' : '#fce7f3';
 
+    const isOwner = !pet.isShared;
+    const canEdit = !pet.isShared || pet.sharePermission === 'EDIT';
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={[styles.header, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -96,12 +99,26 @@ export default function PetProfileScreen() {
                     <Text style={[styles.btnVoltar, { color: Colors.brand.primaryBlue }]}>← Voltar</Text>
                 </Pressable>
                 <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Perfil do Pet</Text>
-                <Pressable
-                    onPress={() => navigation.navigate('PetDetails', { petId })}
-                    hitSlop={12}
-                >
-                    <Text style={[styles.btnEditar, { color: Colors.brand.primaryOrange }]}>Editar</Text>
-                </Pressable>
+                <View style={styles.headerActions}>
+                    {isOwner && (
+                        <Pressable
+                            onPress={() => navigation.navigate('PetShare', { petId, petNome: pet.nome })}
+                            hitSlop={12}
+                        >
+                            <Text style={[styles.btnCompartilhar, { color: Colors.brand.primaryBlue }]}>
+                                Compartilhar
+                            </Text>
+                        </Pressable>
+                    )}
+                    {canEdit && (
+                        <Pressable
+                            onPress={() => navigation.navigate('PetDetails', { petId })}
+                            hitSlop={12}
+                        >
+                            <Text style={[styles.btnEditar, { color: Colors.brand.primaryOrange }]}>Editar</Text>
+                        </Pressable>
+                    )}
+                </View>
             </View>
 
             <ScrollView
@@ -254,10 +271,21 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter-Bold'
     },
 
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12
+    },
+
+    btnCompartilhar: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold'
+    },
+
     btnEditar: {
         fontSize: 15,
         fontFamily: 'Inter-Bold',
-        width: 60,
+        minWidth: 50,
         textAlign: 'right'
     },
 

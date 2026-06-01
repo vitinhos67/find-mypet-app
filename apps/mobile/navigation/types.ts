@@ -13,6 +13,7 @@ export type PetStackParamList = {
     PetAdd: undefined;
     PetProfile: { petId: string };
     PetDetails: { petId: string };
+    PetShare: { petId: string; petNome: string };
     Collar: NavigatorScreenParams<CollarStackParamList>;
 }
 export type TabParamList = {

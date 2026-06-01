@@ -6,6 +6,7 @@ import {
     FlatList,
     Image,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     View
@@ -13,15 +14,78 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/useTheme';
+import { Pet } from '../../models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList', 'Colar'>;
 
+function PetCard({
+    item,
+    onPress,
+    theme
+}: {
+    item: Pet;
+    onPress: () => void;
+    theme: any;
+}) {
+    return (
+        <Pressable
+            style={({ pressed }) => [
+                styles.card,
+                { backgroundColor: theme.surface, opacity: pressed ? 0.82 : 1 }
+            ]}
+            onPress={onPress}
+        >
+            {item.foto ? (
+                <Image source={{ uri: item.foto }} style={styles.petImage} />
+            ) : (
+                <View style={[styles.placeholder, { backgroundColor: theme.border }]}>
+                    <Text style={styles.placeholderIcon}>🐾</Text>
+                </View>
+            )}
+
+            <View style={styles.cardContent}>
+                <Text style={[styles.nomeText, { color: theme.textPrimary }]}>
+                    {item.nome}
+                </Text>
+                <Text style={[styles.racaText, { color: theme.textSecondary }]}>
+                    {item.raca}
+                </Text>
+                {item.isShared && item.sharePermission && (
+                    <View style={[
+                        styles.permissionTag,
+                        { backgroundColor: item.sharePermission === 'EDIT' ? '#fef3c7' : '#dbeafe' }
+                    ]}>
+                        <Text style={[
+                            styles.permissionTagText,
+                            { color: item.sharePermission === 'EDIT' ? '#b45309' : Colors.brand.primaryBlue }
+                        ]}>
+                            {item.sharePermission === 'EDIT' ? 'Pode editar' : 'Visualização'}
+                        </Text>
+                    </View>
+                )}
+            </View>
+
+            <View style={[
+                styles.sexoBadge,
+                { backgroundColor: item.sexo === 'MACHO' ? '#dbeafe' : '#fce7f3' }
+            ]}>
+                <Text style={[
+                    styles.sexoBadgeText,
+                    { color: item.sexo === 'MACHO' ? Colors.brand.primaryBlue : '#ec4899' }
+                ]}>
+                    {item.sexo === 'MACHO' ? '♂' : '♀'}
+                </Text>
+            </View>
+        </Pressable>
+    );
+}
+
 export default function PetListScreen() {
     const navigation = useNavigation<NavigationProp>();
-    const { pets, isLoading, carregarPets } = usePetViewModel();
+    const { pets, sharedPets, isLoading, carregarPets } = usePetViewModel();
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
 
@@ -37,11 +101,34 @@ export default function PetListScreen() {
             ? `${pets.length} pets cadastrados`
             : 'Nenhum pet cadastrado';
 
+    if (isLoading && pets.length === 0 && sharedPets.length === 0) {
+        return (
+            <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+                <View style={[styles.header, { backgroundColor: theme.surface }]}>
+                    <View>
+                        <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Pets</Text>
+                    </View>
+                    <Pressable
+                        style={[styles.coleirasBtn, { borderColor: theme.border }]}
+                        onPress={() => navigation.navigate('Collar' as any)}
+                    >
+                        <Text style={[styles.coleirasBtnText, { color: theme.textSecondary }]}>
+                            Coleiras
+                        </Text>
+                    </Pressable>
+                </View>
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={[styles.header, { backgroundColor: theme.surface }]}>
                 <View>
-                    <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Meus Pets</Text>
+                    <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Pets</Text>
                     <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{totalLabel}</Text>
                 </View>
                 <Pressable
@@ -54,69 +141,73 @@ export default function PetListScreen() {
                 </Pressable>
             </View>
 
-            {isLoading && pets.length === 0 ? (
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
-                </View>
-            ) : (
-                <FlatList
-                    data={pets}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={[
-                        styles.listContainer,
-                        pets.length === 0 && styles.emptyContainer
-                    ]}
-                    renderItem={({ item }) => (
-                        <Pressable
-                            style={({ pressed }) => [
-                                styles.card,
-                                { backgroundColor: theme.surface, opacity: pressed ? 0.82 : 1 }
-                            ]}
-                            onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
-                        >
-                            {item.foto ? (
-                                <Image source={{ uri: item.foto }} style={styles.petImage} />
-                            ) : (
-                                <View style={[styles.placeholder, { backgroundColor: theme.border }]}>
-                                    <Text style={styles.placeholderIcon}>🐾</Text>
-                                </View>
-                            )}
+            <ScrollView
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    pets.length === 0 && sharedPets.length === 0 && styles.emptyScrollContent
+                ]}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Seção: Meus Pets */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                        Meus Pets
+                    </Text>
 
-                            <View style={styles.cardContent}>
-                                <Text style={[styles.nomeText, { color: theme.textPrimary }]}>
-                                    {item.nome}
-                                </Text>
-                                <Text style={[styles.racaText, { color: theme.textSecondary }]}>
-                                    {item.raca}
-                                </Text>
-                            </View>
-
-                            <View style={[
-                                styles.sexoBadge,
-                                { backgroundColor: item.sexo === 'MACHO' ? '#dbeafe' : '#fce7f3' }
-                            ]}>
-                                <Text style={[
-                                    styles.sexoBadgeText,
-                                    { color: item.sexo === 'MACHO' ? Colors.brand.primaryBlue : '#ec4899' }
-                                ]}>
-                                    {item.sexo === 'MACHO' ? '♂' : '♀'}
-                                </Text>
-                            </View>
-                        </Pressable>
-                    )}
-                    ListEmptyComponent={
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyIcon}>🐾</Text>
-                            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
+                    {pets.length === 0 ? (
+                        <View style={[styles.emptySection, { backgroundColor: theme.surface }]}>
+                            <Text style={styles.emptySectionIcon}>🐾</Text>
+                            <Text style={[styles.emptySectionTitle, { color: theme.textPrimary }]}>
                                 Nenhum pet ainda
                             </Text>
-                            <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+                            <Text style={[styles.emptySectionSubtitle, { color: theme.textSecondary }]}>
                                 Toque no botão + para cadastrar seu primeiro pet
                             </Text>
                         </View>
-                    }
-                />
-            )}
+                    ) : (
+                        <View style={styles.cardList}>
+                            {pets.map((item) => (
+                                <PetCard
+                                    key={item.id}
+                                    item={item}
+                                    theme={theme}
+                                    onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                                />
+                            ))}
+                        </View>
+                    )}
+                </View>
+
+                {/* Seção: Compartilhados comigo */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                        Compartilhados comigo
+                    </Text>
+
+                    {sharedPets.length === 0 ? (
+                        <View style={[styles.emptySection, { backgroundColor: theme.surface }]}>
+                            <Text style={styles.emptySectionIcon}>🔗</Text>
+                            <Text style={[styles.emptySectionTitle, { color: theme.textPrimary }]}>
+                                Sem pets compartilhados
+                            </Text>
+                            <Text style={[styles.emptySectionSubtitle, { color: theme.textSecondary }]}>
+                                Quando alguém compartilhar um pet com você, ele aparecerá aqui
+                            </Text>
+                        </View>
+                    ) : (
+                        <View style={styles.cardList}>
+                            {sharedPets.map((item) => (
+                                <PetCard
+                                    key={item.id}
+                                    item={item}
+                                    theme={theme}
+                                    onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                                />
+                            ))}
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
 
             <Pressable
                 style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
@@ -172,15 +263,29 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
 
-    listContainer: {
+    scrollContent: {
         padding: 16,
-        gap: 10,
-        paddingBottom: 88
+        paddingBottom: 100,
+        gap: 8
     },
 
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center'
+    emptyScrollContent: {
+        flex: 1
+    },
+
+    section: {
+        gap: 10,
+        marginBottom: 8
+    },
+
+    sectionTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        paddingHorizontal: 2
+    },
+
+    cardList: {
+        gap: 10
     },
 
     card: {
@@ -216,7 +321,8 @@ const styles = StyleSheet.create({
     },
 
     cardContent: {
-        flex: 1
+        flex: 1,
+        gap: 2
     },
 
     nomeText: {
@@ -226,8 +332,20 @@ const styles = StyleSheet.create({
 
     racaText: {
         fontSize: 13,
-        marginTop: 2,
         fontFamily: 'Inter-Regular'
+    },
+
+    permissionTag: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 20,
+        marginTop: 2
+    },
+
+    permissionTagText: {
+        fontSize: 10,
+        fontFamily: 'Inter-Bold'
     },
 
     sexoBadge: {
@@ -242,28 +360,29 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
 
-    emptyState: {
+    emptySection: {
         alignItems: 'center',
-        paddingVertical: 60,
-        paddingHorizontal: 40
+        paddingVertical: 28,
+        paddingHorizontal: 24,
+        borderRadius: 14,
+        gap: 6
     },
 
-    emptyIcon: {
-        fontSize: 56,
-        marginBottom: 16
+    emptySectionIcon: {
+        fontSize: 36,
+        marginBottom: 4
     },
 
-    emptyTitle: {
-        fontSize: 18,
-        fontFamily: 'Inter-Bold',
-        marginBottom: 8
+    emptySectionTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold'
     },
 
-    emptySubtitle: {
-        fontSize: 14,
+    emptySectionSubtitle: {
+        fontSize: 13,
         fontFamily: 'Inter-Regular',
         textAlign: 'center',
-        lineHeight: 22
+        lineHeight: 20
     },
 
     fab: {

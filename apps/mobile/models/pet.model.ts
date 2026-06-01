@@ -1,4 +1,5 @@
 export type SexoPet = 'MACHO' | 'FEMEA';
+export type SharePermission = 'VIEW' | 'EDIT';
 
 export interface Pet {
     id: string;
@@ -8,6 +9,10 @@ export interface Pet {
     cor: string;
     sexo: SexoPet;
     descricao: string;
+    isShared?: boolean;
+    sharePermission?: SharePermission;
+    shareId?: string;
+    ownerEmail?: string;
 }
 
 export interface PetPayload {
@@ -30,4 +35,27 @@ export interface PetResponse {
     owner_id?: string;
     created_at?: string;
 }
-//
+
+export interface PetShare {
+    id: string;
+    pet_id: string;
+    owner_id: string;
+    shared_with_user_id: string;
+    shared_with_email?: string;
+    permission: SharePermission;
+    created_at: string;
+}
+
+export interface SharedPetResponse {
+    share_id: string;
+    permission: SharePermission;
+    id: string;
+    image_href: string | null;
+    name: string;
+    raca: string | null;
+    cor: string | null;
+    sexo: SexoPet | null;
+    descricao: string | null;
+    owner_id: string;
+    created_at: string;
+}
