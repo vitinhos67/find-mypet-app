@@ -72,7 +72,7 @@ export default function PetListScreen() {
                                 styles.card,
                                 { backgroundColor: theme.surface, opacity: pressed ? 0.82 : 1 }
                             ]}
-                            onPress={() => navigation.navigate('PetDetails', { petId: item.id })}
+                            onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
                         >
                             {item.foto ? (
                                 <Image source={{ uri: item.foto }} style={styles.petImage} />

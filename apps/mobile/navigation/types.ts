@@ -11,9 +11,8 @@ export type CollarStackParamList = {
 export type PetStackParamList = {
     PetList: undefined;
     PetAdd: undefined;
-    PetDetails: {
-        petId: string;
-    };
+    PetProfile: { petId: string };
+    PetDetails: { petId: string };
     Collar: NavigatorScreenParams<CollarStackParamList>;
 }
 export type TabParamList = {
