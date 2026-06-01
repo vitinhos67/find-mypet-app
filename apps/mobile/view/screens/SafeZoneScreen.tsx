@@ -113,8 +113,9 @@ export default function SafeZoneScreen() {
             }
             const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
             const coord = safeCoord(loc.coords.latitude, loc.coords.longitude);
+            setUserLocation(coord);
+            setCenter(coord);
             mapRef.current?.animateToRegion(safeRegion(coord.latitude, coord.longitude, radius), 500);
-            if (!center) setCenter(coord);
         } catch {
             Alert.alert('Erro', 'Não foi possível obter sua localização.');
         } finally {
@@ -241,6 +242,13 @@ export default function SafeZoneScreen() {
                                             </View>
                                         </Marker>
                                     </>
+                                )}
+                                {userLocation && (
+                                    <Marker coordinate={userLocation} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+                                        <View style={styles.userMarkerRing}>
+                                            <View style={styles.userMarkerDot} />
+                                        </View>
+                                    </Marker>
                                 )}
                             </MapView>
 
@@ -551,6 +559,24 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 15,
         fontFamily: 'Inter-Bold',
+    },
+
+    userMarkerRing: {
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: 'rgba(66,133,244,0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    userMarkerDot: {
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        backgroundColor: '#4285F4',
+        borderWidth: 2.5,
+        borderColor: '#fff',
     },
 
     locationBtn: {
