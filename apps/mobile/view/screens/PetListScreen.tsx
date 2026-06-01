@@ -2,6 +2,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback } from 'react';
 import {
+    ActivityIndicator,
     FlatList,
     Image,
     Pressable,
@@ -11,33 +12,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTheme } from '../../hooks/useTheme';
 import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
-
-import { useTheme } from '../../hooks/useTheme';
 import { Colors } from '../styles/color';
-;
 
-type NavigationProp =
-    NativeStackNavigationProp<
-        PetStackParamList,
-        'PetList',
-        'Colar'
-    >;
+type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList', 'Colar'>;
 
 export default function PetListScreen() {
-
-    const navigation =
-        useNavigation<NavigationProp>();
-
-    const { pets, carregarPets } =
-        usePetViewModel();
-    console.log(pets)
+    const navigation = useNavigation<NavigationProp>();
+    const { pets, isLoading, carregarPets } = usePetViewModel();
     const { darkMode } = useTheme();
-
-    const theme = darkMode
-        ? Colors.dark
-        : Colors.light;
+    const theme = darkMode ? Colors.dark : Colors.light;
 
     useFocusEffect(
         useCallback(() => {
@@ -45,187 +31,99 @@ export default function PetListScreen() {
         }, [carregarPets])
     );
 
+    const totalLabel = pets.length === 1
+        ? '1 pet cadastrado'
+        : pets.length > 1
+            ? `${pets.length} pets cadastrados`
+            : 'Nenhum pet cadastrado';
+
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                {
-                    backgroundColor:
-                        theme.background
-                }
-            ]}
-        >
-            <View
-                style={[
-                    styles.header,
-                    {
-                        backgroundColor:
-                            theme.surface,
-                    }
-                ]}
-            >
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.header, { backgroundColor: theme.surface }]}>
                 <View>
-                    <Text
-                        style={[
-                            styles.title,
-                            {
-                                color:
-                                    Colors.brand.primaryBlue
-                            }
-                        ]}
-                    >
-                        Meus Pets
-                    </Text>
-
-                    <Text
-                        style={[
-                            styles.subtitle,
-                            {
-                                color:
-                                    theme.textSecondary
-                            }
-                        ]}
-                    >
-                        Gerencie seus animais
-                    </Text>
+                    <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Meus Pets</Text>
+                    <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{totalLabel}</Text>
                 </View>
-
-                <View style={{ flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
-                    <Pressable
-                        style={styles.btnAdd}
-                        onPress={() =>
-                            navigation.navigate(
-                                'PetAdd'
-                            )
-                        }
-                    >
-                        <Text
-                            style={styles.btnAddText}
-                        >
-                            + Novo
-                        </Text>
-                    </Pressable>
-
-                    <Pressable
-                        style={[styles.btnAdd, { backgroundColor: Colors.brand.primaryBlue }]}
-                        onPress={() => navigation.navigate('Collar' as any)}
-                    >
-                        <Text style={styles.btnAddText}>
-                            Coleiras
-                        </Text>
-                    </Pressable>
-                </View>
+                <Pressable
+                    style={[styles.coleirasBtn, { borderColor: theme.border }]}
+                    onPress={() => navigation.navigate('Collar' as any)}
+                >
+                    <Text style={[styles.coleirasBtnText, { color: theme.textSecondary }]}>
+                        Coleiras
+                    </Text>
+                </Pressable>
             </View>
 
-            <FlatList
-                data={pets}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={
-                    styles.listContainer
-                }
-                renderItem={({ item }) => (
-                    <View
-                        style={[
-                            styles.card,
-                            {
-                                backgroundColor:
-                                    theme.surface
-                            }
-                        ]}
-                    >
-                        <View
-                            style={styles.cardInfo}
+            {isLoading && pets.length === 0 ? (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
+                </View>
+            ) : (
+                <FlatList
+                    data={pets}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={[
+                        styles.listContainer,
+                        pets.length === 0 && styles.emptyContainer
+                    ]}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            style={({ pressed }) => [
+                                styles.card,
+                                { backgroundColor: theme.surface, opacity: pressed ? 0.82 : 1 }
+                            ]}
+                            onPress={() => navigation.navigate('PetDetails', { petId: item.id })}
                         >
                             {item.foto ? (
-                                <Image
-                                    source={{
-                                        uri: item.foto
-                                    }}
-                                    style={
-                                        styles.petImage
-                                    }
-                                />
+                                <Image source={{ uri: item.foto }} style={styles.petImage} />
                             ) : (
-                                <View
-                                    style={[
-                                        styles.placeholder,
-                                        {
-                                            backgroundColor:
-                                                theme.border
-                                        }
-                                    ]}
-                                >
-                                    <Text
-                                        style={
-                                            styles.placeholderText
-                                        }
-                                    >
-                                        🐾
-                                    </Text>
+                                <View style={[styles.placeholder, { backgroundColor: theme.border }]}>
+                                    <Text style={styles.placeholderIcon}>🐾</Text>
                                 </View>
                             )}
 
-                            <View
-                                style={
-                                    styles.textContainer
-                                }
-                            >
-                                <Text
-                                    style={[
-                                        styles.nomeText,
-                                        {
-                                            color:
-                                                theme.textPrimary
-                                        }
-                                    ]}
-                                >
+                            <View style={styles.cardContent}>
+                                <Text style={[styles.nomeText, { color: theme.textPrimary }]}>
                                     {item.nome}
                                 </Text>
-
-                                <Text
-                                    style={[
-                                        styles.racaText,
-                                        {
-                                            color:
-                                                theme.textSecondary
-                                        }
-                                    ]}
-                                >
+                                <Text style={[styles.racaText, { color: theme.textSecondary }]}>
                                     {item.raca}
                                 </Text>
                             </View>
-                        </View>
 
-                        <Pressable
-                            style={
-                                styles.btnDetalhes
-                            }
-                            onPress={() =>
-                                navigation.navigate(
-                                    'PetDetails',
-                                    {
-                                        petId:
-                                            item.id
-                                    }
-                                )
-                            }
-                        >
-                            <Text
-                                style={
-                                    styles.btnDetalhesText
-                                }
-                            >
-                                Detalhes
-                            </Text>
+                            <View style={[
+                                styles.sexoBadge,
+                                { backgroundColor: item.sexo === 'MACHO' ? '#dbeafe' : '#fce7f3' }
+                            ]}>
+                                <Text style={[
+                                    styles.sexoBadgeText,
+                                    { color: item.sexo === 'MACHO' ? Colors.brand.primaryBlue : '#ec4899' }
+                                ]}>
+                                    {item.sexo === 'MACHO' ? '♂' : '♀'}
+                                </Text>
+                            </View>
                         </Pressable>
-                    </View>
-                )}
-                ListEmptyComponent={
-                    <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                        Nenhum pet cadastrado.
-                    </Text>
-                }
-            />
+                    )}
+                    ListEmptyComponent={
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyIcon}>🐾</Text>
+                            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>
+                                Nenhum pet ainda
+                            </Text>
+                            <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+                                Toque no botão + para cadastrar seu primeiro pet
+                            </Text>
+                        </View>
+                    }
+                />
+            )}
+
+            <Pressable
+                style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
+                onPress={() => navigation.navigate('PetAdd')}
+            >
+                <Text style={styles.fabText}>+</Text>
+            </Pressable>
         </SafeAreaView>
     );
 }
@@ -236,85 +134,89 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
         flexDirection: 'row',
-        justifyContent:
-            'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryOrange
+        borderColor: Colors.brand.primaryOrange + '50'
     },
 
     title: {
-        fontSize: 20,
+        fontSize: 22,
         fontFamily: 'Inter-Bold'
     },
 
     subtitle: {
-        fontSize: 14,
-        marginTop: 4,
+        fontSize: 13,
+        marginTop: 2,
         fontFamily: 'Inter-Regular'
     },
 
-    btnAdd: {
-        backgroundColor:
-            Colors.brand.primaryOrange,
+    coleirasBtn: {
+        paddingHorizontal: 16,
         paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 8
+        borderRadius: 20,
+        borderWidth: 1
     },
 
-    btnAddText: {
-        color: 'white',
+    coleirasBtnText: {
+        fontSize: 13,
         fontFamily: 'Inter-Bold'
     },
 
-    listContainer: {
-        padding: 20,
-        gap: 15
-    },
-
-    card: {
-        padding: 16,
-        borderRadius: 12,
-
-        flexDirection: 'row',
-
-        justifyContent:
-            'space-between',
-
-        alignItems: 'center',
-
-        elevation: 2
-    },
-
-    cardInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1
-    },
-
-    petImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 35
-    },
-
-    placeholder: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-
+    centered: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
     },
 
-    placeholderText: {
-        fontSize: 24
+    listContainer: {
+        padding: 16,
+        gap: 10,
+        paddingBottom: 88
     },
 
-    textContainer: {
-        marginLeft: 12
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center'
+    },
+
+    card: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        borderRadius: 14,
+        gap: 12,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4
+    },
+
+    petImage: {
+        width: 54,
+        height: 54,
+        borderRadius: 27
+    },
+
+    placeholder: {
+        width: 54,
+        height: 54,
+        borderRadius: 27,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    placeholderIcon: {
+        fontSize: 22
+    },
+
+    cardContent: {
+        flex: 1
     },
 
     nomeText: {
@@ -323,29 +225,68 @@ const styles = StyleSheet.create({
     },
 
     racaText: {
+        fontSize: 13,
+        marginTop: 2,
+        fontFamily: 'Inter-Regular'
+    },
+
+    sexoBadge: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    sexoBadgeText: {
+        fontSize: 18
+    },
+
+    emptyState: {
+        alignItems: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 40
+    },
+
+    emptyIcon: {
+        fontSize: 56,
+        marginBottom: 16
+    },
+
+    emptyTitle: {
+        fontSize: 18,
+        fontFamily: 'Inter-Bold',
+        marginBottom: 8
+    },
+
+    emptySubtitle: {
         fontSize: 14,
-        marginTop: 4,
-        fontFamily: 'Inter-Regular'
-    },
-
-    btnDetalhes: {
-        backgroundColor:
-            Colors.brand.primaryBlue,
-
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-
-        borderRadius: 8
-    },
-
-    btnDetalhesText: {
-        color: 'white',
-        fontFamily: 'Inter-Bold'
-    },
-
-    emptyText: {
+        fontFamily: 'Inter-Regular',
         textAlign: 'center',
-        marginTop: 50,
-        fontFamily: 'Inter-Regular'
+        lineHeight: 22
+    },
+
+    fab: {
+        position: 'absolute',
+        bottom: 24,
+        right: 24,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: Colors.brand.primaryOrange,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 6,
+        shadowColor: Colors.brand.primaryOrange,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8
+    },
+
+    fabText: {
+        color: 'white',
+        fontSize: 30,
+        fontFamily: 'Inter-Bold',
+        lineHeight: 34
     }
 });

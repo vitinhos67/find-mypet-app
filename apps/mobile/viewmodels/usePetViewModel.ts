@@ -1,3 +1,4 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { Pet, PetPayload, SexoPet } from '../models/pet.model';
@@ -120,6 +121,19 @@ export function usePetViewModel() {
         return pets.find(pet => pet.id === id);
     }
 
+    async function selecionarFoto(): Promise<string | null> {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+            allowsEditing: true,
+            aspect: [1, 1]
+        });
+        if (!result.canceled) {
+            return result.assets[0].uri;
+        }
+        return null;
+    }
+
     return {
         pets,
         isLoading,
@@ -127,6 +141,7 @@ export function usePetViewModel() {
         adicionarPet,
         atualizarPet,
         excluirPet,
-        getPetById
+        getPetById,
+        selecionarFoto
     };
 }
