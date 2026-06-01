@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Image } from 'react-native';
 
 import { UserProfile } from '../models/profile.model';
 import { ProfileService } from '../services/ProfileService';
@@ -33,11 +32,6 @@ export function useProfileViewModel() {
     }
 
     async function carregarPerfil() {
-        await carregarUsuario();
-        await carregarImagem();
-    }
-
-    async function carregarUsuario() {
         try {
             const usuarioAtual =
                 await ProfileService.carregarUsuarioAtual();
@@ -48,52 +42,33 @@ export function useProfileViewModel() {
 
             setUsuario(usuarioAtual);
             preencherFormulario(usuarioAtual);
-            setProfileImage(usuarioAtual.avatarUrl || null);
-
-        } catch (error) {
-            console.log('Erro ao carregar usuário:', error);
-        }
-    }
-
-    async function carregarImagem() {
-        try {
-            setProfileImage(null);
 
             const imagemSalva =
                 await ProfileService.carregarImagemPerfil();
 
-            if (imagemSalva) {
-                setProfileImage(imagemSalva);
-            }
+            setProfileImage(imagemSalva);
 
         } catch (error) {
-            console.log('Erro ao carregar imagem de perfil:', error);
+            console.log('Erro ao carregar perfil:', error);
             setProfileImage(null);
         }
     }
 
-    async function salvarImagemPerfil(imagemUri: string) {
+    async function salvarImagemPerfil(
+        imagemUri: string,
+        mimeType?: string | null
+    ) {
         try {
             setProfileImage(imagemUri);
             setMessage(null);
             setErrorMessage(null);
         
             const usuarioAtualizado =
-                await ProfileService.salvarImagemPerfil(imagemUri);
+                await ProfileService.salvarImagemPerfil(imagemUri, mimeType);
 
             if (usuarioAtualizado) {
                 setUsuario(usuarioAtualizado);
                 preencherFormulario(usuarioAtualizado);
-
-                if (usuarioAtualizado.avatarUrl) {
-                    const imagemRemotaCarregou =
-                        await Image.prefetch(usuarioAtualizado.avatarUrl);
-
-                    if (imagemRemotaCarregou) {
-                        setProfileImage(usuarioAtualizado.avatarUrl);
-                    }
-                }
-
                 setMessage('Foto de perfil atualizada com sucesso.');
             }
         
@@ -144,7 +119,7 @@ export function useProfileViewModel() {
                 nome: nomeFormatado,
                 telefone: telefone.trim() || null,
                 genero: genero.trim() || null,
-                avatarUrl: usuario.avatarUrl || null,
+                avatarPath: usuario.avatarPath || null,
             });
 
             setUsuario(usuarioAtualizado);

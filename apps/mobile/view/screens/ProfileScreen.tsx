@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import React from 'react';
+import { Image as ExpoImage } from 'expo-image';
+import React, { useEffect, useState } from 'react';
 import {
-    Image,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -18,6 +18,7 @@ const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];
 
 export default function ProfileScreen() {
     const { darkMode, toggleTheme } = useTheme();
+    const [avatarRenderFailed, setAvatarRenderFailed] = useState(false);
 
     const {
         usuario,
@@ -39,6 +40,10 @@ export default function ProfileScreen() {
         realizarLogout,
     } = useProfileViewModel();
 
+    useEffect(() => {
+        setAvatarRenderFailed(false);
+    }, [profileImage]);
+
     async function selecionarImagem() {
         const permissao =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -56,7 +61,10 @@ export default function ProfileScreen() {
             });
 
         if (!resultado.canceled) {
-            await salvarImagemPerfil(resultado.assets[0].uri);
+            await salvarImagemPerfil(
+                resultado.assets[0].uri,
+                resultado.assets[0].mimeType
+            );
         }
     }
 
@@ -95,10 +103,14 @@ export default function ProfileScreen() {
                     ]}
                 >
                     <Pressable onPress={selecionarImagem}>
-                        {profileImage ? (
-                            <Image
+                        {profileImage && !avatarRenderFailed ? (
+                            <ExpoImage
+                                key={profileImage}
                                 source={{ uri: profileImage }}
                                 style={styles.profileImage}
+                                contentFit="cover"
+                                cachePolicy="none"
+                                onError={() => setAvatarRenderFailed(true)}
                             />
                         ) : (
                             <View style={styles.profilePlaceholder}>
