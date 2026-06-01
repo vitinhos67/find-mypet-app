@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -37,6 +37,7 @@ export default function PetProfileScreen() {
 
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
+    const isFocused = useIsFocused();
 
     const [safeZone, setSafeZone] = useState<SafeZone | null>(null);
 
@@ -228,26 +229,30 @@ export default function PetProfileScreen() {
                         </View>
                     ) : localizacao ? (
                         <>
-                            <MapView
-                                style={styles.map}
-                                initialRegion={{
-                                    latitude: localizacao.latitude,
-                                    longitude: localizacao.longitude,
-                                    latitudeDelta: 0.008,
-                                    longitudeDelta: 0.008
-                                }}
-                                scrollEnabled={false}
-                                zoomEnabled={false}
-                                pitchEnabled={false}
-                                rotateEnabled={false}
-                            >
-                                <Marker
-                                    coordinate={{ latitude: localizacao.latitude, longitude: localizacao.longitude }}
-                                    title={pet.nome}
-                                    description={pet.raca}
-                                    pinColor={Colors.brand.primaryOrange}
-                                />
-                            </MapView>
+                            {isFocused ? (
+                                <MapView
+                                    style={styles.map}
+                                    initialRegion={{
+                                        latitude: localizacao.latitude,
+                                        longitude: localizacao.longitude,
+                                        latitudeDelta: 0.008,
+                                        longitudeDelta: 0.008
+                                    }}
+                                    scrollEnabled={false}
+                                    zoomEnabled={false}
+                                    pitchEnabled={false}
+                                    rotateEnabled={false}
+                                >
+                                    <Marker
+                                        coordinate={{ latitude: localizacao.latitude, longitude: localizacao.longitude }}
+                                        title={pet.nome}
+                                        description={pet.raca}
+                                        pinColor={Colors.brand.primaryOrange}
+                                    />
+                                </MapView>
+                            ) : (
+                                <View style={[styles.map, { backgroundColor: Colors.light.surface }]} />
+                            )}
                             <View style={styles.locMeta}>
                                 <Text style={[styles.locTime, { color: theme.textSecondary }]}>
                                     Atualizado em {formatarData(localizacao.updatedAt)}

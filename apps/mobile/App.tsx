@@ -8,9 +8,23 @@ import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
 import { ThemeProvider } from './hooks/useTheme';
+import { ErrorBoundary } from './view/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
+declare const ErrorUtils: {
+    setGlobalHandler: (handler: (error: Error, isFatal?: boolean) => void) => void;
+};
+
+ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+    const timestamp = new Date().toISOString();
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[CRASH AUDIT] ${timestamp}`);
+    console.error(`[CRASH AUDIT] Tipo: ${isFatal ? 'FATAL (JS global)' : 'Não-fatal (JS global)'}`);
+    console.error(`[CRASH AUDIT] Mensagem: ${error.message}`);
+    console.error(`[CRASH AUDIT] Stack:\n${error.stack}`);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+});
 
 export default function App() {
     const [userLogado, setUserLogado] = useState(false);
@@ -40,12 +54,14 @@ export default function App() {
     }, []);
     
     return (
-        <SafeAreaProvider>
-            <ThemeProvider>
-                <NavigationContainer>
-                    {userLogado ? <TabNavigator /> : <AuthNavigator />}
-                </NavigationContainer>
-            </ThemeProvider>
-        </SafeAreaProvider>
+        <ErrorBoundary>
+            <SafeAreaProvider>
+                <ThemeProvider>
+                    <NavigationContainer>
+                        {userLogado ? <TabNavigator /> : <AuthNavigator />}
+                    </NavigationContainer>
+                </ThemeProvider>
+            </SafeAreaProvider>
+        </ErrorBoundary>
     );
 }

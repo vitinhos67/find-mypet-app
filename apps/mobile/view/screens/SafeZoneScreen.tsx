@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -26,8 +26,24 @@ type NavProps = NativeStackNavigationProp<PetStackParamList, 'SafeZone'>;
 
 const RADIUS_STEPS = [50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000];
 
+const DEFAULT_LAT = -23.5505;
+const DEFAULT_LNG = -46.6333;
+const MIN_DELTA = 0.003;
+
 function formatRadius(m: number) {
     return m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`;
+}
+
+function safeCoord(lat: unknown, lng: unknown): { latitude: number; longitude: number } {
+    const latitude = typeof lat === 'number' && Number.isFinite(lat) ? lat : DEFAULT_LAT;
+    const longitude = typeof lng === 'number' && Number.isFinite(lng) ? lng : DEFAULT_LNG;
+    return { latitude, longitude };
+}
+
+function safeRegion(lat: unknown, lng: unknown, meters: number) {
+    const { latitude, longitude } = safeCoord(lat, lng);
+    const delta = Math.max((Math.abs(meters) * 6) / 111000, MIN_DELTA);
+    return { latitude, longitude, latitudeDelta: delta, longitudeDelta: delta };
 }
 
 export default function SafeZoneScreen() {
@@ -44,12 +60,16 @@ export default function SafeZoneScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Aguarda animações de navegação terminarem antes de montar o MapView
-    // Evita crash por múltiplos MapViews ativos simultaneamente durante transição
-    useEffect(() => {
+    // Monta o MapView só após a tela ganhar foco e desmonta ao perder.
+    // Sem o unmount, a instância nativa Android fica com referências nulas
+    // ao retornar para a tela, causando crash (react-native-maps #5722).
+    useFocusEffect(useCallback(() => {
         const timer = setTimeout(() => setMapReady(true), 350);
-        return () => clearTimeout(timer);
-    }, []);
+        return () => {
+            clearTimeout(timer);
+            setMapReady(false);
+        };
+    }, []));
 
     const [center, setCenter] = useState<{ latitude: number; longitude: number } | null>(null);
     const [radiusIndex, setRadiusIndex] = useState(3); // 300m default
@@ -65,17 +85,18 @@ export default function SafeZoneScreen() {
                 const data: SafeZone | null = resp?.data ?? resp ?? null;
                 if (data) {
                     setZone(data);
-                    setCenter({ latitude: data.latitude, longitude: data.longitude });
-                    setName(data.name);
-                    setIsActive(data.is_active);
-                    const idx = RADIUS_STEPS.findIndex(r => r >= data.radius_meters);
+                    setCenter(safeCoord(data.latitude, data.longitude));
+                    setName(data.name ?? 'Casa');
+                    setIsActive(data.is_active ?? true);
+                    const safeRadius = typeof data.radius_meters === 'number' && data.radius_meters > 0
+                        ? data.radius_meters
+                        : RADIUS_STEPS[3];
+                    const idx = RADIUS_STEPS.findIndex(r => r >= safeRadius);
                     setRadiusIndex(idx >= 0 ? idx : 3);
-                    mapRef.current?.animateToRegion({
-                        latitude: data.latitude,
-                        longitude: data.longitude,
-                        latitudeDelta: (data.radius_meters * 4) / 111000,
-                        longitudeDelta: (data.radius_meters * 4) / 111000,
-                    }, 600);
+                    mapRef.current?.animateToRegion(
+                        safeRegion(data.latitude, data.longitude, safeRadius),
+                        600,
+                    );
                 }
             } catch { /* sem zona ainda */ }
             finally { setIsLoading(false); }
@@ -83,13 +104,9 @@ export default function SafeZoneScreen() {
     }, [petId]);
 
     function handleMapPress(e: MapPressEvent) {
-        const coord = e.nativeEvent.coordinate;
+        const coord = safeCoord(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude);
         setCenter(coord);
-        mapRef.current?.animateToRegion({
-            ...coord,
-            latitudeDelta: (radius * 4) / 111000,
-            longitudeDelta: (radius * 4) / 111000,
-        }, 400);
+        mapRef.current?.animateToRegion(safeRegion(coord.latitude, coord.longitude, radius), 400);
     }
 
     async function handleSave() {
@@ -126,14 +143,17 @@ export default function SafeZoneScreen() {
         ]);
     }
 
-    const mapRegion = center
-        ? {
-            latitude: center.latitude,
-            longitude: center.longitude,
-            latitudeDelta: Math.max((radius * 6) / 111000, 0.005),
-            longitudeDelta: Math.max((radius * 6) / 111000, 0.005),
+    // Quando o mapa monta após o delay de 350ms e os dados já carregaram,
+    // o animateToRegion original virou no-op. Este effect corrige isso.
+    useEffect(() => {
+        if (mapReady && center) {
+            mapRef.current?.animateToRegion(safeRegion(center.latitude, center.longitude, radius), 400);
         }
-        : { latitude: -23.5505, longitude: -46.6333, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+    }, [mapReady]);
+
+    const mapRegion = center
+        ? safeRegion(center.latitude, center.longitude, radius)
+        : { latitude: DEFAULT_LAT, longitude: DEFAULT_LNG, latitudeDelta: 0.05, longitudeDelta: 0.05 };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>

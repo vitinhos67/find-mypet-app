@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -95,6 +95,7 @@ export default function HomeScreen() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
     const [panelOpen, setPanelOpen] = useState(true);
+    const isFocused = useIsFocused();
     const { pets, safeZones, unreadCount, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
         useHomeViewModel();
 
@@ -113,44 +114,45 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.root}>
-            {/* MAP */}
-            <MapView
-                ref={mapRef}
-                style={StyleSheet.absoluteFillObject}
-                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-                initialRegion={mapRegion}
-                showsUserLocation
-                showsMyLocationButton={false}
-                showsCompass={false}
-                customMapStyle={darkMode ? DARK_MAP_STYLE : []}
-            >
-                {/* Zonas seguras */}
-                {safeZones
-                    .filter(z => z.is_active)
-                    .map(zone => (
-                        <Circle
-                            key={zone.id}
-                            center={{ latitude: zone.latitude, longitude: zone.longitude }}
-                            radius={zone.radius_meters}
-                            strokeColor={Colors.brand.primaryBlue + '90'}
-                            fillColor={Colors.brand.primaryBlue + '18'}
-                            strokeWidth={1.5}
-                        />
-                    ))}
+            {/* MAP — desmonta quando a aba Home não está em foco para evitar múltiplos MapViews simultâneos */}
+            {isFocused && (
+                <MapView
+                    ref={mapRef}
+                    style={StyleSheet.absoluteFillObject}
+                    provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                    initialRegion={mapRegion}
+                    showsUserLocation
+                    showsMyLocationButton={false}
+                    showsCompass={false}
+                    customMapStyle={darkMode ? DARK_MAP_STYLE : []}
+                >
+                    {safeZones
+                        .filter(z => z.is_active)
+                        .map(zone => (
+                            <Circle
+                                key={zone.id}
+                                center={{ latitude: zone.latitude, longitude: zone.longitude }}
+                                radius={zone.radius_meters}
+                                strokeColor={Colors.brand.primaryBlue + '90'}
+                                fillColor={Colors.brand.primaryBlue + '18'}
+                                strokeWidth={1.5}
+                            />
+                        ))}
 
-                {pets
-                    .filter((p) => p.latitude != null && p.longitude != null)
-                    .map((pet) => (
-                        <Marker
-                            key={pet.id}
-                            coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
-                            onPress={() => handlePetPress(pet)}
-                            tracksViewChanges={selectedPetId === pet.id}
-                        >
-                            <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
-                        </Marker>
-                    ))}
-            </MapView>
+                    {pets
+                        .filter((p) => p.latitude != null && p.longitude != null)
+                        .map((pet) => (
+                            <Marker
+                                key={pet.id}
+                                coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
+                                onPress={() => handlePetPress(pet)}
+                                tracksViewChanges={selectedPetId === pet.id}
+                            >
+                                <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
+                            </Marker>
+                        ))}
+                </MapView>
+            )}
 
             <View style={[styles.headerSafe, { top: insets.top }]} pointerEvents="box-none">
                 <View style={[styles.header, darkMode && styles.headerDark]}>
