@@ -10,59 +10,29 @@ interface Props {
     textSecondaryColor: string;
 }
 
-function SexoChip({
-    label,
-    selected,
-    onPress,
-    surfaceColor,
-    borderColor,
-    textSecondaryColor
-}: {
-    label: string;
-    selected: boolean;
-    onPress: () => void;
-    surfaceColor: string;
-    borderColor: string;
-    textSecondaryColor: string;
-}) {
-    return (
-        <Pressable
-            style={[
-                styles.chip,
-                {
-                    backgroundColor: selected ? Colors.brand.primaryBlue : surfaceColor,
-                    borderColor: selected ? Colors.brand.primaryBlue : borderColor,
-                    flex: 1
-                }
-            ]}
-            onPress={onPress}
-        >
-            <Text style={[styles.chipText, { color: selected ? 'white' : textSecondaryColor }]}>
-                {label}
-            </Text>
-        </Pressable>
-    );
-}
-
 export function SexoSelector({ value, onChange, surfaceColor, borderColor, textSecondaryColor }: Props) {
     return (
         <View style={styles.container}>
-            <SexoChip
-                label="Macho"
-                selected={value === 'MACHO'}
-                onPress={() => onChange('MACHO')}
-                surfaceColor={surfaceColor}
-                borderColor={borderColor}
-                textSecondaryColor={textSecondaryColor}
-            />
-            <SexoChip
-                label="Fêmea"
-                selected={value === 'FEMEA'}
-                onPress={() => onChange('FEMEA')}
-                surfaceColor={surfaceColor}
-                borderColor={borderColor}
-                textSecondaryColor={textSecondaryColor}
-            />
+            {(['MACHO', 'FEMEA'] as const).map((opt) => {
+                const selected = value === opt;
+                const label = opt === 'MACHO' ? '♂  Macho' : '♀  Fêmea';
+                const activeColor = opt === 'MACHO' ? Colors.brand.primaryBlue : '#E879A8';
+                const activeBg = opt === 'MACHO' ? '#EEF3FF' : '#FFF0F7';
+                return (
+                    <Pressable
+                        key={opt}
+                        style={[
+                            styles.chip,
+                            { backgroundColor: selected ? activeBg : surfaceColor, borderColor: selected ? activeColor : borderColor }
+                        ]}
+                        onPress={() => onChange(opt)}
+                    >
+                        <Text style={[styles.chipText, { color: selected ? activeColor : textSecondaryColor }]}>
+                            {label}
+                        </Text>
+                    </Pressable>
+                );
+            })}
         </View>
     );
 }
@@ -70,16 +40,17 @@ export function SexoSelector({ value, onChange, surfaceColor, borderColor, textS
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        gap: 10
+        gap: 10,
     },
     chip: {
+        flex: 1,
         borderWidth: 1,
         paddingVertical: 12,
-        borderRadius: 10,
-        alignItems: 'center'
+        borderRadius: 12,
+        alignItems: 'center',
     },
     chipText: {
         fontFamily: 'Inter-Bold',
-        fontSize: 14
-    }
+        fontSize: 14,
+    },
 });

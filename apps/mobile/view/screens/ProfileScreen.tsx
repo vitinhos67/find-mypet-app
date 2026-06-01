@@ -1,7 +1,9 @@
-import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -10,6 +12,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useTheme } from '../../hooks/useTheme';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 import { Colors } from '../styles/color';
@@ -18,567 +21,503 @@ const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];
 
 export default function ProfileScreen() {
     const { darkMode, toggleTheme } = useTheme();
-    const [avatarRenderFailed, setAvatarRenderFailed] = useState(false);
+    const theme = darkMode ? Colors.dark : Colors.light;
+    const [avatarFailed, setAvatarFailed] = useState(false);
 
     const {
-        usuario,
-        profileImage,
-        isEditing,
-        isSaving,
-        nome,
-        telefone,
-        genero,
-        message,
-        errorMessage,
-        setNome,
-        setTelefone,
-        setGenero,
-        iniciarEdicao,
-        cancelarEdicao,
-        salvarPerfil,
-        salvarImagemPerfil,
-        realizarLogout,
+        usuario, profileImage, isEditing, isSaving,
+        nome, telefone, genero, message, errorMessage,
+        setNome, setTelefone, setGenero,
+        iniciarEdicao, cancelarEdicao, salvarPerfil,
+        salvarImagemPerfil, realizarLogout,
     } = useProfileViewModel();
 
-    useEffect(() => {
-        setAvatarRenderFailed(false);
-    }, [profileImage]);
+    useEffect(() => { setAvatarFailed(false); }, [profileImage]);
 
     async function selecionarImagem() {
-        const permissao =
-            await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (!permissao.granted) {
-            return;
-        }
-
-        const resultado =
-            await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['images'],
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 1,
-            });
-
-        if (!resultado.canceled) {
-            await salvarImagemPerfil(
-                resultado.assets[0].uri,
-                resultado.assets[0].mimeType
-            );
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!perm.granted) return;
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+        if (!result.canceled) {
+            await salvarImagemPerfil(result.assets[0].uri, result.assets[0].mimeType);
         }
     }
 
-    return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                darkMode && styles.containerDark,
-            ]}
-        >
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.header}>
-                    <Text
-                        style={[
-                            styles.headerTitle,
-                            darkMode && styles.textDark,
-                        ]}
-                    >
-                        Meu Perfil
-                    </Text>
+    const initials = (usuario.nome || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
-                    <Text
-                        style={[
-                            styles.headerSubtitle,
-                            darkMode && styles.subtitleDark,
-                        ]}
-                    >
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Perfil</Text>
+                    <Text style={[styles.headerSub, { color: theme.textSecondary }]}>
                         Gerencie sua conta e preferências
                     </Text>
                 </View>
 
-                <View
-                    style={[
-                        styles.profileCard,
-                        darkMode && styles.cardDark,
-                    ]}
-                >
-                    <Pressable onPress={selecionarImagem}>
-                        {profileImage && !avatarRenderFailed ? (
+                {/* Avatar + info */}
+                <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
+                    <Pressable onPress={selecionarImagem} style={styles.avatarWrap}>
+                        {profileImage && !avatarFailed ? (
                             <ExpoImage
                                 key={profileImage}
                                 source={{ uri: profileImage }}
-                                style={styles.profileImage}
+                                style={styles.avatar}
                                 contentFit="cover"
                                 cachePolicy="none"
-                                onError={() => setAvatarRenderFailed(true)}
+                                onError={() => setAvatarFailed(true)}
                             />
                         ) : (
-                            <View style={styles.profilePlaceholder}>
-                                <Text style={styles.profilePlaceholderText}>
-                                    Foto
+                            <View style={[styles.avatarFallback, { backgroundColor: Colors.brand.primaryBlue + '18' }]}>
+                                <Text style={[styles.avatarInitials, { color: Colors.brand.primaryBlue }]}>
+                                    {initials}
                                 </Text>
                             </View>
                         )}
+                        <View style={styles.avatarBadge}>
+                            <Ionicons name="camera" size={11} color="#fff" />
+                        </View>
                     </Pressable>
 
-                    <View style={styles.userInfo}>
-                        <Text
-                            style={[
-                                styles.userName,
-                                darkMode && styles.textDark,
-                            ]}
-                        >
+                    <View style={styles.profileInfo}>
+                        <Text style={[styles.profileName, { color: theme.textPrimary }]} numberOfLines={1}>
                             {usuario.nome || 'Usuário'}
                         </Text>
-
-                        {!isEditing ? (
+                        <Text style={[styles.profileEmail, { color: theme.textSecondary }]} numberOfLines={1}>
+                            {usuario.email || '—'}
+                        </Text>
+                        {!isEditing && (
                             <Pressable
-                                style={styles.editButton}
+                                style={({ pressed }) => [styles.editBtn, { opacity: pressed ? 0.75 : 1 }]}
                                 onPress={iniciarEdicao}
                             >
-                                <Text style={styles.editButtonText}>
-                                    Editar Perfil
-                                </Text>
+                                <Ionicons name="create-outline" size={14} color={Colors.brand.primaryBlue} />
+                                <Text style={[styles.editBtnText, { color: Colors.brand.primaryBlue }]}>Editar perfil</Text>
                             </Pressable>
-                        ) : null}
+                        )}
                     </View>
                 </View>
 
-                {message ? (
-                    <Text style={styles.successText}>{message}</Text>
-                ) : null}
+                {/* Mensagens */}
+                {!!message && (
+                    <View style={[styles.msgBox, { backgroundColor: '#F0FDF4' }]}>
+                        <Ionicons name="checkmark-circle" size={16} color="#16A34A" />
+                        <Text style={[styles.msgText, { color: '#16A34A' }]}>{message}</Text>
+                    </View>
+                )}
+                {!!errorMessage && (
+                    <View style={[styles.msgBox, { backgroundColor: '#FEF2F2' }]}>
+                        <Ionicons name="alert-circle" size={16} color="#DC2626" />
+                        <Text style={[styles.msgText, { color: '#DC2626' }]}>{errorMessage}</Text>
+                    </View>
+                )}
 
-                {errorMessage ? (
-                    <Text style={styles.errorText}>{errorMessage}</Text>
-                ) : null}
+                {/* Formulário de edição */}
+                {isEditing && (
+                    <View style={[styles.editCard, { backgroundColor: theme.surface }]}>
+                        <Text style={[styles.editCardTitle, { color: theme.textPrimary }]}>Editar informações</Text>
 
-                {isEditing ? (
-                    <View
-                        style={[
-                            styles.editForm,
-                            darkMode && styles.cardDark,
-                        ]}
-                    >
-                        <Text style={[styles.inputLabel, darkMode && styles.textDark]}>
-                            Nome completo
-                        </Text>
-                        <TextInput
-                            style={[styles.input, darkMode && styles.inputDark]}
-                            value={nome}
-                            onChangeText={setNome}
-                            placeholder="Seu nome"
-                            placeholderTextColor="#888888"
-                        />
+                        <FormField label="Nome completo" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary, borderColor: theme.border, backgroundColor: theme.background }]}
+                                value={nome}
+                                onChangeText={setNome}
+                                placeholder="Seu nome"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </FormField>
 
-                        <Text style={[styles.inputLabel, darkMode && styles.textDark]}>
-                            Telefone
-                        </Text>
-                        <TextInput
-                            style={[styles.input, darkMode && styles.inputDark]}
-                            value={telefone}
-                            onChangeText={setTelefone}
-                            placeholder="DDD + 9 números"
-                            placeholderTextColor="#888888"
-                            keyboardType="phone-pad"
-                            maxLength={11}
-                        />
+                        <FormField label="Telefone" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary, borderColor: theme.border, backgroundColor: theme.background }]}
+                                value={telefone}
+                                onChangeText={setTelefone}
+                                placeholder="DDD + 9 números"
+                                placeholderTextColor={theme.textSecondary}
+                                keyboardType="phone-pad"
+                                maxLength={11}
+                            />
+                        </FormField>
 
-                        <Text style={[styles.inputLabel, darkMode && styles.textDark]}>
-                            Gênero
-                        </Text>
-                        <View style={styles.genderOptions}>
-                            {GENERO_OPTIONS.map((option) => {
-                                const isSelected = genero === option;
-
-                                return (
-                                    <Pressable
-                                        key={option}
-                                        style={[
-                                            styles.genderOption,
-                                            isSelected && styles.genderOptionSelected,
-                                        ]}
-                                        onPress={() => setGenero(option)}
-                                    >
-                                        <Text
+                        <FormField label="Gênero" theme={theme}>
+                            <View style={styles.genderRow}>
+                                {GENERO_OPTIONS.map((opt) => {
+                                    const sel = genero === opt;
+                                    return (
+                                        <Pressable
+                                            key={opt}
                                             style={[
-                                                styles.genderOptionText,
-                                                isSelected && styles.genderOptionTextSelected,
+                                                styles.genderChip,
+                                                { borderColor: theme.border, backgroundColor: theme.background },
+                                                sel && { backgroundColor: Colors.brand.primaryBlue, borderColor: Colors.brand.primaryBlue }
                                             ]}
+                                            onPress={() => setGenero(opt)}
                                         >
-                                            {option}
-                                        </Text>
-                                    </Pressable>
-                                );
-                            })}
-                        </View>
+                                            <Text style={[
+                                                styles.genderChipText,
+                                                { color: theme.textSecondary },
+                                                sel && { color: '#fff' }
+                                            ]}>
+                                                {opt}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
+                        </FormField>
 
-                        <View style={styles.formActions}>
+                        <View style={styles.editActions}>
                             <Pressable
-                                style={styles.cancelButton}
+                                style={[styles.cancelBtn, { backgroundColor: theme.border }]}
                                 onPress={cancelarEdicao}
                                 disabled={isSaving}
                             >
-                                <Text style={styles.cancelButtonText}>
-                                    Cancelar
-                                </Text>
+                                <Text style={[styles.cancelBtnText, { color: theme.textSecondary }]}>Cancelar</Text>
                             </Pressable>
-
                             <Pressable
-                                style={styles.saveButton}
+                                style={[styles.saveBtn, isSaving && { opacity: 0.65 }]}
                                 onPress={salvarPerfil}
                                 disabled={isSaving}
                             >
-                                <Text style={styles.saveButtonText}>
-                                    {isSaving ? 'Salvando...' : 'Salvar'}
-                                </Text>
+                                {isSaving
+                                    ? <ActivityIndicator color="#fff" size="small" />
+                                    : <Text style={styles.saveBtnText}>Salvar</Text>
+                                }
                             </Pressable>
                         </View>
                     </View>
-                ) : null}
+                )}
 
-                <ProfileInfoCard
-                    label="Email"
-                    value={usuario.email || 'email@email.com'}
-                    darkMode={darkMode}
-                />
+                {/* Informações */}
+                <View style={[styles.infoCard, { backgroundColor: theme.surface }]}>
+                    <InfoRow label="Telefone" value={usuario.telefone || 'Não informado'} theme={theme} />
+                    <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                    <InfoRow label="Gênero" value={usuario.genero || 'Não informado'} theme={theme} last />
+                </View>
 
-                <ProfileInfoCard
-                    label="Telefone"
-                    value={usuario.telefone || 'Não informado'}
-                    darkMode={darkMode}
-                />
-
-                <ProfileInfoCard
-                    label="Gênero"
-                    value={usuario.genero || 'Não informado'}
-                    darkMode={darkMode}
-                />
-
-                <View
-                    style={[
-                        styles.settingsCard,
-                        darkMode && styles.cardDark,
-                    ]}
-                >
+                {/* Configurações */}
+                <View style={[styles.settingsCard, { backgroundColor: theme.surface }]}>
                     <View>
-                        <Text
-                            style={[
-                                styles.configTitle,
-                                darkMode && styles.textDark,
-                            ]}
-                        >
-                            Tema
-                        </Text>
-
-                        <Text
-                            style={[
-                                styles.configSubtitle,
-                                darkMode && styles.subtitleDark,
-                            ]}
-                        >
-                            {darkMode ? 'Modo Escuro Ativado' : 'Modo Claro Ativado'}
+                        <Text style={[styles.settingsTitle, { color: theme.textPrimary }]}>Aparência</Text>
+                        <Text style={[styles.settingsSub, { color: theme.textSecondary }]}>
+                            {darkMode ? 'Modo Escuro' : 'Modo Claro'}
                         </Text>
                     </View>
-
                     <Pressable
-                        style={[
-                            styles.themeButton,
-                            darkMode && styles.themeButtonDark,
-                        ]}
+                        style={({ pressed }) => [styles.themeToggle, { opacity: pressed ? 0.8 : 1 }]}
                         onPress={toggleTheme}
                     >
-                        <Text style={styles.themeButtonText}>
+                        <Ionicons
+                            name={darkMode ? 'moon' : 'sunny'}
+                            size={16}
+                            color={darkMode ? Colors.brand.primaryBlue : Colors.brand.primaryOrange}
+                        />
+                        <Text style={[styles.themeToggleText, { color: darkMode ? Colors.brand.primaryBlue : Colors.brand.primaryOrange }]}>
                             {darkMode ? 'Escuro' : 'Claro'}
                         </Text>
                     </Pressable>
                 </View>
 
+                {/* Logout */}
                 <Pressable
-                    style={styles.logoutButton}
+                    style={({ pressed }) => [styles.logoutBtn, { opacity: pressed ? 0.8 : 1 }]}
                     onPress={realizarLogout}
                 >
-                    <Text style={styles.logoutText}>
-                        Sair da Conta
-                    </Text>
+                    <Ionicons name="log-out-outline" size={18} color="#EF4444" />
+                    <Text style={styles.logoutText}>Sair da Conta</Text>
                 </Pressable>
             </ScrollView>
         </SafeAreaView>
     );
 }
 
-function ProfileInfoCard({
-    label,
-    value,
-    darkMode,
-}: {
-    label: string;
-    value: string;
-    darkMode: boolean;
-}) {
+function FormField({ label, children, theme }: { label: string; children: React.ReactNode; theme: any }) {
     return (
-        <View
-            style={[
-                styles.infoCard,
-                darkMode && styles.cardDark,
-            ]}
-        >
-            <Text
-                style={[
-                    styles.infoLabel,
-                    darkMode && styles.textDark,
-                ]}
-            >
-                {label}
-            </Text>
+        <View style={styles.formFieldWrap}>
+            <Text style={[styles.formFieldLabel, { color: theme.textSecondary }]}>{label}</Text>
+            {children}
+        </View>
+    );
+}
 
-            <Text
-                style={[
-                    styles.infoValue,
-                    darkMode && styles.textDark,
-                ]}
-                numberOfLines={1}
-            >
-                {value}
-            </Text>
+function InfoRow({ label, value, theme, last }: { label: string; value: string; theme: any; last?: boolean }) {
+    return (
+        <View style={[styles.infoRow, last && { borderBottomWidth: 0 }]}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>{label}</Text>
+            <Text style={[styles.infoValue, { color: theme.textPrimary }]} numberOfLines={1}>{value}</Text>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: Colors.light.background,
-        padding: 30,
+    container: { flex: 1 },
+
+    scroll: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 48,
+        gap: 12,
     },
-    containerDark: {
-        backgroundColor: Colors.dark.background,
-    },
-    textDark: {
-        color: 'white',
-    },
-    header: {
-        marginBottom: 25,
-    },
+
+    header: { marginBottom: 4 },
+
     headerTitle: {
-        fontSize: 28,
+        fontSize: 26,
         fontFamily: 'Inter-Bold',
-        color: Colors.brand.primaryBlue,
+        letterSpacing: -0.5,
     },
-    headerSubtitle: {
-        marginTop: 4,
-        fontSize: 14,
-        color: Colors.light.textSecondary,
+
+    headerSub: {
+        fontSize: 13,
         fontFamily: 'Inter-Regular',
+        marginTop: 3,
     },
-    subtitleDark: {
-        color: Colors.dark.textSecondary,
-    },
+
     profileCard: {
+        borderRadius: 18,
+        padding: 18,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 20,
-        backgroundColor: Colors.light.surface,
-        padding: 20,
-        elevation: 3,
-        borderRadius: 10,
+        gap: 16,
     },
-    cardDark: {
-        backgroundColor: Colors.dark.surface,
+
+    avatarWrap: { position: 'relative' },
+
+    avatar: {
+        width: 72,
+        height: 72,
+        borderRadius: 20,
     },
-    profilePlaceholder: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#D9D9D9',
+
+    avatarFallback: {
+        width: 72,
+        height: 72,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 4,
-        borderColor: Colors.brand.primaryBlue,
     },
-    profilePlaceholderText: {
-        fontSize: 20,
-        fontFamily: 'Inter-Regular',
-    },
-    profileImage: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        borderWidth: 4,
-        borderColor: Colors.brand.primaryBlue,
-    },
-    userInfo: {
-        flex: 1,
-    },
-    userName: {
-        fontSize: 20,
+
+    avatarInitials: {
+        fontSize: 24,
         fontFamily: 'Inter-Bold',
-        marginBottom: 10,
     },
-    editButton: {
+
+    avatarBadge: {
+        position: 'absolute',
+        bottom: -2,
+        right: -2,
+        width: 22,
+        height: 22,
+        borderRadius: 8,
         backgroundColor: Colors.brand.primaryOrange,
-        paddingVertical: 10,
-        borderRadius: 10,
+        justifyContent: 'center',
         alignItems: 'center',
     },
-    editButtonText: {
-        fontSize: 14,
+
+    profileInfo: { flex: 1, gap: 4 },
+
+    profileName: {
+        fontSize: 18,
         fontFamily: 'Inter-Bold',
+        letterSpacing: -0.3,
     },
-    successText: {
-        marginTop: 14,
-        color: '#15803d',
-        fontFamily: 'Inter-Bold',
-    },
-    errorText: {
-        marginTop: 14,
-        color: '#dc2626',
-        fontFamily: 'Inter-Bold',
-    },
-    editForm: {
-        marginTop: 20,
-        backgroundColor: Colors.light.surface,
-        padding: 20,
-        borderRadius: 10,
-        elevation: 2,
-    },
-    inputLabel: {
-        fontSize: 14,
-        fontFamily: 'Inter-Bold',
-        marginBottom: 8,
-    },
-    input: {
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: '#cbd5e1',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        fontSize: 16,
+
+    profileEmail: {
+        fontSize: 13,
         fontFamily: 'Inter-Regular',
     },
-    inputDark: {
-        backgroundColor: '#121212',
-        color: 'white',
-        borderColor: '#333333',
+
+    editBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        marginTop: 6,
+        alignSelf: 'flex-start',
     },
-    genderOptions: {
+
+    editBtnText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
+    },
+
+    msgBox: {
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+
+    msgText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
+        flex: 1,
+    },
+
+    editCard: {
+        borderRadius: 18,
+        padding: 18,
+        gap: 14,
+    },
+
+    editCardTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        marginBottom: 2,
+    },
+
+    formFieldWrap: { gap: 8 },
+
+    formFieldLabel: {
+        fontSize: 11,
+        fontFamily: 'Inter-Bold',
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+    },
+
+    input: {
+        borderWidth: 1,
+        borderRadius: 12,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        fontSize: 15,
+        fontFamily: 'Inter-Regular',
+    },
+
+    genderRow: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+
+    genderChip: {
+        flex: 1,
+        paddingVertical: 11,
+        borderRadius: 12,
+        borderWidth: 1,
+        alignItems: 'center',
+    },
+
+    genderChipText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
+    },
+
+    editActions: {
         flexDirection: 'row',
         gap: 10,
-        marginBottom: 16,
-    },
-    genderOption: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#cbd5e1',
-        borderRadius: 8,
-        paddingVertical: 12,
-        alignItems: 'center',
-        backgroundColor: 'white',
-    },
-    genderOptionSelected: {
-        backgroundColor: Colors.brand.primaryBlue,
-        borderColor: Colors.brand.primaryBlue,
-    },
-    genderOptionText: {
-        color: '#334155',
-        fontFamily: 'Inter-Bold',
-        fontSize: 13,
-    },
-    genderOptionTextSelected: {
-        color: 'white',
-    },
-    formActions: {
-        flexDirection: 'row',
-        gap: 12,
         marginTop: 4,
     },
-    cancelButton: {
+
+    cancelBtn: {
         flex: 1,
         paddingVertical: 14,
-        borderRadius: 10,
+        borderRadius: 14,
         alignItems: 'center',
-        backgroundColor: '#e5e7eb',
     },
-    cancelButtonText: {
-        color: '#111827',
+
+    cancelBtnText: {
+        fontSize: 14,
         fontFamily: 'Inter-Bold',
     },
-    saveButton: {
+
+    saveBtn: {
         flex: 1,
         paddingVertical: 14,
-        borderRadius: 10,
+        borderRadius: 14,
         alignItems: 'center',
         backgroundColor: Colors.brand.primaryBlue,
     },
-    saveButtonText: {
-        color: 'white',
+
+    saveBtnText: {
+        color: '#fff',
+        fontSize: 14,
         fontFamily: 'Inter-Bold',
     },
+
     infoCard: {
-        marginTop: 20,
-        borderRadius: 10,
-        paddingVertical: 14,
-        backgroundColor: Colors.light.surface,
-        paddingHorizontal: 18,
-        elevation: 2,
+        borderRadius: 18,
+        overflow: 'hidden',
     },
-    infoLabel: {
-        fontSize: 14,
-        color: '#666666',
-        fontFamily: 'Inter-Bold',
-        marginBottom: 4,
-    },
-    infoValue: {
-        fontSize: 14,
-        color: '#000000',
-        fontFamily: 'Inter-Regular',
-    },
-    settingsCard: {
+
+    infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: Colors.light.surface,
-        marginTop: 25,
-        padding: 20,
-        elevation: 2,
-        borderRadius: 10,
-    },
-    configTitle: {
-        fontSize: 20,
-        fontFamily: 'Inter-Bold',
-    },
-    configSubtitle: {
-        fontSize: 13,
-        marginTop: 4,
-        color: Colors.light.textSecondary,
-        fontFamily: 'Inter-Regular',
-    },
-    themeButton: {
-        backgroundColor: Colors.brand.primaryOrange,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 10,
-    },
-    themeButtonDark: {
-        backgroundColor: Colors.brand.primaryBlue,
-    },
-    themeButtonText: {
-        color: 'white',
-        fontSize: 14,
-        fontFamily: 'Inter-Bold',
-    },
-    logoutButton: {
-        backgroundColor: '#FF3B30',
+        paddingHorizontal: 18,
         paddingVertical: 16,
-        paddingHorizontal: 40,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginTop: 30,
-        marginBottom: 30,
     },
-    logoutText: {
-        color: 'white',
+
+    infoLabel: {
         fontSize: 14,
+        fontFamily: 'Inter-Bold',
+    },
+
+    infoValue: {
+        fontSize: 14,
+        fontFamily: 'Inter-Regular',
+        maxWidth: '55%',
+        textAlign: 'right',
+    },
+
+    divider: { height: 1, marginHorizontal: 18 },
+
+    settingsCard: {
+        borderRadius: 18,
+        padding: 18,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    settingsTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+    },
+
+    settingsSub: {
+        fontSize: 13,
+        fontFamily: 'Inter-Regular',
+        marginTop: 2,
+    },
+
+    themeToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 14,
+        paddingVertical: 9,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: Colors.brand.primaryBlue + '40',
+    },
+
+    themeToggleText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
+    },
+
+    logoutBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#EF444440',
+        marginTop: 8,
+    },
+
+    logoutText: {
+        color: '#EF4444',
+        fontSize: 15,
         fontFamily: 'Inter-Bold',
     },
 });

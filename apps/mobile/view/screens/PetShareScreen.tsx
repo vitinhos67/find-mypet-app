@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -24,11 +25,6 @@ import { Colors } from '../styles/color';
 type RouteProps = RouteProp<PetStackParamList, 'PetShare'>;
 type NavProps = NativeStackNavigationProp<PetStackParamList, 'PetShare'>;
 
-const PERMISSION_LABELS: Record<SharePermission, string> = {
-    VIEW: 'Visualizar',
-    EDIT: 'Editar'
-};
-
 export default function PetShareScreen() {
     const navigation = useNavigation<NavProps>();
     const route = useRoute<RouteProps>();
@@ -46,212 +42,175 @@ export default function PetShareScreen() {
     const carregarShares = useCallback(async () => {
         setIsLoading(true);
         try {
-            const resposta: any = await ShareService.listShares(petId);
-            const data = Array.isArray(resposta) ? resposta : (resposta?.data || []);
-            setShares(data);
-        } catch (error) {
-            console.error('Erro ao carregar compartilhamentos:', error);
-        } finally {
-            setIsLoading(false);
-        }
+            const resp: any = await ShareService.listShares(petId);
+            setShares(Array.isArray(resp) ? resp : (resp?.data || []));
+        } catch { /* silencioso */ }
+        finally { setIsLoading(false); }
     }, [petId]);
 
-    useEffect(() => {
-        carregarShares();
-    }, [carregarShares]);
+    useEffect(() => { carregarShares(); }, [carregarShares]);
 
     async function handleCompartilhar() {
-        if (!email.trim()) {
-            Alert.alert('Erro', 'Informe o email para compartilhar.');
-            return;
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.trim())) {
-            Alert.alert('Erro', 'Informe um email válido.');
-            return;
-        }
+        if (!email.trim()) { Alert.alert('Erro', 'Informe o email para compartilhar.'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { Alert.alert('Erro', 'Informe um email válido.'); return; }
 
         setIsSaving(true);
         try {
             await ShareService.sharePet(petId, email.trim().toLowerCase(), permission);
             setEmail('');
             await carregarShares();
-            Alert.alert('Sucesso', 'Pet compartilhado com sucesso!');
-        } catch (error: any) {
-            const msg = error?.message || 'Não foi possível compartilhar o pet.';
-            Alert.alert('Erro', msg);
-        } finally {
-            setIsSaving(false);
-        }
+        } catch (err: any) {
+            Alert.alert('Erro', err?.message || 'Não foi possível compartilhar.');
+        } finally { setIsSaving(false); }
     }
 
     async function handleRemover(share: PetShare) {
-        Alert.alert(
-            'Remover acesso',
-            `Remover acesso de ${share.shared_with_email}?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Remover',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await ShareService.removeShare(petId, share.id);
-                            await carregarShares();
-                        } catch {
-                            Alert.alert('Erro', 'Não foi possível remover o acesso.');
-                        }
-                    }
+        Alert.alert('Remover acesso', `Remover acesso de ${share.shared_with_email ?? 'este usuário'}?`, [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+                text: 'Remover', style: 'destructive',
+                onPress: async () => {
+                    try { await ShareService.removeShare(petId, share.id); await carregarShares(); }
+                    catch { Alert.alert('Erro', 'Não foi possível remover o acesso.'); }
                 }
-            ]
-        );
+            }
+        ]);
     }
 
     async function handleAlterarPermissao(share: PetShare) {
-        const novaPermissao: SharePermission = share.permission === 'VIEW' ? 'EDIT' : 'VIEW';
-        try {
-            await ShareService.updatePermission(petId, share.id, novaPermissao);
-            await carregarShares();
-        } catch {
-            Alert.alert('Erro', 'Não foi possível alterar a permissão.');
-        }
+        const nova: SharePermission = share.permission === 'VIEW' ? 'EDIT' : 'VIEW';
+        try { await ShareService.updatePermission(petId, share.id, nova); await carregarShares(); }
+        catch { Alert.alert('Erro', 'Não foi possível alterar a permissão.'); }
     }
+
+    const display = (share: PetShare) => share.shared_with_email ?? share.shared_with_user_id;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <View style={[styles.header, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-                    <Text style={[styles.btnVoltar, { color: Colors.brand.primaryBlue }]}>← Voltar</Text>
+            {/* Header */}
+            <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+                <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn} hitSlop={8}>
+                    <Ionicons name="chevron-back" size={22} color={theme.textPrimary} />
                 </Pressable>
                 <Text style={[styles.headerTitle, { color: theme.textPrimary }]} numberOfLines={1}>
                     Compartilhar {petNome}
                 </Text>
-                <View style={{ width: 60 }} />
+                <View style={styles.iconBtn} />
             </View>
 
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
-                {/* Formulário de novo compartilhamento */}
-                <View style={[styles.formCard, { backgroundColor: theme.surface }]}>
-                    <Text style={[styles.formTitle, { color: theme.textPrimary }]}>
-                        Adicionar acesso
-                    </Text>
-                    <Text style={[styles.formSubtitle, { color: theme.textSecondary }]}>
-                        Informe o email da conta que terá acesso a este pet.
-                    </Text>
-
-                    <TextInput
-                        style={[styles.input, {
-                            backgroundColor: theme.background,
-                            color: theme.textPrimary,
-                            borderColor: theme.border
-                        }]}
-                        placeholder="Email do usuário"
-                        placeholderTextColor={theme.textSecondary}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-
-                    <Text style={[styles.permissionLabel, { color: theme.textSecondary }]}>
-                        Permissão
-                    </Text>
-                    <View style={styles.permissionRow}>
-                        {(['VIEW', 'EDIT'] as SharePermission[]).map((p) => (
-                            <Pressable
-                                key={p}
-                                style={[
-                                    styles.permissionBtn,
-                                    { borderColor: theme.border },
-                                    permission === p && styles.permissionBtnActive
-                                ]}
-                                onPress={() => setPermission(p)}
-                            >
-                                <Text style={[
-                                    styles.permissionBtnText,
-                                    { color: theme.textSecondary },
-                                    permission === p && styles.permissionBtnTextActive
-                                ]}>
-                                    {PERMISSION_LABELS[p]}
-                                </Text>
-                            </Pressable>
-                        ))}
-                    </View>
-
-                    <Pressable
-                        style={({ pressed }) => [
-                            styles.shareBtn,
-                            { opacity: pressed || isSaving ? 0.75 : 1 }
-                        ]}
-                        onPress={handleCompartilhar}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                        ) : (
-                            <Text style={styles.shareBtnText}>Compartilhar</Text>
-                        )}
-                    </Pressable>
-                </View>
-
-                {/* Lista de compartilhamentos */}
-                <View style={styles.listHeader}>
-                    <Text style={[styles.listTitle, { color: theme.textPrimary }]}>
-                        Quem tem acesso
-                    </Text>
-                    {isLoading && <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />}
-                </View>
-
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
                 <FlatList
                     data={shares}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContainer}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
+                    ListHeaderComponent={
+                        <>
+                            {/* Formulário */}
+                            <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Adicionar acesso</Text>
+                                <Text style={[styles.cardSub, { color: theme.textSecondary }]}>
+                                    Informe o email da conta que terá acesso a este pet.
+                                </Text>
+
+                                <TextInput
+                                    style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
+                                    placeholder="email@exemplo.com"
+                                    placeholderTextColor={theme.textSecondary}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                />
+
+                                <Text style={[styles.permLabel, { color: theme.textSecondary }]}>Permissão</Text>
+                                <View style={styles.permRow}>
+                                    {(['VIEW', 'EDIT'] as SharePermission[]).map((p) => (
+                                        <Pressable
+                                            key={p}
+                                            style={[
+                                                styles.permChip,
+                                                { borderColor: theme.border },
+                                                permission === p && { backgroundColor: Colors.brand.primaryBlue, borderColor: Colors.brand.primaryBlue }
+                                            ]}
+                                            onPress={() => setPermission(p)}
+                                        >
+                                            <Text style={[
+                                                styles.permChipText,
+                                                { color: theme.textSecondary },
+                                                permission === p && { color: '#fff' }
+                                            ]}>
+                                                {p === 'VIEW' ? 'Visualizar' : 'Editar'}
+                                            </Text>
+                                        </Pressable>
+                                    ))}
+                                </View>
+
+                                <Pressable
+                                    style={({ pressed }) => [styles.btnShare, { opacity: pressed || isSaving ? 0.75 : 1 }]}
+                                    onPress={handleCompartilhar}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving
+                                        ? <ActivityIndicator color="#fff" size="small" />
+                                        : <>
+                                            <Ionicons name="person-add-outline" size={16} color="#fff" />
+                                            <Text style={styles.btnShareText}>Compartilhar</Text>
+                                        </>
+                                    }
+                                </Pressable>
+                            </View>
+
+                            {/* Título da lista */}
+                            <View style={styles.listHeadRow}>
+                                <Text style={[styles.listHead, { color: theme.textPrimary }]}>Quem tem acesso</Text>
+                                {isLoading && <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />}
+                            </View>
+                        </>
+                    }
                     renderItem={({ item }) => (
                         <View style={[styles.shareItem, { backgroundColor: theme.surface }]}>
-                            <View style={styles.shareItemLeft}>
-                                <View style={[styles.avatarCircle, { backgroundColor: Colors.brand.primaryBlue + '20' }]}>
-                                    <Text style={[styles.avatarLetter, { color: Colors.brand.primaryBlue }]}>
-                                        {(item.shared_with_email ?? item.shared_with_user_id)[0].toUpperCase()}
-                                    </Text>
-                                </View>
-                                <View style={styles.shareItemInfo}>
-                                    <Text style={[styles.shareEmail, { color: theme.textPrimary }]} numberOfLines={1}>
-                                        {item.shared_with_email ?? item.shared_with_user_id}
-                                    </Text>
-                                    <Pressable onPress={() => handleAlterarPermissao(item)}>
-                                        <View style={[
-                                            styles.permissionTag,
-                                            { backgroundColor: item.permission === 'EDIT' ? '#fef3c7' : '#dbeafe' }
+                            <View style={[styles.avatar, { backgroundColor: Colors.brand.primaryBlue + '18' }]}>
+                                <Text style={[styles.avatarLetter, { color: Colors.brand.primaryBlue }]}>
+                                    {display(item)[0].toUpperCase()}
+                                </Text>
+                            </View>
+
+                            <View style={styles.shareInfo}>
+                                <Text style={[styles.shareEmail, { color: theme.textPrimary }]} numberOfLines={1}>
+                                    {display(item)}
+                                </Text>
+                                <Pressable onPress={() => handleAlterarPermissao(item)} hitSlop={6}>
+                                    <View style={[
+                                        styles.permTag,
+                                        { backgroundColor: item.permission === 'EDIT' ? '#FFF4E8' : '#EEF3FF' }
+                                    ]}>
+                                        <Text style={[
+                                            styles.permTagText,
+                                            { color: item.permission === 'EDIT' ? Colors.brand.primaryOrange : Colors.brand.primaryBlue }
                                         ]}>
-                                            <Text style={[
-                                                styles.permissionTagText,
-                                                { color: item.permission === 'EDIT' ? '#b45309' : Colors.brand.primaryBlue }
-                                            ]}>
-                                                {PERMISSION_LABELS[item.permission]} · alterar
-                                            </Text>
-                                        </View>
-                                    </Pressable>
-                                </View>
+                                            {item.permission === 'EDIT' ? 'Pode editar' : 'Visualização'} · alterar
+                                        </Text>
+                                    </View>
+                                </Pressable>
                             </View>
 
                             <Pressable
+                                style={({ pressed }) => [styles.removeBtn, { opacity: pressed ? 0.5 : 1 }]}
                                 onPress={() => handleRemover(item)}
                                 hitSlop={10}
-                                style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
                             >
-                                <Text style={styles.removeBtn}>✕</Text>
+                                <Ionicons name="close" size={18} color={theme.textSecondary} />
                             </Pressable>
                         </View>
                     )}
                     ListEmptyComponent={
                         !isLoading ? (
-                            <View style={styles.emptyState}>
+                            <View style={[styles.emptyBox, { backgroundColor: theme.surface }]}>
+                                <Ionicons name="people-outline" size={32} color={theme.border} />
                                 <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                                    Nenhum compartilhamento ainda.
+                                    Nenhum compartilhamento ainda
                                 </Text>
                             </View>
                         ) : null
@@ -263,191 +222,182 @@ export default function PetShareScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
+    container: { flex: 1 },
 
     header: {
-        paddingHorizontal: 20,
-        paddingVertical: 14,
+        height: 56,
+        paddingHorizontal: 8,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottomWidth: 1
-    },
-
-    btnVoltar: {
-        fontSize: 15,
-        fontFamily: 'Inter-Bold',
-        width: 60
+        borderBottomWidth: 1,
     },
 
     headerTitle: {
         fontSize: 17,
         fontFamily: 'Inter-Bold',
         flex: 1,
-        textAlign: 'center'
+        textAlign: 'center',
+        letterSpacing: -0.2,
     },
 
-    formCard: {
-        margin: 16,
-        marginBottom: 8,
-        borderRadius: 14,
-        padding: 16,
-        gap: 10
+    iconBtn: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
-    formTitle: {
+    list: {
+        padding: 20,
+        gap: 10,
+        paddingBottom: 40,
+    },
+
+    card: {
+        borderRadius: 18,
+        padding: 18,
+        gap: 12,
+        marginBottom: 4,
+    },
+
+    cardTitle: {
         fontSize: 16,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
     },
 
-    formSubtitle: {
+    cardSub: {
         fontSize: 13,
         fontFamily: 'Inter-Regular',
         lineHeight: 18,
-        marginTop: -4
+        marginTop: -4,
     },
 
     input: {
         borderWidth: 1,
-        borderRadius: 10,
+        borderRadius: 12,
         paddingHorizontal: 14,
         paddingVertical: 12,
         fontSize: 15,
-        fontFamily: 'Inter-Regular'
+        fontFamily: 'Inter-Regular',
     },
 
-    permissionLabel: {
-        fontSize: 13,
+    permLabel: {
+        fontSize: 11,
         fontFamily: 'Inter-Bold',
-        marginTop: 4
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
     },
 
-    permissionRow: {
+    permRow: {
         flexDirection: 'row',
-        gap: 10
+        gap: 10,
+        marginTop: -4,
     },
 
-    permissionBtn: {
+    permChip: {
         flex: 1,
-        paddingVertical: 10,
-        borderRadius: 10,
-        borderWidth: 1,
-        alignItems: 'center'
-    },
-
-    permissionBtnActive: {
-        backgroundColor: Colors.brand.primaryBlue,
-        borderColor: Colors.brand.primaryBlue
-    },
-
-    permissionBtnText: {
-        fontSize: 14,
-        fontFamily: 'Inter-Bold'
-    },
-
-    permissionBtnTextActive: {
-        color: '#fff'
-    },
-
-    shareBtn: {
-        backgroundColor: Colors.brand.primaryOrange,
+        paddingVertical: 11,
         borderRadius: 12,
+        borderWidth: 1,
+        alignItems: 'center',
+    },
+
+    permChipText: {
+        fontSize: 14,
+        fontFamily: 'Inter-Bold',
+    },
+
+    btnShare: {
+        backgroundColor: Colors.brand.primaryOrange,
+        borderRadius: 14,
         paddingVertical: 14,
         alignItems: 'center',
-        marginTop: 4
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
+        marginTop: 2,
     },
 
-    shareBtnText: {
+    btnShareText: {
         color: '#fff',
         fontSize: 15,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
     },
 
-    listHeader: {
+    listHeadRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 8
+        paddingVertical: 4,
+        marginBottom: 2,
     },
 
-    listTitle: {
+    listHead: {
         fontSize: 15,
-        fontFamily: 'Inter-Bold'
-    },
-
-    listContainer: {
-        paddingHorizontal: 16,
-        gap: 8,
-        paddingBottom: 32
+        fontFamily: 'Inter-Bold',
     },
 
     shareItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: 14,
         padding: 14,
-        borderRadius: 12,
-        gap: 10
+        borderRadius: 16,
     },
 
-    shareItemLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        gap: 12
-    },
-
-    avatarCircle: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+    avatar: {
+        width: 42,
+        height: 42,
+        borderRadius: 14,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
     avatarLetter: {
         fontSize: 16,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
     },
 
-    shareItemInfo: {
+    shareInfo: {
         flex: 1,
-        gap: 4
+        gap: 5,
     },
 
     shareEmail: {
         fontSize: 14,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
     },
 
-    permissionTag: {
+    permTag: {
         alignSelf: 'flex-start',
-        paddingHorizontal: 10,
+        paddingHorizontal: 9,
         paddingVertical: 3,
-        borderRadius: 20
+        borderRadius: 8,
     },
 
-    permissionTagText: {
+    permTagText: {
         fontSize: 11,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
     },
 
     removeBtn: {
-        fontSize: 16,
-        color: '#ef4444',
-        fontFamily: 'Inter-Bold'
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
-    emptyState: {
-        paddingVertical: 24,
-        alignItems: 'center'
+    emptyBox: {
+        borderRadius: 16,
+        paddingVertical: 28,
+        alignItems: 'center',
+        gap: 8,
     },
 
     emptyText: {
         fontSize: 14,
-        fontFamily: 'Inter-Regular'
-    }
+        fontFamily: 'Inter-Regular',
+    },
 });

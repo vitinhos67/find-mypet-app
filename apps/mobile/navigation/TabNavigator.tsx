@@ -13,14 +13,15 @@ const Tab = createBottomTabNavigator();
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TAB_ICONS: Record<string, { active: IoniconsName; inactive: IoniconsName }> = {
-    Home:   { active: 'map',          inactive: 'map-outline' },
-    Pets:   { active: 'paw',          inactive: 'paw-outline' },
-    Perfil: { active: 'person',       inactive: 'person-outline' },
+    Home:   { active: 'map',     inactive: 'map-outline' },
+    Pets:   { active: 'paw',     inactive: 'paw-outline' },
+    Perfil: { active: 'person',  inactive: 'person-outline' },
 };
 
 export function TabNavigator() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
+    const theme = darkMode ? Colors.dark : Colors.light;
 
     return (
         <Tab.Navigator
@@ -28,16 +29,13 @@ export function TabNavigator() {
                 headerShown: false,
                 tabBarIcon: ({ focused, color, size }) => {
                     const icons = TAB_ICONS[route.name];
-                    const iconName = focused ? icons.active : icons.inactive;
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    return <Ionicons name={focused ? icons.active : icons.inactive} size={size} color={color} />;
                 },
                 tabBarActiveTintColor: Colors.brand.primaryBlue,
-                tabBarInactiveTintColor: darkMode
-                    ? Colors.dark.textSecondary
-                    : Colors.light.textSecondary,
+                tabBarInactiveTintColor: theme.textSecondary,
                 tabBarStyle: {
-                    backgroundColor: darkMode ? Colors.dark.surface : Colors.light.surface,
-                    borderTopColor: darkMode ? Colors.dark.border : Colors.light.border,
+                    backgroundColor: theme.background,
+                    borderTopColor: theme.border,
                     borderTopWidth: 1,
                     height: 56 + insets.bottom,
                     paddingBottom: insets.bottom + 6,
@@ -45,12 +43,12 @@ export function TabNavigator() {
                 },
                 tabBarLabelStyle: {
                     fontSize: 11,
-                    fontFamily: 'Inter-Medium',
+                    fontFamily: 'Inter-Bold',
                 },
             })}
         >
-            <Tab.Screen name="Home"   component={HomeScreen}   options={{ tabBarLabel: 'Home' }} />
-            <Tab.Screen name="Pets"   component={PetNavigator} options={{ tabBarLabel: 'Pets' }} />
+            <Tab.Screen name="Home"   component={HomeScreen}    options={{ tabBarLabel: 'Home' }} />
+            <Tab.Screen name="Pets"   component={PetNavigator}  options={{ tabBarLabel: 'Pets' }} />
             <Tab.Screen name="Perfil" component={ProfileScreen} options={{ tabBarLabel: 'Perfil' }} />
         </Tab.Navigator>
     );

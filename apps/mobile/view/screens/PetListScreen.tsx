@@ -1,9 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback } from 'react';
 import {
     ActivityIndicator,
-    FlatList,
     Image,
     Pressable,
     ScrollView,
@@ -19,48 +19,36 @@ import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
-type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList', 'Colar'>;
+type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList'>;
 
-function PetCard({
-    item,
-    onPress,
-    theme
-}: {
-    item: Pet;
-    onPress: () => void;
-    theme: any;
-}) {
+function PetCard({ item, onPress, theme }: { item: Pet; onPress: () => void; theme: any }) {
+    const isMacho = item.sexo === 'MACHO';
     return (
         <Pressable
-            style={({ pressed }) => [
-                styles.card,
-                { backgroundColor: theme.surface, opacity: pressed ? 0.82 : 1 }
-            ]}
+            style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.88 : 1 }]}
             onPress={onPress}
         >
             {item.foto ? (
-                <Image source={{ uri: item.foto }} style={styles.petImage} />
+                <Image source={{ uri: item.foto }} style={styles.avatar} />
             ) : (
-                <View style={[styles.placeholder, { backgroundColor: theme.border }]}>
-                    <Text style={styles.placeholderIcon}>🐾</Text>
+                <View style={[styles.avatarPlaceholder, { backgroundColor: Colors.brand.primaryBlue + '15' }]}>
+                    <Text style={styles.avatarEmoji}>🐾</Text>
                 </View>
             )}
 
-            <View style={styles.cardContent}>
-                <Text style={[styles.nomeText, { color: theme.textPrimary }]}>
-                    {item.nome}
-                </Text>
-                <Text style={[styles.racaText, { color: theme.textSecondary }]}>
-                    {item.raca}
+            <View style={styles.cardBody}>
+                <Text style={[styles.cardName, { color: theme.textPrimary }]}>{item.nome}</Text>
+                <Text style={[styles.cardBreed, { color: theme.textSecondary }]} numberOfLines={1}>
+                    {item.raca || 'Raça não informada'}
                 </Text>
                 {item.isShared && item.sharePermission && (
                     <View style={[
-                        styles.permissionTag,
-                        { backgroundColor: item.sharePermission === 'EDIT' ? '#fef3c7' : '#dbeafe' }
+                        styles.permTag,
+                        { backgroundColor: item.sharePermission === 'EDIT' ? '#FFF4E8' : '#EEF3FF' }
                     ]}>
                         <Text style={[
-                            styles.permissionTagText,
-                            { color: item.sharePermission === 'EDIT' ? '#b45309' : Colors.brand.primaryBlue }
+                            styles.permTagText,
+                            { color: item.sharePermission === 'EDIT' ? Colors.brand.primaryOrange : Colors.brand.primaryBlue }
                         ]}>
                             {item.sharePermission === 'EDIT' ? 'Pode editar' : 'Visualização'}
                         </Text>
@@ -68,18 +56,38 @@ function PetCard({
                 )}
             </View>
 
-            <View style={[
-                styles.sexoBadge,
-                { backgroundColor: item.sexo === 'MACHO' ? '#dbeafe' : '#fce7f3' }
-            ]}>
-                <Text style={[
-                    styles.sexoBadgeText,
-                    { color: item.sexo === 'MACHO' ? Colors.brand.primaryBlue : '#ec4899' }
-                ]}>
-                    {item.sexo === 'MACHO' ? '♂' : '♀'}
+            <View style={[styles.sexBadge, { backgroundColor: isMacho ? '#EEF3FF' : '#FFF0F7' }]}>
+                <Text style={[styles.sexIcon, { color: isMacho ? Colors.brand.primaryBlue : '#E879A8' }]}>
+                    {isMacho ? '♂' : '♀'}
                 </Text>
             </View>
         </Pressable>
+    );
+}
+
+function SectionHeader({ title, count }: { title: string; count: number }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    return (
+        <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{title}</Text>
+            {count > 0 && (
+                <View style={styles.countBadge}>
+                    <Text style={styles.countText}>{count}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+function EmptySection({ icon, message }: { icon: string; message: string }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    return (
+        <View style={[styles.emptyBox, { backgroundColor: theme.surface }]}>
+            <Text style={styles.emptyIcon}>{icon}</Text>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>{message}</Text>
+        </View>
     );
 }
 
@@ -89,323 +97,257 @@ export default function PetListScreen() {
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
 
-    useFocusEffect(
-        useCallback(() => {
-            carregarPets();
-        }, [carregarPets])
-    );
+    useFocusEffect(useCallback(() => { carregarPets(); }, [carregarPets]));
 
-    const totalLabel = pets.length === 1
-        ? '1 pet cadastrado'
-        : pets.length > 1
-            ? `${pets.length} pets cadastrados`
-            : 'Nenhum pet cadastrado';
-
-    if (isLoading && pets.length === 0 && sharedPets.length === 0) {
-        return (
-            <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-                <View style={[styles.header, { backgroundColor: theme.surface }]}>
-                    <View>
-                        <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Pets</Text>
-                    </View>
-                    <Pressable
-                        style={[styles.coleirasBtn, { borderColor: theme.border }]}
-                        onPress={() => navigation.navigate('Collar' as any)}
-                    >
-                        <Text style={[styles.coleirasBtnText, { color: theme.textSecondary }]}>
-                            Coleiras
-                        </Text>
-                    </Pressable>
-                </View>
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
-                </View>
-            </SafeAreaView>
-        );
-    }
+    const loading = isLoading && pets.length === 0 && sharedPets.length === 0;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <View style={[styles.header, { backgroundColor: theme.surface }]}>
+            {/* Header */}
+            <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
                 <View>
-                    <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Pets</Text>
-                    <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{totalLabel}</Text>
+                    <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Pets</Text>
+                    <Text style={[styles.headerSub, { color: theme.textSecondary }]}>
+                        {pets.length + sharedPets.length === 0
+                            ? 'Nenhum pet cadastrado'
+                            : `${pets.length + sharedPets.length} ${pets.length + sharedPets.length === 1 ? 'pet' : 'pets'} no total`}
+                    </Text>
                 </View>
                 <Pressable
-                    style={[styles.coleirasBtn, { borderColor: theme.border }]}
+                    style={({ pressed }) => [styles.collarBtn, { borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
                     onPress={() => navigation.navigate('Collar' as any)}
                 >
-                    <Text style={[styles.coleirasBtnText, { color: theme.textSecondary }]}>
-                        Coleiras
-                    </Text>
+                    <Ionicons name="bluetooth-outline" size={15} color={theme.textSecondary} />
+                    <Text style={[styles.collarText, { color: theme.textSecondary }]}>Coleiras</Text>
                 </Pressable>
             </View>
 
-            <ScrollView
-                contentContainerStyle={[
-                    styles.scrollContent,
-                    pets.length === 0 && sharedPets.length === 0 && styles.emptyScrollContent
-                ]}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* Seção: Meus Pets */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-                        Meus Pets
-                    </Text>
-
-                    {pets.length === 0 ? (
-                        <View style={[styles.emptySection, { backgroundColor: theme.surface }]}>
-                            <Text style={styles.emptySectionIcon}>🐾</Text>
-                            <Text style={[styles.emptySectionTitle, { color: theme.textPrimary }]}>
-                                Nenhum pet ainda
-                            </Text>
-                            <Text style={[styles.emptySectionSubtitle, { color: theme.textSecondary }]}>
-                                Toque no botão + para cadastrar seu primeiro pet
-                            </Text>
-                        </View>
-                    ) : (
-                        <View style={styles.cardList}>
-                            {pets.map((item) => (
-                                <PetCard
-                                    key={item.id}
-                                    item={item}
-                                    theme={theme}
-                                    onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
-                                />
-                            ))}
-                        </View>
-                    )}
+            {loading ? (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
                 </View>
+            ) : (
+                <ScrollView
+                    contentContainerStyle={styles.scroll}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Meus Pets */}
+                    <SectionHeader title="Meus Pets" count={pets.length} />
+                    {pets.length === 0
+                        ? <EmptySection icon="🐾" message="Toque em + para cadastrar seu primeiro pet" />
+                        : pets.map(item => (
+                            <PetCard
+                                key={item.id}
+                                item={item}
+                                theme={theme}
+                                onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                            />
+                        ))
+                    }
 
-                {/* Seção: Compartilhados comigo */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-                        Compartilhados comigo
-                    </Text>
-
-                    {sharedPets.length === 0 ? (
-                        <View style={[styles.emptySection, { backgroundColor: theme.surface }]}>
-                            <Text style={styles.emptySectionIcon}>🔗</Text>
-                            <Text style={[styles.emptySectionTitle, { color: theme.textPrimary }]}>
-                                Sem pets compartilhados
-                            </Text>
-                            <Text style={[styles.emptySectionSubtitle, { color: theme.textSecondary }]}>
-                                Quando alguém compartilhar um pet com você, ele aparecerá aqui
-                            </Text>
-                        </View>
-                    ) : (
-                        <View style={styles.cardList}>
-                            {sharedPets.map((item) => (
-                                <PetCard
-                                    key={item.id}
-                                    item={item}
-                                    theme={theme}
-                                    onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
-                                />
-                            ))}
-                        </View>
-                    )}
-                </View>
-            </ScrollView>
+                    {/* Compartilhados comigo */}
+                    <SectionHeader title="Compartilhados comigo" count={sharedPets.length} />
+                    {sharedPets.length === 0
+                        ? <EmptySection icon="🔗" message="Quando alguém compartilhar um pet com você, ele aparecerá aqui" />
+                        : sharedPets.map(item => (
+                            <PetCard
+                                key={item.id}
+                                item={item}
+                                theme={theme}
+                                onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                            />
+                        ))
+                    }
+                </ScrollView>
+            )}
 
             <Pressable
                 style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
                 onPress={() => navigation.navigate('PetAdd')}
             >
-                <Text style={styles.fabText}>+</Text>
+                <Ionicons name="add" size={28} color="#fff" />
             </Pressable>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
+    container: { flex: 1 },
 
     header: {
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingHorizontal: 24,
+        paddingVertical: 18,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryOrange + '50'
     },
 
-    title: {
-        fontSize: 22,
-        fontFamily: 'Inter-Bold'
+    headerTitle: {
+        fontSize: 26,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.5,
     },
 
-    subtitle: {
+    headerSub: {
         fontSize: 13,
+        fontFamily: 'Inter-Regular',
         marginTop: 2,
-        fontFamily: 'Inter-Regular'
     },
 
-    coleirasBtn: {
-        paddingHorizontal: 16,
+    collarBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 20,
-        borderWidth: 1
+        borderWidth: 1,
     },
 
-    coleirasBtnText: {
+    collarText: {
         fontSize: 13,
-        fontFamily: 'Inter-Bold'
+        fontFamily: 'Inter-Bold',
     },
 
     centered: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
-    scrollContent: {
-        padding: 16,
+    scroll: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
         paddingBottom: 100,
-        gap: 8
+        gap: 8,
     },
 
-    emptyScrollContent: {
-        flex: 1
-    },
-
-    section: {
-        gap: 10,
-        marginBottom: 8
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 10,
+        marginTop: 4,
     },
 
     sectionTitle: {
         fontSize: 15,
         fontFamily: 'Inter-Bold',
-        paddingHorizontal: 2
+        letterSpacing: -0.2,
     },
 
-    cardList: {
-        gap: 10
+    countBadge: {
+        backgroundColor: Colors.brand.primaryBlue + '20',
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+
+    countText: {
+        fontSize: 12,
+        fontFamily: 'Inter-Bold',
+        color: Colors.brand.primaryBlue,
     },
 
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 14,
-        borderRadius: 14,
-        gap: 12,
-        elevation: 2,
+        padding: 14,
+        borderRadius: 16,
+        gap: 14,
+        marginBottom: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        elevation: 1,
     },
 
-    petImage: {
-        width: 54,
-        height: 54,
-        borderRadius: 27
+    avatar: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
     },
 
-    placeholder: {
-        width: 54,
-        height: 54,
-        borderRadius: 27,
+    avatarPlaceholder: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
-    placeholderIcon: {
-        fontSize: 22
+    avatarEmoji: { fontSize: 22 },
+
+    cardBody: { flex: 1, gap: 3 },
+
+    cardName: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
     },
 
-    cardContent: {
-        flex: 1,
-        gap: 2
-    },
-
-    nomeText: {
-        fontSize: 16,
-        fontFamily: 'Inter-Bold'
-    },
-
-    racaText: {
+    cardBreed: {
         fontSize: 13,
-        fontFamily: 'Inter-Regular'
+        fontFamily: 'Inter-Regular',
     },
 
-    permissionTag: {
+    permTag: {
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 20,
-        marginTop: 2
+        paddingVertical: 3,
+        borderRadius: 8,
+        marginTop: 2,
     },
 
-    permissionTagText: {
-        fontSize: 10,
-        fontFamily: 'Inter-Bold'
+    permTagText: {
+        fontSize: 11,
+        fontFamily: 'Inter-Bold',
     },
 
-    sexoBadge: {
-        width: 34,
-        height: 34,
-        borderRadius: 17,
+    sexBadge: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
         justifyContent: 'center',
-        alignItems: 'center'
-    },
-
-    sexoBadgeText: {
-        fontSize: 18
-    },
-
-    emptySection: {
         alignItems: 'center',
-        paddingVertical: 28,
-        paddingHorizontal: 24,
-        borderRadius: 14,
-        gap: 6
     },
 
-    emptySectionIcon: {
-        fontSize: 36,
-        marginBottom: 4
+    sexIcon: { fontSize: 18, fontFamily: 'Inter-Bold' },
+
+    emptyBox: {
+        borderRadius: 16,
+        paddingVertical: 24,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 8,
     },
 
-    emptySectionTitle: {
-        fontSize: 15,
-        fontFamily: 'Inter-Bold'
-    },
+    emptyIcon: { fontSize: 32 },
 
-    emptySectionSubtitle: {
+    emptyText: {
         fontSize: 13,
         fontFamily: 'Inter-Regular',
         textAlign: 'center',
-        lineHeight: 20
+        lineHeight: 20,
     },
 
     fab: {
         position: 'absolute',
-        bottom: 24,
+        bottom: 28,
         right: 24,
         width: 56,
         height: 56,
-        borderRadius: 28,
+        borderRadius: 18,
         backgroundColor: Colors.brand.primaryOrange,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 6,
         shadowColor: Colors.brand.primaryOrange,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 8
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+        elevation: 6,
     },
-
-    fabText: {
-        color: 'white',
-        fontSize: 30,
-        fontFamily: 'Inter-Bold',
-        lineHeight: 34
-    }
 });

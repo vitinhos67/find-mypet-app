@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
@@ -44,16 +45,14 @@ export default function PetAddScreen() {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-                <View style={[styles.header, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
-                        <Text style={[styles.btnVoltar, { color: Colors.brand.primaryBlue }]}>← Voltar</Text>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                {/* Header */}
+                <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+                    <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn} hitSlop={8}>
+                        <Ionicons name="chevron-back" size={22} color={theme.textPrimary} />
                     </Pressable>
                     <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Novo Pet</Text>
-                    <View style={{ width: 60 }} />
+                    <View style={styles.iconBtn} />
                 </View>
 
                 <ScrollView
@@ -61,64 +60,57 @@ export default function PetAddScreen() {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <Pressable style={styles.photoWrapper} onPress={handleSelecionarFoto}>
+                    {/* Foto */}
+                    <Pressable style={styles.photoWrap} onPress={handleSelecionarFoto}>
                         {foto ? (
                             <Image source={{ uri: foto }} style={styles.photo} />
                         ) : (
-                            <View style={[styles.photoPlaceholder, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                                <Text style={styles.photoIcon}>📷</Text>
-                                <Text style={[styles.photoHint, { color: theme.textSecondary }]}>
-                                    Adicionar foto
-                                </Text>
+                            <View style={[styles.photoEmpty, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                                <Ionicons name="camera-outline" size={32} color={theme.textSecondary} />
+                                <Text style={[styles.photoHint, { color: theme.textSecondary }]}>Adicionar foto</Text>
                             </View>
                         )}
                         <View style={styles.photoBadge}>
-                            <Text style={styles.photoBadgeText}>✎</Text>
+                            <Ionicons name="pencil" size={12} color="#fff" />
                         </View>
                     </Pressable>
 
-                    <View style={[styles.formCard, { backgroundColor: theme.surface }]}>
-                        <View style={styles.fieldGroup}>
-                            <Text style={[styles.label, { color: theme.textSecondary }]}>Nome</Text>
+                    {/* Campos principais */}
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Nome" theme={theme}>
                             <TextInput
-                                style={[styles.input, { color: theme.textPrimary, borderColor: theme.border }]}
+                                style={[styles.input, { color: theme.textPrimary }]}
                                 value={nome}
                                 onChangeText={setNome}
                                 placeholder="Ex: Rex"
                                 placeholderTextColor={theme.textSecondary}
                             />
-                        </View>
-
-                        <View style={[styles.separator, { backgroundColor: theme.border }]} />
-
-                        <View style={styles.fieldGroup}>
-                            <Text style={[styles.label, { color: theme.textSecondary }]}>Raça</Text>
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Raça" theme={theme}>
                             <TextInput
-                                style={[styles.input, { color: theme.textPrimary, borderColor: theme.border }]}
+                                style={[styles.input, { color: theme.textPrimary }]}
                                 value={raca}
                                 onChangeText={setRaca}
                                 placeholder="Ex: Labrador"
                                 placeholderTextColor={theme.textSecondary}
                             />
-                        </View>
-
-                        <View style={[styles.separator, { backgroundColor: theme.border }]} />
-
-                        <View style={styles.fieldGroup}>
-                            <Text style={[styles.label, { color: theme.textSecondary }]}>Cor</Text>
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Cor" theme={theme}>
                             <TextInput
-                                style={[styles.input, { color: theme.textPrimary, borderColor: theme.border }]}
+                                style={[styles.input, { color: theme.textPrimary }]}
                                 value={cor}
                                 onChangeText={setCor}
                                 placeholder="Ex: Caramelo"
                                 placeholderTextColor={theme.textSecondary}
                             />
-                        </View>
+                        </Field>
                     </View>
 
-                    <View style={[styles.formCard, { backgroundColor: theme.surface }]}>
-                        <View style={styles.fieldGroup}>
-                            <Text style={[styles.label, { color: theme.textSecondary }]}>Sexo</Text>
+                    {/* Sexo */}
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Sexo" theme={theme}>
                             <SexoSelector
                                 value={sexo}
                                 onChange={setSexo}
@@ -126,12 +118,12 @@ export default function PetAddScreen() {
                                 borderColor={theme.border}
                                 textSecondaryColor={theme.textSecondary}
                             />
-                        </View>
+                        </Field>
                     </View>
 
-                    <View style={[styles.formCard, { backgroundColor: theme.surface }]}>
-                        <View style={styles.fieldGroup}>
-                            <Text style={[styles.label, { color: theme.textSecondary }]}>Descrição</Text>
+                    {/* Descrição */}
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Descrição" theme={theme}>
                             <TextInput
                                 multiline
                                 numberOfLines={4}
@@ -142,19 +134,18 @@ export default function PetAddScreen() {
                                 placeholderTextColor={theme.textSecondary}
                                 textAlignVertical="top"
                             />
-                        </View>
+                        </Field>
                     </View>
 
                     <Pressable
-                        style={[styles.btnSalvar, isLoading && styles.btnDisabled]}
+                        style={({ pressed }) => [styles.btnPrimary, isLoading && { opacity: 0.65 }, { opacity: pressed && !isLoading ? 0.85 : undefined }]}
                         onPress={handleSalvar}
                         disabled={isLoading}
                     >
-                        {isLoading ? (
-                            <ActivityIndicator color="white" />
-                        ) : (
-                            <Text style={styles.btnSalvarText}>Cadastrar Pet</Text>
-                        )}
+                        {isLoading
+                            ? <ActivityIndicator color="white" />
+                            : <Text style={styles.btnPrimaryText}>Cadastrar Pet</Text>
+                        }
                     </Pressable>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -162,136 +153,128 @@ export default function PetAddScreen() {
     );
 }
 
+function Field({ label, children, theme }: { label: string; children: React.ReactNode; theme: any }) {
+    return (
+        <View style={styles.fieldWrap}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
+            {children}
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
+    container: { flex: 1 },
 
     header: {
-        paddingHorizontal: 20,
-        paddingVertical: 14,
+        height: 56,
+        paddingHorizontal: 8,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottomWidth: 1
-    },
-
-    btnVoltar: {
-        fontSize: 15,
-        fontFamily: 'Inter-Bold',
-        width: 60
+        borderBottomWidth: 1,
     },
 
     headerTitle: {
-        fontSize: 18,
-        fontFamily: 'Inter-Bold'
+        fontSize: 17,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
+    },
+
+    iconBtn: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     content: {
-        padding: 16,
-        paddingBottom: 40,
-        gap: 12
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 48,
+        gap: 12,
     },
 
-    photoWrapper: {
+    photoWrap: {
         alignSelf: 'center',
         marginBottom: 4,
-        marginTop: 8
     },
 
     photo: {
-        width: 110,
-        height: 110,
-        borderRadius: 55
+        width: 100,
+        height: 100,
+        borderRadius: 24,
     },
 
-    photoPlaceholder: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
-        borderWidth: 2,
+    photoEmpty: {
+        width: 100,
+        height: 100,
+        borderRadius: 24,
+        borderWidth: 1.5,
         borderStyle: 'dashed',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 4
-    },
-
-    photoIcon: {
-        fontSize: 28
+        gap: 4,
     },
 
     photoHint: {
         fontSize: 11,
-        fontFamily: 'Inter-Regular'
+        fontFamily: 'Inter-Regular',
     },
 
     photoBadge: {
         position: 'absolute',
         bottom: 4,
         right: 4,
-        width: 28,
-        height: 28,
-        borderRadius: 14,
+        width: 26,
+        height: 26,
+        borderRadius: 9,
         backgroundColor: Colors.brand.primaryOrange,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
-    photoBadgeText: {
-        color: 'white',
-        fontSize: 14
+    card: {
+        borderRadius: 18,
+        paddingHorizontal: 18,
+        overflow: 'hidden',
     },
 
-    formCard: {
-        borderRadius: 14,
-        paddingHorizontal: 16,
-        overflow: 'hidden'
-    },
+    fieldWrap: { paddingVertical: 14 },
 
-    fieldGroup: {
-        paddingVertical: 12
-    },
-
-    separator: {
-        height: 1
-    },
+    divider: { height: 1 },
 
     label: {
-        fontSize: 12,
+        fontSize: 11,
         fontFamily: 'Inter-Bold',
-        marginBottom: 6,
         textTransform: 'uppercase',
-        letterSpacing: 0.5
+        letterSpacing: 0.6,
+        marginBottom: 8,
     },
 
     input: {
         fontSize: 16,
         fontFamily: 'Inter-Regular',
-        paddingVertical: 4
+        paddingVertical: 0,
     },
 
     textArea: {
         fontSize: 15,
         fontFamily: 'Inter-Regular',
-        minHeight: 90,
-        lineHeight: 22
+        minHeight: 80,
+        lineHeight: 22,
     },
 
-    btnSalvar: {
+    btnPrimary: {
         backgroundColor: Colors.brand.primaryBlue,
         paddingVertical: 16,
-        borderRadius: 14,
+        borderRadius: 16,
         alignItems: 'center',
-        marginTop: 4
+        marginTop: 4,
     },
 
-    btnDisabled: {
-        opacity: 0.65
-    },
-
-    btnSalvarText: {
+    btnPrimaryText: {
         color: 'white',
         fontSize: 16,
-        fontFamily: 'Inter-Bold'
-    }
+        fontFamily: 'Inter-Bold',
+    },
 });
