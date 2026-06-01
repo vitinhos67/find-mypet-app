@@ -12,6 +12,7 @@ import {
     TextInput,
     View
 } from 'react-native';
+import * as Location from 'expo-location';
 import MapView, { Circle, MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -59,6 +60,8 @@ export default function SafeZoneScreen() {
     const [zone, setZone] = useState<SafeZone | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isLocating, setIsLocating] = useState(false);
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     useFocusEffect(useCallback(() => {
         const timer = setTimeout(() => setMapReady(true), 350);
@@ -100,6 +103,26 @@ export default function SafeZoneScreen() {
         })();
     }, [petId]);
 
+    async function goToUserLocation() {
+        setIsLocating(true);
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permissão negada', 'Ative a localização nas configurações do dispositivo.');
+                return;
+            }
+            const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            const coord = safeCoord(loc.coords.latitude, loc.coords.longitude);
+            setUserLocation(coord);
+            setCenter(coord);
+            mapRef.current?.animateToRegion(safeRegion(coord.latitude, coord.longitude, radius), 500);
+        } catch {
+            Alert.alert('Erro', 'Não foi possível obter sua localização.');
+        } finally {
+            setIsLocating(false);
+        }
+    }
+
     function handleMapPress(e: MapPressEvent) {
         const coord = safeCoord(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude);
         setCenter(coord);
@@ -140,11 +163,12 @@ export default function SafeZoneScreen() {
         ]);
     }
 
-    // Quando o mapa monta após o delay de 350ms e os dados já carregaram,
-    // o animateToRegion original virou no-op. Este effect corrige isso.
     useEffect(() => {
-        if (mapReady && center) {
+        if (!mapReady) return;
+        if (center) {
             mapRef.current?.animateToRegion(safeRegion(center.latitude, center.longitude, radius), 400);
+        } else {
+            goToUserLocation();
         }
     }, [mapReady]);
 
@@ -193,32 +217,52 @@ export default function SafeZoneScreen() {
                             <ActivityIndicator color={Colors.brand.primaryBlue} />
                         </View>
                     ) : (
-                        <MapView
-                            ref={mapRef}
-                            style={styles.map}
-                            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-                            initialRegion={mapRegion}
-                            onPress={handleMapPress}
-                            showsMyLocationButton={false}
-                            showsCompass={false}
-                        >
-                            {center && (
-                                <>
-                                    <Circle
-                                        center={center}
-                                        radius={radius}
-                                        strokeColor={Colors.brand.primaryBlue}
-                                        fillColor={Colors.brand.primaryBlue + '22'}
-                                        strokeWidth={2}
-                                    />
-                                    <Marker coordinate={center} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
-                                        <View style={styles.centerMarker}>
-                                            <View style={[styles.centerDot, { backgroundColor: Colors.brand.primaryBlue }]} />
+                        <View style={styles.map}>
+                            <MapView
+                                ref={mapRef}
+                                style={StyleSheet.absoluteFillObject}
+                                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                                initialRegion={mapRegion}
+                                onPress={handleMapPress}
+                                showsMyLocationButton={false}
+                                showsCompass={false}
+                            >
+                                {center && (
+                                    <>
+                                        <Circle
+                                            center={center}
+                                            radius={radius}
+                                            strokeColor={Colors.brand.primaryBlue}
+                                            fillColor={Colors.brand.primaryBlue + '22'}
+                                            strokeWidth={2}
+                                        />
+                                        <Marker coordinate={center} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+                                            <View style={styles.centerMarker}>
+                                                <View style={[styles.centerDot, { backgroundColor: Colors.brand.primaryBlue }]} />
+                                            </View>
+                                        </Marker>
+                                    </>
+                                )}
+                                {userLocation && (
+                                    <Marker coordinate={userLocation} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+                                        <View style={styles.userMarkerRing}>
+                                            <View style={styles.userMarkerDot} />
                                         </View>
                                     </Marker>
-                                </>
-                            )}
-                        </MapView>
+                                )}
+                            </MapView>
+
+                            <Pressable
+                                style={[styles.locationBtn, { backgroundColor: theme.background }]}
+                                onPress={goToUserLocation}
+                                hitSlop={8}
+                            >
+                                {isLocating
+                                    ? <ActivityIndicator size="small" color={Colors.brand.primaryBlue} />
+                                    : <Ionicons name="navigate" size={20} color={Colors.brand.primaryBlue} />
+                                }
+                            </Pressable>
+                        </View>
                     )}
 
                     {/* Painel de configuração */}
@@ -515,5 +559,39 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 15,
         fontFamily: 'Inter-Bold',
+    },
+
+    userMarkerRing: {
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: 'rgba(66,133,244,0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    userMarkerDot: {
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        backgroundColor: '#4285F4',
+        borderWidth: 2.5,
+        borderColor: '#fff',
+    },
+
+    locationBtn: {
+        position: 'absolute',
+        bottom: 12,
+        right: 12,
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 4,
     },
 });
