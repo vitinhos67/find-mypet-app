@@ -60,9 +60,6 @@ export default function SafeZoneScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Monta o MapView só após a tela ganhar foco e desmonta ao perder.
-    // Sem o unmount, a instância nativa Android fica com referências nulas
-    // ao retornar para a tela, causando crash (react-native-maps #5722).
     useFocusEffect(useCallback(() => {
         const timer = setTimeout(() => setMapReady(true), 350);
         return () => {
