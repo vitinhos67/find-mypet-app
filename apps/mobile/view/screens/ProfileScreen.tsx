@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import React from 'react';
+import { Image as ExpoImage } from 'expo-image';
+import React, { useEffect, useState } from 'react';
 import {
-    Image,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -14,8 +14,11 @@ import { useTheme } from '../../hooks/useTheme';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 import { Colors } from '../styles/color';
 
+const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];
+
 export default function ProfileScreen() {
     const { darkMode, toggleTheme } = useTheme();
+    const [avatarRenderFailed, setAvatarRenderFailed] = useState(false);
 
     const {
         usuario,
@@ -37,6 +40,10 @@ export default function ProfileScreen() {
         realizarLogout,
     } = useProfileViewModel();
 
+    useEffect(() => {
+        setAvatarRenderFailed(false);
+    }, [profileImage]);
+
     async function selecionarImagem() {
         const permissao =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,7 +61,10 @@ export default function ProfileScreen() {
             });
 
         if (!resultado.canceled) {
-            await salvarImagemPerfil(resultado.assets[0].uri);
+            await salvarImagemPerfil(
+                resultado.assets[0].uri,
+                resultado.assets[0].mimeType
+            );
         }
     }
 
@@ -93,10 +103,14 @@ export default function ProfileScreen() {
                     ]}
                 >
                     <Pressable onPress={selecionarImagem}>
-                        {profileImage ? (
-                            <Image
+                        {profileImage && !avatarRenderFailed ? (
+                            <ExpoImage
+                                key={profileImage}
                                 source={{ uri: profileImage }}
                                 style={styles.profileImage}
+                                contentFit="cover"
+                                cachePolicy="none"
+                                onError={() => setAvatarRenderFailed(true)}
                             />
                         ) : (
                             <View style={styles.profilePlaceholder}>
@@ -163,21 +177,40 @@ export default function ProfileScreen() {
                             style={[styles.input, darkMode && styles.inputDark]}
                             value={telefone}
                             onChangeText={setTelefone}
-                            placeholder="Seu telefone"
+                            placeholder="DDD + 9 números"
                             placeholderTextColor="#888888"
                             keyboardType="phone-pad"
+                            maxLength={11}
                         />
 
                         <Text style={[styles.inputLabel, darkMode && styles.textDark]}>
                             Gênero
                         </Text>
-                        <TextInput
-                            style={[styles.input, darkMode && styles.inputDark]}
-                            value={genero}
-                            onChangeText={setGenero}
-                            placeholder="Seu gênero"
-                            placeholderTextColor="#888888"
-                        />
+                        <View style={styles.genderOptions}>
+                            {GENERO_OPTIONS.map((option) => {
+                                const isSelected = genero === option;
+
+                                return (
+                                    <Pressable
+                                        key={option}
+                                        style={[
+                                            styles.genderOption,
+                                            isSelected && styles.genderOptionSelected,
+                                        ]}
+                                        onPress={() => setGenero(option)}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.genderOptionText,
+                                                isSelected && styles.genderOptionTextSelected,
+                                            ]}
+                                        >
+                                            {option}
+                                        </Text>
+                                    </Pressable>
+                                );
+                            })}
+                        </View>
 
                         <View style={styles.formActions}>
                             <Pressable
@@ -427,6 +460,32 @@ const styles = StyleSheet.create({
         backgroundColor: '#121212',
         color: 'white',
         borderColor: '#333333',
+    },
+    genderOptions: {
+        flexDirection: 'row',
+        gap: 10,
+        marginBottom: 16,
+    },
+    genderOption: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#cbd5e1',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: 'white',
+    },
+    genderOptionSelected: {
+        backgroundColor: Colors.brand.primaryBlue,
+        borderColor: Colors.brand.primaryBlue,
+    },
+    genderOptionText: {
+        color: '#334155',
+        fontFamily: 'Inter-Bold',
+        fontSize: 13,
+    },
+    genderOptionTextSelected: {
+        color: 'white',
     },
     formActions: {
         flexDirection: 'row',

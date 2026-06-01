@@ -3,12 +3,12 @@ export type UserProfile = {
     email: string;
     telefone?: string | null;
     genero?: string | null;
-    avatarUrl?: string | null;
+    avatarPath?: string | null;
 };
 
 export type UpdateProfileInput = {
     nome: string;
     telefone?: string | null;
     genero?: string | null;
-    avatarUrl?: string | null;
+    avatarPath?: string | null;
 };

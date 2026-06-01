@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { UserProfile } from '../models/profile.model';
 import { ProfileService } from '../services/ProfileService';
 
+const GENEROS_PERMITIDOS = ['Masculino', 'Feminino', 'Outro'];
+
 export function useProfileViewModel() {
     const [profileImage, setProfileImage] = useState<string | null>(null);
 
@@ -21,16 +23,15 @@ export function useProfileViewModel() {
 
     function preencherFormulario(usuarioAtual: Partial<UserProfile>) {
         setNome(usuarioAtual.nome || '');
-        setTelefone(usuarioAtual.telefone || '');
+        setTelefone((usuarioAtual.telefone || '').replace(/\D/g, '').slice(0, 11));
         setGenero(usuarioAtual.genero || '');
     }
 
-    async function carregarPerfil() {
-        await carregarUsuario();
-        await carregarImagem();
+    function atualizarTelefone(valor: string) {
+        setTelefone(valor.replace(/\D/g, '').slice(0, 11));
     }
 
-    async function carregarUsuario() {
+    async function carregarPerfil() {
         try {
             const usuarioAtual =
                 await ProfileService.carregarUsuarioAtual();
@@ -42,36 +43,38 @@ export function useProfileViewModel() {
             setUsuario(usuarioAtual);
             preencherFormulario(usuarioAtual);
 
-        } catch (error) {
-            console.log('Erro ao carregar usuário:', error);
-        }
-    }
-
-    async function carregarImagem() {
-        try {
-            setProfileImage(null);
-
             const imagemSalva =
                 await ProfileService.carregarImagemPerfil();
 
-            if (imagemSalva) {
-                setProfileImage(imagemSalva);
-            }
+            setProfileImage(imagemSalva);
 
         } catch (error) {
-            console.log('Erro ao carregar imagem de perfil:', error);
+            console.log('Erro ao carregar perfil:', error);
             setProfileImage(null);
         }
     }
 
-    async function salvarImagemPerfil(imagemUri: string) {
+    async function salvarImagemPerfil(
+        imagemUri: string,
+        mimeType?: string | null
+    ) {
         try {
             setProfileImage(imagemUri);
+            setMessage(null);
+            setErrorMessage(null);
         
-            await ProfileService.salvarImagemPerfil(imagemUri);
+            const usuarioAtualizado =
+                await ProfileService.salvarImagemPerfil(imagemUri, mimeType);
+
+            if (usuarioAtualizado) {
+                setUsuario(usuarioAtualizado);
+                preencherFormulario(usuarioAtualizado);
+                setMessage('Foto de perfil atualizada com sucesso.');
+            }
         
-        } catch (error) {
+        } catch (error: any) {
             console.log('Erro ao salvar imagem de perfil:', error);
+            setErrorMessage(error.message || 'Não foi possível salvar a foto de perfil.');
         }
     }
 
@@ -97,6 +100,16 @@ export function useProfileViewModel() {
             return false;
         }
 
+        if (telefone && telefone.length !== 11) {
+            setErrorMessage('Informe o telefone com DDD e 9 números.');
+            return false;
+        }
+
+        if (genero && !GENEROS_PERMITIDOS.includes(genero)) {
+            setErrorMessage('Selecione um gênero válido.');
+            return false;
+        }
+
         try {
             setIsSaving(true);
             setMessage(null);
@@ -106,7 +119,7 @@ export function useProfileViewModel() {
                 nome: nomeFormatado,
                 telefone: telefone.trim() || null,
                 genero: genero.trim() || null,
-                avatarUrl: usuario.avatarUrl || null,
+                avatarPath: usuario.avatarPath || null,
             });
 
             setUsuario(usuarioAtualizado);
@@ -148,7 +161,7 @@ export function useProfileViewModel() {
         message,
         errorMessage,
         setNome,
-        setTelefone,
+        setTelefone: atualizarTelefone,
         setGenero,
         iniciarEdicao,
         cancelarEdicao,
