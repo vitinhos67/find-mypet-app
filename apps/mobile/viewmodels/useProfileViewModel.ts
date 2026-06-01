@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Image } from 'react-native';
 
 import { UserProfile } from '../models/profile.model';
 import { ProfileService } from '../services/ProfileService';
@@ -47,6 +48,7 @@ export function useProfileViewModel() {
 
             setUsuario(usuarioAtual);
             preencherFormulario(usuarioAtual);
+            setProfileImage(usuarioAtual.avatarUrl || null);
 
         } catch (error) {
             console.log('Erro ao carregar usuário:', error);
@@ -82,7 +84,16 @@ export function useProfileViewModel() {
             if (usuarioAtualizado) {
                 setUsuario(usuarioAtualizado);
                 preencherFormulario(usuarioAtualizado);
-                setProfileImage(usuarioAtualizado.avatarUrl || null);
+
+                if (usuarioAtualizado.avatarUrl) {
+                    const imagemRemotaCarregou =
+                        await Image.prefetch(usuarioAtualizado.avatarUrl);
+
+                    if (imagemRemotaCarregou) {
+                        setProfileImage(usuarioAtualizado.avatarUrl);
+                    }
+                }
+
                 setMessage('Foto de perfil atualizada com sucesso.');
             }
         
