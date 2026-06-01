@@ -11,13 +11,11 @@ export const updateProfileBodySchema = z
     phone: z
       .string()
       .trim()
-      .max(30, "O telefone deve ter no máximo 30 caracteres.")
+      .regex(/^\d{11}$/, "Informe o telefone com DDD e 9 números.")
       .nullable()
       .optional(),
     gender: z
-      .string()
-      .trim()
-      .max(30, "O gênero deve ter no máximo 30 caracteres.")
+      .enum(["Masculino", "Feminino", "Outro"])
       .nullable()
       .optional(),
     avatar_url: z
