@@ -4,6 +4,8 @@ import { UpdateProfileInput, UserProfile } from '../models/profile.model';
 import { supabase } from '../src/shared/lib/supabase';
 import { ApiService } from './ApiService';
 
+const AVATARS_BUCKET = 'avatars';
+
 type ProfileResponse = {
     id: string;
     full_name: string | null;
@@ -151,31 +153,95 @@ export class ProfileService {
             return null;
         }
 
-        const imagemSalva = await AsyncStorage.getItem(
-            `@profile_image_${user.id}`
+        const usuarioSalvo = await AsyncStorage.getItem(
+            `@usuario_${user.id}`
         );
 
-        return imagemSalva;
+        if (!usuarioSalvo) {
+            return null;
+        }
+
+        const usuario = JSON.parse(usuarioSalvo) as UserProfile;
+
+        return usuario.avatarUrl || null;
     }
 
-    static async salvarImagemPerfil(imagemUri: string): Promise<void> {
+    static async salvarImagemPerfil(imagemUri: string): Promise<UserProfile | null> {
         const { data, error } = await supabase.auth.getUser();
     
         if (error) {
-            console.log('Erro ao buscar usuário para salvar imagem:', error.message);
-            return;
+            throw new Error(error.message);
         }
     
         const user = data.user;
     
         if (!user) {
-            return;
+            throw new Error('Usuário não autenticado.');
+        }
+
+        const response = await fetch(imagemUri);
+
+        if (!response.ok) {
+            throw new Error('Não foi possível carregar a imagem selecionada.');
+        }
+
+        const blob = await response.blob();
+        const { extension, contentType } = this.getImageMetadata(
+            imagemUri,
+            blob.type
+        );
+        const filePath = `${user.id}/avatar-${Date.now()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from(AVATARS_BUCKET)
+            .upload(filePath, blob, {
+                contentType,
+                upsert: false,
+            });
+
+        if (uploadError) {
+            throw new Error(uploadError.message);
+        }
+
+        const { data: publicUrlData } = supabase.storage
+            .from(AVATARS_BUCKET)
+            .getPublicUrl(filePath);
+
+        const usuarioAtual = await this.carregarUsuarioAtual();
+
+        if (!usuarioAtual) {
+            throw new Error('Não foi possível carregar o perfil atual.');
         }
     
-        await AsyncStorage.setItem(
-            `@profile_image_${user.id}`,
-            imagemUri
-        );
+        return this.atualizarPerfil({
+            nome: usuarioAtual.nome,
+            telefone: usuarioAtual.telefone,
+            genero: usuarioAtual.genero,
+            avatarUrl: publicUrlData.publicUrl,
+        });
+    }
+
+    private static getImageMetadata(uri: string, mimeType?: string) {
+        const normalizedMimeType = mimeType || '';
+
+        if (normalizedMimeType.includes('png') || uri.endsWith('.png')) {
+            return {
+                extension: 'png',
+                contentType: 'image/png',
+            };
+        }
+
+        if (normalizedMimeType.includes('webp') || uri.endsWith('.webp')) {
+            return {
+                extension: 'webp',
+                contentType: 'image/webp',
+            };
+        }
+
+        return {
+            extension: 'jpg',
+            contentType: 'image/jpeg',
+        };
     }
 
     static async realizarLogout(): Promise<void> {

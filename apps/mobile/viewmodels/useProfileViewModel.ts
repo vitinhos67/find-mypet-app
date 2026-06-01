@@ -73,11 +73,22 @@ export function useProfileViewModel() {
     async function salvarImagemPerfil(imagemUri: string) {
         try {
             setProfileImage(imagemUri);
+            setMessage(null);
+            setErrorMessage(null);
         
-            await ProfileService.salvarImagemPerfil(imagemUri);
+            const usuarioAtualizado =
+                await ProfileService.salvarImagemPerfil(imagemUri);
+
+            if (usuarioAtualizado) {
+                setUsuario(usuarioAtualizado);
+                preencherFormulario(usuarioAtualizado);
+                setProfileImage(usuarioAtualizado.avatarUrl || null);
+                setMessage('Foto de perfil atualizada com sucesso.');
+            }
         
-        } catch (error) {
+        } catch (error: any) {
             console.log('Erro ao salvar imagem de perfil:', error);
+            setErrorMessage(error.message || 'Não foi possível salvar a foto de perfil.');
         }
     }
 
