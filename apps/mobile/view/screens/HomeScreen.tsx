@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { PetHomeType, formatUpdatedAt, useHomeViewModel } from '../../viewmodels/useHomeViewModel';
@@ -95,7 +95,8 @@ export default function HomeScreen() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
     const [panelOpen, setPanelOpen] = useState(true);
-    const { pets, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
+    const isFocused = useIsFocused();
+    const { pets, safeZones, unreadCount, isLoading, carregarPets, selectedPetId, selectPet, mapRegion, mapRef } =
         useHomeViewModel();
 
     useFocusEffect(
@@ -113,30 +114,45 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.root}>
-            {/* MAP */}
-            <MapView
-                ref={mapRef}
-                style={StyleSheet.absoluteFillObject}
-                provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-                initialRegion={mapRegion}
-                showsUserLocation
-                showsMyLocationButton={false}
-                showsCompass={false}
-                customMapStyle={darkMode ? DARK_MAP_STYLE : []}
-            >
-                {pets
-                    .filter((p) => p.latitude != null && p.longitude != null)
-                    .map((pet) => (
-                        <Marker
-                            key={pet.id}
-                            coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
-                            onPress={() => handlePetPress(pet)}
-                            tracksViewChanges={selectedPetId === pet.id}
-                        >
-                            <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
-                        </Marker>
-                    ))}
-            </MapView>
+            {/* MAP — desmonta quando a aba Home não está em foco para evitar múltiplos MapViews simultâneos */}
+            {isFocused && (
+                <MapView
+                    ref={mapRef}
+                    style={StyleSheet.absoluteFillObject}
+                    provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+                    initialRegion={mapRegion}
+                    showsUserLocation
+                    showsMyLocationButton={false}
+                    showsCompass={false}
+                    customMapStyle={darkMode ? DARK_MAP_STYLE : []}
+                >
+                    {safeZones
+                        .filter(z => z.is_active)
+                        .map(zone => (
+                            <Circle
+                                key={zone.id}
+                                center={{ latitude: zone.latitude, longitude: zone.longitude }}
+                                radius={zone.radius_meters}
+                                strokeColor={Colors.brand.primaryBlue + '90'}
+                                fillColor={Colors.brand.primaryBlue + '18'}
+                                strokeWidth={1.5}
+                            />
+                        ))}
+
+                    {pets
+                        .filter((p) => p.latitude != null && p.longitude != null)
+                        .map((pet) => (
+                            <Marker
+                                key={pet.id}
+                                coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
+                                onPress={() => handlePetPress(pet)}
+                                tracksViewChanges={selectedPetId === pet.id}
+                            >
+                                <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
+                            </Marker>
+                        ))}
+                </MapView>
+            )}
 
             <View style={[styles.headerSafe, { top: insets.top }]} pointerEvents="box-none">
                 <View style={[styles.header, darkMode && styles.headerDark]}>
@@ -160,6 +176,24 @@ export default function HomeScreen() {
                                 {pets.length} {pets.length === 1 ? 'pet' : 'pets'}
                             </Text>
                         </View>
+
+                        {/* Badge de alertas */}
+                        {unreadCount > 0 && (
+                            <View style={styles.alertBtnWrap}>
+                                <TouchableOpacity
+                                    style={[styles.refreshBtn, darkMode && styles.refreshBtnDark]}
+                                    onPress={carregarPets}
+                                >
+                                    <Ionicons name="warning-outline" size={20} color="#EF4444" />
+                                </TouchableOpacity>
+                                <View style={styles.alertDot}>
+                                    <Text style={styles.alertDotText}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </Text>
+                                </View>
+                            </View>
+                        )}
+
                         <TouchableOpacity
                             onPress={carregarPets}
                             style={[styles.refreshBtn, darkMode && styles.refreshBtnDark]}
@@ -472,6 +506,28 @@ const styles = StyleSheet.create({
     },
     refreshBtnDark: {
         backgroundColor: Colors.dark.background,
+    },
+    alertBtnWrap: {
+        position: 'relative',
+    },
+    alertDot: {
+        position: 'absolute',
+        top: -2,
+        right: -2,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: '#EF4444',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 3,
+        borderWidth: 1.5,
+        borderColor: 'white',
+    },
+    alertDotText: {
+        fontSize: 9,
+        fontFamily: 'Inter-Bold',
+        color: '#fff',
     },
 
     bottomSafe: {
