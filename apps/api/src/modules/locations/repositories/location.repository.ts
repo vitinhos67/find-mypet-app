@@ -3,14 +3,22 @@ import { ErrorCodes } from "../../../shared/exceptions/error-codes";
 import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
 import type { CreateLocationInput, DeviceLocationRecord } from "../models/location.model";
 
-const LOCATION_FIELDS = "id, device_id, latitude, longitude, precision, recorded_at";
+const LOCATION_FIELDS = "id, device_id, pet_id, latitude, longitude, precision, recorded_at";
 
 export class LocationRepository {
   async save(input: CreateLocationInput): Promise<DeviceLocationRecord> {
+
+    const { data: device } = await supabaseAdmin
+      .from("devices")
+      .select("pet_id")
+      .eq("id", input.device_id)
+      .maybeSingle();
+
     const { data, error } = await supabaseAdmin
       .from("device_locations")
       .insert({
         device_id: input.device_id,
+        pet_id: device?.pet_id ?? null,
         latitude: input.latitude,
         longitude: input.longitude,
         precision: input.precision ?? null,

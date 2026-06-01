@@ -1,6 +1,7 @@
 export interface DeviceLocationRecord {
   id: string;
   device_id: string;
+  pet_id: string | null;
   latitude: number;
   longitude: number;
   precision: number | null;
