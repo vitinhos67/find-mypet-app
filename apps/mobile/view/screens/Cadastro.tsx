@@ -1,338 +1,412 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
+    ActivityIndicator,
     Image,
     KeyboardAvoidingView,
     Platform,
     Pressable,
     ScrollView,
     StyleSheet,
-    Text, TextInput, View
+    Text,
+    TextInput,
+    View
 } from 'react-native';
-import { SafeAreaView, } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { AuthStackParams } from '../../navigation/types';
 import { useCadastroViewModel } from '../../viewmodels/useCadastroViewModel';
-import { Colors } from "../styles/color";
+import { Colors } from '../styles/color';
+
+const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];
 
 export default function Cadastro() {
-
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParams>>();
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [confirmarSenha, setConfirmarSenha] = useState('');
     const [telefone, setTelefone] = useState('');
-    const [genero, setGenero] = useState('Gênero');
-    const [showGeneros, setShowGeneros] = useState(false);
-    const opcoesGenero = ['Masculino', 'Feminino', 'Outro'];
-    const { realizarCadastro, isLoading } = useCadastroViewModel();
+    const [genero, setGenero] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
-    function handleEntrar() {
-        realizarCadastro(nome, email, senha, confirmarSenha, telefone, genero);
+    const { realizarCadastro, isLoading } = useCadastroViewModel();
+
+    function handleCadastrar() {
+        realizarCadastro(nome, email, senha, confirmarSenha, telefone, genero || 'Gênero');
     }
-    return(
+
+    return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
-                style={styles.keyboardContainer}
+                style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <ScrollView
+                    contentContainerStyle={styles.scroll}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
+                    {/* Header */}
                     <View style={styles.header}>
-                        <Text style={styles.title}>Find my PET</Text>
-                        <Image 
-                            source={require("../../assets/images/logo-pet.png")}
-                            style={styles.logo} 
-                        />
+                        <Pressable onPress={() => navigation.pop()} style={styles.backBtn} hitSlop={8}>
+                            <Ionicons name="chevron-back" size={22} color={Colors.light.textPrimary} />
+                        </Pressable>
+                        <View style={styles.brandingInline}>
+                            <Image
+                                source={require('../../assets/images/logo-pet.png')}
+                                style={styles.logoSmall}
+                            />
+                            <Text style={styles.appName}>Find my PET</Text>
+                        </View>
+                        <View style={styles.backBtn} />
                     </View>
 
-                    <View style={styles.formContainer}>
-                        <Text style={styles.welcomeTitle}>Cadastro</Text>
-                        <Text style={styles.welcomeSubtitle}>
-                            Preencha as informações corretamente
-                        </Text>
-                        
-                            <View style={styles.inputsSection}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Nome completo"
-                                    placeholderTextColor="#888888"
-                                    value={nome}
-                                    onChangeText={setNome}
-                                />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="E-mail"
-                                    placeholderTextColor="#888888"
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    value={email}
-                                    onChangeText={setEmail}
-                                />
-                                <View style={styles.passwordContainer}>
-                                    <TextInput
-                                        style={styles.passwordInput}
-                                        placeholder="Senha"
-                                        placeholderTextColor="#888888"
-                                        secureTextEntry={!mostrarSenha}
-                                        value={senha}
-                                        onChangeText={setSenha}
-                                    />
-                                    <Pressable
-                                        onPress={() => setMostrarSenha(!mostrarSenha)}
-                                        style={styles.eyeIcon}
-                                    >
-                                        <Ionicons
-                                            name={mostrarSenha ? 'eye-off' : 'eye'}
-                                            size={24}
-                                            color="#888888"
-                                        />
-                                    </Pressable>
-                                </View>
-                                <View style={styles.passwordContainer}>
-                                    <TextInput
-                                        style={styles.passwordInput}
-                                        placeholder="Confirmar Senha"
-                                        placeholderTextColor="#888888"
-                                        secureTextEntry={!mostrarConfirmarSenha}
-                                        value={confirmarSenha}
-                                        onChangeText={setConfirmarSenha}
-                                    />
-                                    <Pressable
-                                    onPress={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-                                        style={styles.eyeIcon}
-                                    >
-                                        <Ionicons
-                                            name={mostrarConfirmarSenha ? 'eye-off' : 'eye'}
-                                            size={24}
-                                            color="#888888"
-                                        />
-                                    </Pressable>
-                                </View>
-                                
-                            <View style={styles.inputMiniSection}>
-                                <View style={styles.generoContainer}>
-                                    <Pressable
-                                        style={styles.inputMini}
-                                        onPress={() => setShowGeneros(!showGeneros)}
-                                    >
-                                        <Text style={{ color: genero === 'Gênero' ? '#888888' : 'black', fontSize: 16 }}>
-                                            {genero} ▼
-                                        </Text>
-                                    </Pressable>
-                                    {showGeneros && (
-                                        <View style={styles.dropdownOverlay}>
-                                            {opcoesGenero.map((opcao) => (
-                                                <Pressable
-                                                    key={opcao}
-                                                    style={styles.dropdownItem}
-                                                    onPress={() => {
-                                                        setGenero(opcao);
-                                                        setShowGeneros(false);
-                                                    }}
-                                                >
-                                                    <Text style={styles.dropdownText}>{opcao}</Text>
-                                                </Pressable>
-                                            ))}
-                                        </View>
-                                    )}
-                                </View>
-                                <TextInput
-                                    style={styles.inputMiniPhone}
-                                    placeholder="Telefone"
-                                    placeholderTextColor="#888888"
-                                    keyboardType="phone-pad"
-                                    value={telefone}
-                                    onChangeText={setTelefone}
-                                />
-                            </View>
-                            </View>
+                    {/* Card de cadastro */}
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Criar conta</Text>
+                        <Text style={styles.cardSub}>Preencha as informações corretamente</Text>
 
-                            <Pressable
-                                onPress={handleEntrar}
-                                style={styles.mainButton}
-                            >
-                                <Text style={styles.mainButtonText}>
-                                    {isLoading ? 'Cadastrando...' : 'Cadastrar-se'}
-                                </Text>
-                            </Pressable>
-                            <View style={styles.footer}>
-                                <Text style={styles.footerText}>Já tem uma conta? </Text>
-                                <Pressable onPress={() => navigation.pop()}>
-                                <Text style={styles.footerLink}>Login</Text>
+                        {/* Nome */}
+                        <InputField
+                            label="Nome completo"
+                            icon="person-outline"
+                            placeholder="Seu nome"
+                            value={nome}
+                            onChangeText={setNome}
+                        />
+
+                        {/* Email */}
+                        <InputField
+                            label="E-mail"
+                            icon="mail-outline"
+                            placeholder="seu@email.com"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
+
+                        {/* Telefone */}
+                        <InputField
+                            label="Telefone"
+                            icon="call-outline"
+                            placeholder="DDD + 9 números"
+                            value={telefone}
+                            onChangeText={setTelefone}
+                            keyboardType="phone-pad"
+                            maxLength={11}
+                        />
+
+                        {/* Senha */}
+                        <PasswordField
+                            label="Senha"
+                            placeholder="Mínimo 6 caracteres"
+                            value={senha}
+                            onChangeText={setSenha}
+                            mostrar={mostrarSenha}
+                            onToggle={() => setMostrarSenha(v => !v)}
+                        />
+
+                        {/* Confirmar senha */}
+                        <PasswordField
+                            label="Confirmar senha"
+                            placeholder="Repita a senha"
+                            value={confirmarSenha}
+                            onChangeText={setConfirmarSenha}
+                            mostrar={mostrarConfirmarSenha}
+                            onToggle={() => setMostrarConfirmarSenha(v => !v)}
+                        />
+
+                        {/* Gênero */}
+                        <View style={styles.fieldWrap}>
+                            <Text style={styles.fieldLabel}>Gênero</Text>
+                            <View style={styles.genderRow}>
+                                {GENERO_OPTIONS.map((opt) => {
+                                    const sel = genero === opt;
+                                    return (
+                                        <Pressable
+                                            key={opt}
+                                            style={[
+                                                styles.genderChip,
+                                                sel && styles.genderChipActive
+                                            ]}
+                                            onPress={() => setGenero(opt)}
+                                        >
+                                            <Text style={[styles.genderChipText, sel && styles.genderChipTextActive]}>
+                                                {opt}
+                                            </Text>
+                                        </Pressable>
+                                    );
+                                })}
+                            </View>
+                        </View>
+
+                        {/* Botão cadastrar */}
+                        <Pressable
+                            style={({ pressed }) => [styles.btnPrimary, { opacity: pressed || isLoading ? 0.8 : 1 }]}
+                            onPress={handleCadastrar}
+                            disabled={isLoading}
+                        >
+                            {isLoading
+                                ? <ActivityIndicator color="#fff" />
+                                : <Text style={styles.btnPrimaryText}>Criar conta</Text>
+                            }
+                        </Pressable>
+
+                        {/* Rodapé */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>Já tem uma conta? </Text>
+                            <Pressable onPress={() => navigation.pop()} hitSlop={8}>
+                                <Text style={styles.footerLink}>Fazer login</Text>
                             </Pressable>
                         </View>
                     </View>
                 </ScrollView>
-            </KeyboardAvoidingView >
+            </KeyboardAvoidingView>
         </SafeAreaView>
+    );
+}
 
+function InputField({
+    label, icon, placeholder, value, onChangeText,
+    keyboardType, autoCapitalize, maxLength
+}: {
+    label: string;
+    icon: React.ComponentProps<typeof Ionicons>['name'];
+    placeholder: string;
+    value: string;
+    onChangeText: (t: string) => void;
+    keyboardType?: any;
+    autoCapitalize?: any;
+    maxLength?: number;
+}) {
+    return (
+        <View style={styles.fieldWrap}>
+            <Text style={styles.fieldLabel}>{label}</Text>
+            <View style={styles.inputRow}>
+                <Ionicons name={icon} size={18} color={Colors.light.textSecondary} style={styles.inputIcon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder={placeholder}
+                    placeholderTextColor={Colors.light.textSecondary}
+                    value={value}
+                    onChangeText={onChangeText}
+                    keyboardType={keyboardType}
+                    autoCapitalize={autoCapitalize}
+                    autoCorrect={false}
+                    maxLength={maxLength}
+                />
+            </View>
+        </View>
+    );
+}
+
+function PasswordField({
+    label, placeholder, value, onChangeText, mostrar, onToggle
+}: {
+    label: string;
+    placeholder: string;
+    value: string;
+    onChangeText: (t: string) => void;
+    mostrar: boolean;
+    onToggle: () => void;
+}) {
+    return (
+        <View style={styles.fieldWrap}>
+            <Text style={styles.fieldLabel}>{label}</Text>
+            <View style={styles.inputRow}>
+                <Ionicons name="lock-closed-outline" size={18} color={Colors.light.textSecondary} style={styles.inputIcon} />
+                <TextInput
+                    style={[styles.input, { flex: 1 }]}
+                    placeholder={placeholder}
+                    placeholderTextColor={Colors.light.textSecondary}
+                    secureTextEntry={!mostrar}
+                    value={value}
+                    onChangeText={onChangeText}
+                />
+                <Pressable onPress={onToggle} style={styles.eyeBtn} hitSlop={8}>
+                    <Ionicons
+                        name={mostrar ? 'eye-off-outline' : 'eye-outline'}
+                        size={20}
+                        color={Colors.light.textSecondary}
+                    />
+                </Pressable>
+            </View>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-   container:{
+    container: {
         flex: 1,
-        margin: 20,
-        justifyContent: 'flex-start',
-    }, 
-    header:{
-        justifyContent: 'flex-start',
-        flexDirection: 'row',
-        flex: 1,
-        alignItems: 'center',
-        gap: 10,
+        backgroundColor: Colors.light.background,
     },
-    keyboardContainer: {
-        flex: 1,
+
+    scroll: {
+        flexGrow: 1,
+        paddingHorizontal: 24,
+        paddingTop: 12,
+        paddingBottom: 40,
+        gap: 20,
+    },
+
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
     },
-    title:{
-        paddingLeft: 10,
-        color: Colors.brand.primaryBlue,
-        fontSize: 28,
-        fontFamily: 'Inter-Black'
+
+    backBtn: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    logo:{
-        height: 100,  
-        width: 100,                 
+
+    brandingInline: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+
+    logoSmall: {
+        width: 32,
+        height: 32,
         resizeMode: 'contain',
     },
-    formContainer:{
-        width: '100%',
-        backgroundColor: Colors.brand.primaryOrange,
-        padding: 20,
-        alignSelf: 'center',
-        borderRadius: 10
-    },
-    input: {
-        borderRadius: 8,
-        padding: 10,
-        fontSize: 16,
-        backgroundColor: Colors.brand.secondaryOrange,
-    },
-    inputMini: {
-        borderRadius: 8,
-        padding: 15,
-        backgroundColor: Colors.brand.secondaryOrange,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: 54,
-    },   
-    welcomeTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: 'black', 
-    },
-    
-    welcomeSubtitle: {
-        fontSize: 14,
+
+    appName: {
+        fontSize: 18,
+        fontFamily: 'Inter-Black',
         color: Colors.brand.primaryBlue,
-        opacity: 0.9,
-        marginBottom: 24,
+        letterSpacing: -0.3,
     },
-    inputsSection: {
-        gap: 16, 
-        marginBottom: 24,
-    },
-    inputMiniSection: {
-        flexDirection: 'row',
-        width: '100%',
+
+    card: {
+        backgroundColor: Colors.light.surface,
+        borderRadius: 24,
+        padding: 24,
         gap: 16,
-        marginBottom: 24,
-        zIndex: 10,
-        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 2,
     },
-    inputMiniPhone: {
+
+    cardTitle: {
+        fontSize: 22,
+        fontFamily: 'Inter-Bold',
+        color: Colors.light.textPrimary,
+        letterSpacing: -0.4,
+    },
+
+    cardSub: {
+        fontSize: 14,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
+        marginTop: -8,
+    },
+
+    fieldWrap: { gap: 6 },
+
+    fieldLabel: {
+        fontSize: 11,
+        fontFamily: 'Inter-Bold',
+        color: Colors.light.textSecondary,
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+    },
+
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.light.border,
+        borderRadius: 14,
+        backgroundColor: Colors.light.background,
+        paddingHorizontal: 14,
+    },
+
+    inputIcon: {
+        marginRight: 10,
+    },
+
+    input: {
         flex: 1,
-        borderRadius: 8,
-        padding: 15,
-        fontSize: 16,
-        backgroundColor: Colors.brand.secondaryOrange,
-        height: 54,
+        fontSize: 15,
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textPrimary,
+        paddingVertical: 14,
     },
-    generoContainer: {
-        flex: 1,
-        position: 'relative',
-    },
-    dropdownOverlay: {
-        position: 'absolute',
-        top: 60,
-        left: 0,
-        right: 0,
-        backgroundColor: Colors.brand.secondaryOrange,
-        borderRadius: 8,
+
+    eyeBtn: {
         padding: 4,
-        zIndex: 999,
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
+        marginLeft: 8,
     },
-    dropdownItem: {
+
+    genderRow: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+
+    genderChip: {
+        flex: 1,
         paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderRadius: 6,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: Colors.light.border,
+        backgroundColor: Colors.light.background,
+        alignItems: 'center',
     },
-    dropdownText: {
-        fontSize: 16,
-        color: 'black',
+
+    genderChipActive: {
+        backgroundColor: Colors.brand.primaryBlue,
+        borderColor: Colors.brand.primaryBlue,
     },
-    mainButton: {
+
+    genderChipText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
+        color: Colors.light.textSecondary,
+    },
+
+    genderChipTextActive: {
+        color: '#fff',
+    },
+
+    btnPrimary: {
         backgroundColor: Colors.brand.primaryBlue,
         paddingVertical: 16,
-        borderRadius: 12,
+        borderRadius: 16,
         alignItems: 'center',
-        marginBottom: 24,
+        marginTop: 4,
     },
-    mainButtonText: {
-        color: '#FFFFFF',
+
+    btnPrimaryText: {
+        color: '#fff',
         fontSize: 16,
-        fontWeight: 'bold',
+        fontFamily: 'Inter-Bold',
     },
-    checkboxContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8, 
-    },
-    checkboxText: {
-        fontSize: 14,
-        color: 'black',
-    },
+
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
     },
+
     footerText: {
         fontSize: 14,
-        color: 'black',
+        fontFamily: 'Inter-Regular',
+        color: Colors.light.textSecondary,
     },
+
     footerLink: {
         fontSize: 14,
-        fontWeight: 'bold',
+        fontFamily: 'Inter-Bold',
         color: Colors.brand.primaryBlue,
-        textDecorationLine: 'underline',
-    },
-    passwordContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Colors.brand.secondaryOrange,
-        borderRadius: 8,
-    },
-    passwordInput: {
-        flex: 1,
-        padding: 15,
-        fontSize: 16,
-    },
-    eyeIcon: {
-        padding: 15,
     },
 });
