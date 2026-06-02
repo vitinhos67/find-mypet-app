@@ -147,6 +147,7 @@ export default function HomeScreen() {
                                 coordinate={{ latitude: pet.latitude!, longitude: pet.longitude! }}
                                 onPress={() => handlePetPress(pet)}
                                 tracksViewChanges={selectedPetId === pet.id}
+                                anchor={{ x: 0.5, y: 1 }}
                             >
                                 <PetMarker pet={pet} isSelected={selectedPetId === pet.id} />
                             </Marker>
@@ -276,9 +277,17 @@ export default function HomeScreen() {
                                         activeOpacity={0.8}
                                     >
                                         <View
-                                            style={[styles.avatar, { backgroundColor: avatarColor }]}
+                                            style={[styles.avatar, { backgroundColor: avatarColor, overflow: 'hidden' }]}
                                         >
-                                            <Ionicons name="paw" size={24} color="white" />
+                                            {item.foto ? (
+                                                <Image 
+                                                    source={{ uri: item.foto }} 
+                                                    style={{ width: '100%', height: '100%' }} 
+                                                    resizeMode="cover" 
+                                                />
+                                            ) : (
+                                                <Ionicons name="paw" size={24} color="white" />
+                                            )}
                                         </View>
 
                                         <Text
@@ -462,17 +471,17 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.dark.surface,
     },
     headerSub: {
-        fontSize: 11,
+        fontSize: 8.5,
         fontFamily: 'Inter-Regular',
         color: Colors.light.textSecondary,
-        letterSpacing: 0.8,
+        letterSpacing: 2,
         textTransform: 'uppercase',
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 30,
         fontFamily: 'Inter-Black',
         color: Colors.brand.primaryBlue,
-        letterSpacing: -0.5,
+        marginTop: -8,
     },
     headerRight: {
         flexDirection: 'row',
@@ -538,7 +547,7 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     bottomPanel: {
-        backgroundColor: 'white',
+        backgroundColor: Colors.light.surface,
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
         paddingTop: 12,
@@ -559,7 +568,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 4,
         borderRadius: 2,
-        backgroundColor: Colors.light.border,
+        backgroundColor: "Colors.light.border",
         alignSelf: 'center',
         marginBottom: 10,
     },

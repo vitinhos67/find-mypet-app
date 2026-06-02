@@ -117,7 +117,7 @@ export default function PetListScreen() {
                     style={({ pressed }) => [styles.collarBtn, { borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
                     onPress={() => navigation.navigate('Collar' as any)}
                 >
-                    <Ionicons name="bluetooth-outline" size={15} color={theme.textSecondary} />
+                    <Ionicons name="hardware-chip-outline" size={15} color={theme.textSecondary} />
                     <Text style={[styles.collarText, { color: theme.textSecondary }]}>Coleiras</Text>
                 </Pressable>
             </View>
