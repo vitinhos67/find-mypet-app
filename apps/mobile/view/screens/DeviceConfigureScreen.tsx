@@ -1,7 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTheme } from '../../hooks/useTheme';
 import { ComportamentoSemWifi } from '../../models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
@@ -14,12 +17,15 @@ export default function DeviceConfigureScreen() {
     const { pets, carregarPets } = usePetViewModel();
     useEffect(() => {
         carregarPets();
-    }, []); 
+    }, []);
+
     const navigation = useNavigation();
     const route = useRoute<ConfigureRouteProp>();
     const { collarId } = route.params;
 
-    const { getColeiraById, atualizarColeira, vincularColeiraAoPet, excluirColeira, desvincularColeira } = useDeviceViewModel();
+    const { devices, getColeiraById, atualizarColeira, vincularColeiraAoPet, excluirColeira, desvincularColeira } = useDeviceViewModel();
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
 
     const coleiraAtual = getColeiraById(collarId);
     const [nome, setNome] = useState('');
@@ -39,7 +45,7 @@ export default function DeviceConfigureScreen() {
     }, [coleiraAtual]);
 
     if (!coleiraAtual) {
-        return <SafeAreaView><Text>Coleira não encontrada.</Text></SafeAreaView>;
+        return <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}><Text style={{ color: theme.textPrimary, padding: 20 }}>Coleira não encontrada.</Text></SafeAreaView>;
     }
 
     async function handleSalvarAlteracoes() {
@@ -63,107 +69,195 @@ export default function DeviceConfigureScreen() {
             ]
         );
     }
+
     function OptionChip({ label, value }: { label: string, value: ComportamentoSemWifi }) {
         const isSelected = comportamento === value;
         return (
             <Pressable
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[
+                    styles.chip,
+                    { backgroundColor: isSelected ? Colors.brand.primaryBlue : theme.background },
+                    !isSelected && { borderWidth: 1, borderColor: theme.border }
+                ]}
                 onPress={() => setComportamento(value)}
             >
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{label}</Text>
+                <Text style={[
+                    styles.chipText,
+                    { color: isSelected ? 'white' : theme.textSecondary, fontFamily: isSelected ? 'Inter-Bold' : 'Inter-Regular' }
+                ]}>
+                    {label}
+                </Text>
             </Pressable>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Pressable onPress={() => navigation.goBack()} style={styles.btnVoltar}>
-                    <Text style={styles.btnVoltarText}>← Voltar</Text>
-                </Pressable>
-                <Text style={styles.title}>Configurar Hardware</Text>
-            </View>
-            <KeyboardAvoidingView
-                style={styles.keyboardContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-                <ScrollView contentContainerStyle={styles.content}>
-                    <Text style={styles.sectionTitle}>Detalhes do Dispositivo</Text>
-                    <Text style={styles.serial}>S/N: {coleiraAtual.serialNumber}</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
-                    <Text style={styles.label}>Apelido</Text>
-                    <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+                <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+                    <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn} hitSlop={8}>
+                        <Ionicons name="chevron-back" size={22} color={theme.textPrimary} />
+                    </Pressable>
+                    <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Configurar Hardware</Text>
+                    <View style={styles.iconBtn} />
+                </View>
 
-                    <View style={styles.divider} />
-
-                    <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
-
-                    <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
-                    <TextInput
-                        style={styles.input}
-                        keyboardType="numeric"
-                        value={intervalo}
-                        onChangeText={setIntervalo}
-                    />
-
-                    <Text style={styles.label}>Comportamento ao sair da zona Wi-Fi:</Text>
-                    <View style={styles.chipContainer}>
-                        <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
-                        <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
-                        <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
-                        <OptionChip label="Apenas Manual" value="IGNORAR" />
+                <ScrollView
+                    contentContainerStyle={styles.content}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Número de Série / PIN" theme={theme}>
+                            <Text style={[styles.serial, { color: theme.textPrimary }]}>{coleiraAtual.serialNumber}</Text>
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Apelido do Dispositivo" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={nome}
+                                onChangeText={setNome}
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
                     </View>
 
-                    <View style={styles.divider} />
-
-                    <Text style={styles.sectionTitle}>Rede Wi-Fi (Modo AP)</Text>
-                    <Text style={styles.label}>Rede Wi-Fi (SSID)</Text>
-                    <TextInput style={styles.input} value={wifiSsid} onChangeText={setWifiSsid} />
-
-                    <Text style={styles.label}>Senha do Wi-Fi</Text>
-                    <TextInput style={styles.input} value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
-
-                    <Pressable style={styles.btnSalvar} onPress={handleSalvarAlteracoes}>
-                        <Text style={styles.btnSalvarText}>Sincronizar com a Coleira</Text>
-                    </Pressable>
-
-                    <View style={styles.divider} />
-
-                    <Text style={styles.sectionTitle}>Vínculo com Pet</Text>
-                    {pets && pets.length > 0 ? (
-                        <View style={styles.actionBox}>
-                            <Text style={styles.label}>Selecione o pet para usar esta coleira:</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Checar Rede Wi-Fi a cada (Minutos)" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                keyboardType="numeric"
+                                value={intervalo}
+                                onChangeText={setIntervalo}
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Comportamento ao sair da zona Wi-Fi" theme={theme}>
                             <View style={styles.chipContainer}>
-                                {pets.map(pet => {
-                                    const isVinculado = coleiraAtual.petId === pet.id;
-                                    return (
-                                        <Pressable
-                                            key={pet.id}
-                                            style={[styles.chip, isVinculado && styles.chipSelected]}
-                                            onPress={() => vincularColeiraAoPet(collarId, pet.id)}
-                                        >
-                                            <Text style={[styles.chipText, isVinculado && styles.chipTextSelected]}>
-                                                {pet.nome || 'Sem nome'}
-                                            </Text>
-                                        </Pressable>
-                                    );
-                                })}
+                                <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                                <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
+                                <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
+                                <OptionChip label="Apenas Manual" value="IGNORAR" />
                             </View>
-                            {coleiraAtual.petId && (
-                                <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
-                                    <Text style={styles.btnText}>Desvincular Pet Atual</Text>
-                                </Pressable>
-                            )}
-                        </View>
-                    ) : (
-                        <View style={styles.actionBox}>
-                            <Text style={styles.infoText}>Você ainda não possui nenhum Pet cadastrado no seu perfil.</Text>
-                            <Text style={styles.subInfoText}>Vá na aba "Perfil" para adicionar um animal antes de vinculá-lo à coleira.</Text>
-                        </View>
-                    )}
+                        </Field>
+                    </View>
 
-                    <View style={styles.divider} />
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Rede Wi-Fi (SSID)" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={wifiSsid}
+                                onChangeText={setWifiSsid}
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Senha do Wi-Fi" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={wifiSenha}
+                                onChangeText={setWifiSenha}
+                                secureTextEntry
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+
+                        <Pressable style={styles.btnPrimary} onPress={handleSalvarAlteracoes}>
+                            <Text style={styles.btnPrimaryText}>Sincronizar com a Coleira</Text>
+                        </Pressable>
+                        <View style={{ height: 16 }} />
+                    </View>
+
+                    <View style={[styles.card, { backgroundColor: theme.surface, paddingVertical: 10 }]}>
+                        <Field label="Vínculo com Pet" theme={theme}>
+                            {pets && pets.length > 0 ? (
+                                <View>
+                                    <Text style={[styles.subInfoText, { color: theme.textSecondary, marginBottom: 12 }]}>
+                                        Selecione o pet para usar esta coleira:
+                                    </Text>
+                                    <View style={styles.chipContainer}>
+                                        {pets.map(pet => {
+                                            const isVinculado = coleiraAtual.petId === pet.id;
+
+                                            const deviceDoPet = devices.find(d => d.petId === pet.id);
+                                            const isVinculadoOutra = deviceDoPet && deviceDoPet.id !== collarId;
+                                            let bgColor = theme.background;
+                                            let borderColor = theme.border;
+                                            let textColor = theme.textSecondary;
+                                            let fontFam = 'Inter-Regular';
+
+                                            if (isVinculado) {
+                                                bgColor = Colors.brand.primaryBlue;
+                                                borderColor = Colors.brand.primaryBlue;
+                                                textColor = 'white';
+                                                fontFam = 'Inter-Bold';
+                                            } else if (isVinculadoOutra) {
+                                                bgColor = Colors.brand.secondaryOrange;
+                                                borderColor = Colors.brand.primaryOrange;
+                                                textColor = "white";
+                                                fontFam = 'Inter-Medium';
+                                            }
+                                            const handlePetPress = () => {
+                                                if (isVinculado) return;
+
+                                                if (isVinculadoOutra) {
+                                                    Alert.alert(
+                                                        "Transferir Coleira",
+                                                        `O pet ${pet.nome} já está usando o dispositivo "${deviceDoPet.nome}". Deseja remover o vínculo antigo e transferi-lo para esta coleira?`,
+                                                        [
+                                                            { text: "Cancelar", style: "cancel" },
+                                                            { text: "Sim, transferir", onPress: () => vincularColeiraAoPet(collarId, pet.id) }
+                                                        ]
+                                                    );
+                                                } else {
+                                                    vincularColeiraAoPet(collarId, pet.id);
+                                                }
+                                            };
+
+                                            return (
+                                                <Pressable
+                                                    key={pet.id}
+                                                    style={[
+                                                        styles.chip,
+                                                        { backgroundColor: bgColor, borderColor: borderColor, borderWidth: 1 }
+                                                    ]}
+                                                    onPress={handlePetPress}
+                                                >
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+
+                                                        {isVinculado && (
+                                                            <Ionicons name="checkmark-circle" size={14} color={textColor} />
+                                                        )}
+                                                        {isVinculadoOutra && (
+                                                            <Ionicons name="hardware-chip-outline" size={14} color={textColor} />
+                                                        )}
+                                                        <Text style={[styles.chipText, { color: textColor, fontFamily: fontFam }]}>
+                                                            {pet.nome || 'Sem nome'}
+                                                        </Text>
+                                                    </View>
+                                                </Pressable>
+                                            );
+                                        })}
+                                    </View>
+                                    {coleiraAtual.petId && (
+                                        <Pressable style={styles.btnDesvincular} onPress={() => desvincularColeira(collarId)}>
+                                            <Text style={styles.btnDesvincularText}>Desvincular Pet Atual</Text>
+                                        </Pressable>
+                                    )}
+                                </View>
+                            ) : (
+                                <View>
+                                    <Text style={[styles.infoText, { color: theme.textPrimary }]}>Você ainda não possui Pets cadastrados.</Text>
+                                    <Text style={[styles.subInfoText, { color: theme.textSecondary }]}>Vá à aba "PET" para adicionar um animal antes de vinculá-lo.</Text>
+                                </View>
+                            )}
+                        </Field>
+                    </View>
+
                     <Pressable style={styles.btnExcluir} onPress={handleExcluir}>
+                        <Ionicons name="trash-outline" size={18} color="#DC2626" />
                         <Text style={styles.btnExcluirText}>Excluir Coleira do App</Text>
                     </Pressable>
 
@@ -173,157 +267,144 @@ export default function DeviceConfigureScreen() {
     );
 }
 
+function Field({ label, children, theme }: { label: string; children: React.ReactNode; theme: any }) {
+    return (
+        <View style={styles.fieldWrap}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
+            {children}
+        </View>
+    );
+}
+
 const styles = StyleSheet.create({
     container: { 
-        flex: 1, 
-        backgroundColor: Colors.light.background 
+        flex: 1 
     },
-    header: { 
-        padding: 20, 
-        backgroundColor: 'white', 
-        borderBottomWidth: 1, 
-        borderColor: '#e2e8f0', 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 15 
-    },
-    btnVoltar: { 
-        padding: 5 
-    },
-    btnVoltarText: { 
-        color: Colors.brand.primaryBlue, 
-        fontFamily: 'Inter-Bold',
-        fontSize: 16 
-    },
-    title: { 
-        fontSize: 20, 
-        fontFamily: 'Inter-Bold',
-        color: '#1e293b' 
-    },
-    content: { 
-        padding: 20, 
-        paddingBottom: 40
-    },
-    sectionTitle: { 
-        fontSize: 18, 
-        fontFamily: 'Inter-Bold',
-        color: Colors.brand.primaryOrange, 
-        marginBottom: 15 
-    },
-    keyboardContainer: {
-        flex: 1,
+    header: {
+        height: 56,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        borderBottomWidth: 1,
     },
-    scrollContent: {
-        flexGrow: 1,
-        padding: 20,
-        paddingBottom: 40,
-    },
-    serial: { 
-        fontSize: 14, 
-        color: '#64748b', 
-        marginBottom: 15, 
+    headerTitle: {
+        fontSize: 17,
         fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
     },
-    label: { 
-        fontSize: 14,
-        fontFamily: 'Inter-Bold',
-        color: '#334155', 
-        marginBottom: 8
-     },
-    input: { 
-        backgroundColor: Colors.light.surface, 
-        borderWidth: 1, 
-        borderColor: '#cbd5e1', 
-        fontFamily: 'Inter-Regular',
-        padding: 15, 
-        borderRadius: 8, 
-        fontSize: 16, 
-        marginBottom: 15 
+    iconBtn: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    content: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 48,
+        gap: 16,
+    },
+    card: {
+        borderRadius: 18,
+        paddingHorizontal: 18,
+        overflow: 'hidden',
+    },
+    fieldWrap: { 
+        paddingTop: 14
     },
     divider: { 
-        height: 1, 
-        backgroundColor: Colors.brand.secondaryOrange, 
-        marginVertical: 25 
+        height: 1,
+        marginVertical: 4
     },
-    btnSalvar: { 
-        backgroundColor: Colors.brand.primaryBlue, 
-        padding: 15, 
-        borderRadius: 8, 
-        alignItems: 'center' 
-    },
-    btnSalvarText: { 
-        color: 'white', 
+    label: {
+        fontSize: 11,
         fontFamily: 'Inter-Bold',
-        fontSize: 16 
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+        marginBottom: 8,
     },
-    actionBox: { 
-        backgroundColor: 'white', 
-        padding: 20, 
-        borderRadius: 12, 
-        borderWidth: 1, 
-        borderColor: '#e2e8f0' 
-    },
-    infoText: { 
-        fontSize: 16, 
-        color: '#334155', 
-        textAlign: 'center', 
-        fontFamily: 'Inter-Bold',
-    },
-    subInfoText: { 
-        fontSize: 14,
+    serial: {
+        fontSize: 15,
         fontFamily: 'Inter-Regular',
-        color: '#64748b', 
-        textAlign: 'center', 
-        marginTop: 10 
+        marginBottom: 4,
     },
-    btnDesvincular: { 
-        backgroundColor: '#ef4444', 
-        padding: 12, 
-        borderRadius: 8, 
-        alignItems: 'center', 
-        marginTop: 15 
+    input: {
+        fontSize: 16,
+        fontFamily: 'Inter-Regular',
+        paddingVertical: 0,
+        marginBottom: 10,
     },
-    btnExcluir: { 
-        backgroundColor: '#fee2e2', 
-        padding: 15, 
-        borderRadius: 8, 
-        alignItems: 'center', 
-        borderWidth: 1, 
-        borderColor: '#ef4444' 
-    },
-    btnExcluirText: { 
-        color: '#ef4444', 
-        fontFamily: 'Inter-Bold',
-        fontSize: 16 
-    },
-    btnText: { 
-        color: 'white', 
-        fontFamily: 'Inter-Bold',
-        fontSize: 14 
-    },
+
     chipContainer: {
-        flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 15
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 4,
+        marginBottom: 10,
     },
     chip: {
-        backgroundColor: Colors.light.background,
-        borderWidth: 1,
-        borderColor: '#cbd5e1',
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-        borderRadius: 10
-    },
-    chipSelected: {
-        backgroundColor: Colors.brand.primaryBlue,
-        borderColor: Colors.brand.primaryBlue
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 12,
     },
     chipText: {
-        fontFamily: 'Inter-Regular',
-        color: '#64748b',
-        fontSize: 14
+        fontSize: 12,
     },
-    chipTextSelected: {
+    btnPrimary: {
+        backgroundColor: Colors.brand.primaryBlue,
+        paddingVertical: 14,
+        borderRadius: 14,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    btnPrimaryText: {
+        color: 'white',
+        fontSize: 15,
         fontFamily: 'Inter-Bold',
-        color: 'white'
-    }
+    },
+    infoText: {
+        fontSize: 14,
+        textAlign: 'center',
+        fontFamily: 'Inter-Bold',
+        marginTop: 8,
+    },
+    subInfoText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Regular',
+        textAlign: 'center',
+        marginTop: 6
+    },
+    btnDesvincular: {
+        backgroundColor: '#FEF2F2',
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#FECACA',
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    btnDesvincularText: {
+        color: '#DC2626',
+        fontFamily: 'Inter-Bold',
+        fontSize: 13
+    },
+    btnExcluir: {
+        backgroundColor: '#FEF2F2',
+        paddingVertical: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        gap: 8,
+        borderWidth: 1,
+        borderColor: '#FECACA',
+        marginTop: 10,
+    },
+    btnExcluirText: {
+        color: '#DC2626',
+        fontFamily: 'Inter-Bold',
+        fontSize: 15
+    },
 });

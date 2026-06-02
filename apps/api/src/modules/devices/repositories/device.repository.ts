@@ -59,12 +59,32 @@ export class DeviceRepository {
     }
 
     async updateLink(id: string, petId: string | null, ownerId: string): Promise<void> {
+        // PASSO 1: Se estivermos vinculando um pet (petId não é null),
+        // removemos este pet de qualquer outra coleira que ele já possua.
+        if (petId !== null) {
+            const { error: unlinkError } = await supabaseAdmin
+                .from("devices")
+                .update({ pet_id: null })
+                .eq("pet_id", petId)
+                .eq("owner_id", ownerId);
+
+            if (unlinkError) {
+                console.error("Erro ao desvincular pet da coleira antiga:", unlinkError);
+                throw unlinkError;
+            }
+        }
+
+        // PASSO 2: Agora que o pet está livre, vinculamos ele na coleira correta.
+        // (Isso também funciona perfeitamente para quando o usuário apenas clica em "Desvincular", onde petId é null)
         const { error } = await supabaseAdmin
             .from("devices")
             .update({ pet_id: petId })
             .eq("id", id)
             .eq("owner_id", ownerId);
 
-        if (error) throw error;
+        if (error) {
+            console.error("Erro ao vincular pet na nova coleira:", error);
+            throw error;
+        }
     }
 }
