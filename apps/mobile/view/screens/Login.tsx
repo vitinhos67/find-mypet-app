@@ -162,12 +162,13 @@ const styles = StyleSheet.create({
     },
 
     logo: {
-        width: 80,
-        height: 80,
+        width: 130,
+        height: 100,
         resizeMode: 'contain',
     },
 
     appName: {
+        marginTop: -30,
         fontSize: 28,
         fontFamily: 'Inter-Black',
         color: Colors.brand.primaryBlue,

@@ -273,8 +273,8 @@ const styles = StyleSheet.create({
     },
 
     logoSmall: {
-        width: 32,
-        height: 32,
+        width: 52,
+        height: 52,
         resizeMode: 'contain',
     },
 

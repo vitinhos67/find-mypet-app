@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 4,
         borderRadius: 2,
-        backgroundColor: "Colors.light.border",
+        backgroundColor: Colors.light.border,
         alignSelf: 'center',
         marginBottom: 10,
     },

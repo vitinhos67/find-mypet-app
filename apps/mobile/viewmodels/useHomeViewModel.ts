@@ -28,8 +28,8 @@ type MapRegion = {
 };
 
 const DEFAULT_REGION: MapRegion = {
-    latitude: -23.5505,
-    longitude: -46.6333,
+    latitude: -21.109928279918968,
+    longitude: - 42.38187763776989,
     latitudeDelta: 0.08,
     longitudeDelta: 0.08,
 };
@@ -59,7 +59,7 @@ export function useHomeViewModel() {
         try {
             setIsLoading(true);
 
-            const [petsResponse, devicesResponse] = await Promise.all([
+            const [petsResponse, devicesResponse] = await Promise.all<any>([
                 PetService.getPets(),
                 DeviceService.getDevices(),
             ]);
