@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 
 import { alertRoutes } from '../../modules/alerts/routes/alert.routes';
 import { deviceRoutes } from '../../modules/devices/routes/device.routes';
+import { hardwareRoutes } from "../../modules/hardware/routes/hardware.routes";
 import { healthRoutes } from "../../modules/health/routes/health.routes";
 import { locationRoutes } from "../../modules/locations/routes/location.routes";
 import { meRoutes } from "../../modules/me/routes/me.routes";
@@ -21,6 +22,7 @@ export async function registerRoutes(app: FastifyInstance) {
       await api.register(alertRoutes, { prefix: "/alerts" });
       await api.register(meRoutes, { prefix: "/me" });
       await api.register(deviceRoutes, { prefix: '/devices' });
+      await api.register(hardwareRoutes, { prefix: "/hardware" });
     },
     { prefix: "/api" }
   );
