@@ -117,8 +117,8 @@ export default function PetListScreen() {
                     style={({ pressed }) => [styles.collarBtn, { borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
                     onPress={() => navigation.navigate('Collar' as any)}
                 >
-                    <Ionicons name="hardware-chip-outline" size={15} color={theme.textSecondary} />
-                    <Text style={[styles.collarText, { color: theme.textSecondary }]}>Coleiras</Text>
+                    <Ionicons name="hardware-chip-outline" size={15} color="white" />
+                    <Text style={[styles.collarText]}>Coleiras</Text>
                 </Pressable>
             </View>
 
@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
     collarBtn: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: Colors.brand.primaryBlue,
         gap: 6,
         paddingHorizontal: 14,
         paddingVertical: 8,
@@ -206,6 +207,7 @@ const styles = StyleSheet.create({
     },
 
     collarText: {
+        color: "white",
         fontSize: 13,
         fontFamily: 'Inter-Bold',
     },

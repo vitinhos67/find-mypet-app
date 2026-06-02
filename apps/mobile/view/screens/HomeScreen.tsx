@@ -384,13 +384,14 @@ const markerStyles = StyleSheet.create({
         alignItems: 'center',
     },
     callout: {
+        flex:1,
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 12,
         marginBottom: 4,
-        maxWidth: 130,
+        maxWidth: 230,
     },
     calloutText: {
         color: 'white',
