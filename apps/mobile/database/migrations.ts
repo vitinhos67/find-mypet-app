@@ -4,6 +4,8 @@ import { getDatabase } from './sqlite';
 
 const CURRENT_SCHEMA_VERSION = 1;
 
+let initializeDatabasePromise: Promise<void> | null = null;
+
 async function getCurrentVersion(db: SQLiteDatabase) {
     await db.execAsync(`
         CREATE TABLE IF NOT EXISTS schema_metadata (
@@ -86,7 +88,7 @@ async function migrateToVersion1(db: SQLiteDatabase) {
     `);
 }
 
-export async function initializeDatabase() {
+async function runMigrations() {
     const db = await getDatabase();
     const currentVersion = await getCurrentVersion(db);
 
@@ -101,4 +103,15 @@ export async function initializeDatabase() {
             { currentVersion, supportedVersion: CURRENT_SCHEMA_VERSION }
         );
     }
+}
+
+export function initializeDatabase() {
+    if (!initializeDatabasePromise) {
+        initializeDatabasePromise = runMigrations().catch((error) => {
+            initializeDatabasePromise = null;
+            throw error;
+        });
+    }
+
+    return initializeDatabasePromise;
 }
