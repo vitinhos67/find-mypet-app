@@ -1,13 +1,29 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useTheme } from '../../hooks/useTheme';
 import { ComportamentoSemWifi } from '../../models/device.model';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
+
 export default function DeviceAddScreen() {
     const navigation = useNavigation();
     const { adicionarNovaColeira } = useDeviceViewModel();
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
 
     const [nome, setNome] = useState('');
     const [serial, setSerial] = useState('');
@@ -15,182 +31,222 @@ export default function DeviceAddScreen() {
     const [wifiSenha, setWifiSenha] = useState('');
     const [intervalo, setIntervalo] = useState('10');
     const [comportamento, setComportamento] = useState<ComportamentoSemWifi>('PEGAR_LOCAL_E_DORMIR');
+    const [isLoading, setIsLoading] = useState(false);
+
     async function handleSalvar() {
+        setIsLoading(true);
         const numIntervalo = parseInt(intervalo) || 10;
         const sucesso = await adicionarNovaColeira(nome, serial, wifiSsid, wifiSenha, numIntervalo, comportamento);
+        setIsLoading(false);
         if (sucesso) navigation.goBack();
     }
+
     function OptionChip({ label, value }: { label: string, value: ComportamentoSemWifi }) {
         const isSelected = comportamento === value;
         return (
             <Pressable
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                style={[
+                    styles.chip,
+                    { backgroundColor: isSelected ? Colors.brand.primaryBlue : theme.background },
+                    !isSelected && { borderWidth: 1, borderColor: theme.border }
+                ]}
                 onPress={() => setComportamento(value)}
             >
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{label}</Text>
+                <Text style={[
+                    styles.chipText,
+                    { color: isSelected ? 'white' : theme.textSecondary, fontFamily: isSelected ? 'Inter-Bold' : 'Inter-Regular' }
+                ]}>
+                    {label}
+                </Text>
             </Pressable>
         );
     }
+
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Pressable onPress={() => navigation.goBack()} style={styles.btnVoltar}>
-                    <Text style={styles.btnVoltarText}>← Voltar</Text>
-                </Pressable>
-                <Text style={styles.title}>Nova Coleira</Text>
-            </View>
-            <KeyboardAvoidingView
-                style={styles.keyboardContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+                    <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn} hitSlop={8}>
+                        <Ionicons name="chevron-back" size={22} color={theme.textPrimary} />
+                    </Pressable>
+                    <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Nova Coleira</Text>
+                    <View style={styles.iconBtn} />
+                </View>
 
-                <ScrollView contentContainerStyle={styles.content}>
-                    <Text style={styles.sectionTitle}>Identificação</Text>
-
-                    <Text style={styles.label}>Apelido do Dispositivo</Text>
-                    <TextInput style={styles.input} placeholder="Ex: Coleira Laranja" value={nome} onChangeText={setNome} />
-
-                    <Text style={styles.label}>Número de Série / PIN</Text>
-                    <TextInput style={styles.input} placeholder="Ex: KODA-89A1" value={serial} onChangeText={setSerial} autoCapitalize="characters" />
-
-                    <View style={styles.divider} />
-
-                    <Text style={styles.sectionTitle}>Configuração de Rede Doméstica</Text>
-
-                    <Text style={styles.label}>Nome da Rede Wi-Fi (SSID)</Text>
-                    <TextInput style={styles.input} placeholder="Sua rede Wi-Fi" value={wifiSsid} onChangeText={setWifiSsid} />
-
-                    <Text style={styles.label}>Senha do Wi-Fi</Text>
-                    <TextInput style={styles.input} placeholder="Senha da rede" value={wifiSenha} onChangeText={setWifiSenha} secureTextEntry />
-                    
-                    <View style={styles.divider} />
-                    <Text style={styles.sectionTitle}>Parâmetros de Operação (IoT)</Text>
-                    <Text style={styles.label}>Checar Rede Wi-Fi a cada (Minutos)</Text>
-                    <TextInput
-                        style={styles.input}
-                        keyboardType="numeric"
-                        placeholder="Ex: 10"
-                        value={intervalo}
-                        onChangeText={setIntervalo}
-                    />
-
-                    <Text style={styles.label}>Se a coleira sair do Wi-Fi da casa:</Text>
-                    <View style={styles.chipContainer}>
-                        <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
-                        <OptionChip label="Perguntar ao Usuário" value="PERGUNTAR" />
-                        <OptionChip label="Rastreio Ativo (15s)" value="RASTREIO_ATIVO" />
-                        <OptionChip label="Apenas Manual" value="IGNORAR" />
+                <ScrollView
+                    contentContainerStyle={styles.content}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Apelido do Dispositivo" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={nome}
+                                onChangeText={setNome}
+                                placeholder="Ex: Coleira Laranja"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Número de Série / PIN" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={serial}
+                                onChangeText={setSerial}
+                                autoCapitalize="characters"
+                                placeholder="Ex: KODA-89A1"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
                     </View>
-
-                    <View style={styles.divider} />
-                    <Pressable style={styles.btnSalvar} onPress={handleSalvar}>
-                        <Text style={styles.btnSalvarText}>Registrar Dispositivo</Text>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Nome da Rede (SSID)" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={wifiSsid}
+                                onChangeText={setWifiSsid}
+                                placeholder="Sua rede Wi-Fi"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Senha do Wi-Fi" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                value={wifiSenha}
+                                onChangeText={setWifiSenha}
+                                secureTextEntry
+                                placeholder="Senha da rede"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                    </View>
+                    <View style={[styles.card, { backgroundColor: theme.surface }]}>
+                        <Field label="Checar Wi-Fi a cada (Minutos)" theme={theme}>
+                            <TextInput
+                                style={[styles.input, { color: theme.textPrimary }]}
+                                keyboardType="numeric"
+                                value={intervalo}
+                                onChangeText={setIntervalo}
+                                placeholder="Ex: 10"
+                                placeholderTextColor={theme.textSecondary}
+                            />
+                        </Field>
+                        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+                        <Field label="Se sair do Wi-Fi (Modo Rua)" theme={theme}>
+                            <View style={styles.chipContainer}>
+                                <OptionChip label="Pegar Local e Dormir" value="PEGAR_LOCAL_E_DORMIR" />
+                                <OptionChip label="Perguntar" value="PERGUNTAR" />
+                                <OptionChip label="Rastreio Ativo" value="RASTREIO_ATIVO" />
+                                <OptionChip label="Apenas Manual" value="IGNORAR" />
+                            </View>
+                        </Field>
+                    </View>
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.btnPrimary,
+                            isLoading && { opacity: 0.65 },
+                            { opacity: pressed && !isLoading ? 0.85 : undefined }
+                        ]}
+                        onPress={handleSalvar}
+                        disabled={isLoading}
+                    >
+                        {isLoading
+                            ? <ActivityIndicator color="white" />
+                            : <Text style={styles.btnPrimaryText}>Registrar Dispositivo</Text>
+                        }
                     </Pressable>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
+function Field({ label, children, theme }: { label: string; children: React.ReactNode; theme: any }) {
+    return (
+        <View style={styles.fieldWrap}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
+            {children}
+        </View>
+    );
+}
 
 const styles = StyleSheet.create({
     container: { 
-        flex: 1, 
-        backgroundColor: Colors.light.background, 
+        flex: 1 
     },
-    header: { 
-        padding: 20, 
-        backgroundColor: 'white', 
-        borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryBlue, 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 15 
-    },
-    btnVoltar: { 
-        padding: 5 
-    },
-    btnVoltarText: { 
-        color: Colors.brand.primaryBlue, 
-        fontFamily: 'Inter-Bold',
-        fontSize: 16 
-    },
-    title: { 
-        fontSize: 20, 
-        fontFamily: 'Inter-Bold',
-        color: '#1e293b' 
-    },
-    keyboardContainer: {
-        flex: 1,
+    header: {
+        height: 56,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        borderBottomWidth: 1,
     },
-    scrollContent: {
-        flexGrow: 1, 
-        padding: 20,
-        paddingBottom: 40,
-    },
-    content: { 
-        padding: 20, 
-        paddingBottom: 40 
-    },
-    sectionTitle: { 
-        fontSize: 18, 
+    headerTitle: {
+        fontSize: 17,
         fontFamily: 'Inter-Bold',
-        color: Colors.brand.primaryOrange, 
-        marginBottom: 15 
+        letterSpacing: -0.2,
     },
-    label: { 
-        fontSize: 14, 
+    iconBtn: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    content: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 48,
+        gap: 12,
+    },
+    card: {
+        borderRadius: 18,
+        paddingHorizontal: 18,
+        overflow: 'hidden',
+    },
+    fieldWrap: { 
+        paddingVertical: 14 
+    },
+    divider: { 
+        height: 1 
+    },
+    label: {
+        fontSize: 11,
         fontFamily: 'Inter-Bold',
-        marginBottom: 8 
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+        marginBottom: 8,
     },
-    input: { 
-        backgroundColor: 'white', 
-        borderWidth: 1, 
-        borderColor: Colors.light.background, 
-        padding: 15, 
-        borderRadius: 8, 
-        fontSize: 16, 
-        marginBottom: 15,
-        fontFamily: 'Inter-Regular' 
+    input: {
+        fontSize: 16,
+        fontFamily: 'Inter-Regular',
+        paddingVertical: 0,
     },
-    divider: {
-        height: 1, 
-        backgroundColor: Colors.light.background, 
-        marginVertical: 20 
+    chipContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginTop: 4,
     },
-    btnSalvar: { 
-        backgroundColor: Colors.brand.primaryBlue, 
-        padding: 18, 
-        borderRadius: 8, 
-        alignItems: 'center', 
-        marginTop: 10 },
-    btnSalvarText: { 
-        color: 'white', 
+    chip: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 12,
+    },
+    chipText: {
+        fontSize: 12,
+    },
+    btnPrimary: {
+        backgroundColor: Colors.brand.primaryBlue,
+        paddingVertical: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    btnPrimaryText: {
+        color: 'white',
+        fontSize: 16,
         fontFamily: 'Inter-Bold',
-        fontSize: 16 
     },
-    chipContainer: { 
-        flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 15 
-    },
-    chip: { 
-        backgroundColor: Colors.light.background, 
-        borderWidth: 1, 
-        borderColor: '#cbd5e1', 
-        paddingVertical: 10, 
-        paddingHorizontal: 15, 
-        borderRadius: 10 
-    },
-    chipSelected: { 
-        backgroundColor: Colors.brand.primaryBlue, 
-        borderColor: Colors.brand.primaryBlue 
-    },
-    chipText: { 
-        fontFamily: 'Inter-Regular', 
-        color: '#64748b', 
-        fontSize: 14 
-    },
-    chipTextSelected: { 
-        fontFamily: 'Inter-Bold', 
-        color: 'white' 
-    }
 });

@@ -3,6 +3,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PetAddScreen from '../view/screens/PetAddScreen';
 import PetDetailsScreen from '../view/screens/PetDetailsScreen';
 import PetListScreen from '../view/screens/PetListScreen';
+import PetProfileScreen from '../view/screens/PetProfileScreen';
+import PetShareScreen from '../view/screens/PetShareScreen';
+import SafeZoneScreen from '../view/screens/SafeZoneScreen';
 import { CollarNavigator } from './CollarNavigator';
 import { PetStackParamList } from './types';
 
@@ -16,24 +19,13 @@ export function PetNavigator() {
                 animation: 'slide_from_right'
             }}
         >
-            <Stack.Screen
-                name="PetList"
-                component={PetListScreen}
-            />
-
-            <Stack.Screen
-                name="PetAdd"
-                component={PetAddScreen}
-            />
-
-            <Stack.Screen
-                name="PetDetails"
-                component={PetDetailsScreen}
-            />
-            <Stack.Screen 
-                name="Collar" 
-                component={CollarNavigator} 
-            />
+            <Stack.Screen name="PetList" component={PetListScreen} />
+            <Stack.Screen name="PetAdd" component={PetAddScreen} />
+            <Stack.Screen name="PetProfile" component={PetProfileScreen} />
+            <Stack.Screen name="PetDetails" component={PetDetailsScreen} />
+            <Stack.Screen name="PetShare" component={PetShareScreen} />
+            <Stack.Screen name="SafeZone" component={SafeZoneScreen} />
+            <Stack.Screen name="Collar" component={CollarNavigator} />
         </Stack.Navigator>
     );
 }

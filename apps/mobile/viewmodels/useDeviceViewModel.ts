@@ -12,7 +12,6 @@ export function useDeviceViewModel() {
             const data = await DeviceService.getDevices();
 
             if (Array.isArray(data)) {
-                // O adapter que garante que a tela não crasha com colunas do banco
                 const devicesFormatados = data.map((dbDevice: any) => ({
                     id: dbDevice.id,
                     nome: dbDevice.name || 'Sem Nome',
@@ -35,12 +34,9 @@ export function useDeviceViewModel() {
             setIsLoading(false);
         }
     }, []);
-
-    // RESTAURADA A ASSINATURA ORIGINAL PARA NÃO QUEBRAR A TELA
     async function adicionarNovaColeira(nome: string, serialNumber: string, wifiSsid: string, wifiSenha: string, intervaloAcordarMinutos: number, comportamentoSemWifi: string) {
         setIsLoading(true);
         try {
-            // O Controller espera essas chaves exatas em português
             await DeviceService.create({
                 nome,
                 serialNumber,
@@ -52,8 +48,14 @@ export function useDeviceViewModel() {
             await carregarColeiras();
             Alert.alert('Sucesso', 'Coleira registrada na nuvem!');
             return true;
-        } catch (error) {
-            Alert.alert('Erro', 'Falha ao registrar coleira.');
+        } catch (error: any) {
+            console.log("ERRO COMPLETO:", JSON.stringify(error, null, 2));
+            console.log(error?.message)
+            const mensagemServidor = error?.message;
+
+            console.log("MENSAGEM EXTRAÍDA:", mensagemServidor);
+
+            Alert.alert('Atenção', mensagemServidor || 'Falha ao registrar coleira.');
             return false;
         } finally {
             setIsLoading(false);

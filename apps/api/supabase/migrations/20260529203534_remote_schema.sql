@@ -54,17 +54,17 @@ drop index if exists "public"."sessions_user_id_idx";
 
 drop table "public"."sessions";
 
-alter table "public"."devices" add column "comportamento_sem_wifi" text not null default 'PEGAR_LOCAL_E_DORMIR'::text;
+alter table "public"."devices" add column if not exists "comportamento_sem_wifi" text not null default 'PEGAR_LOCAL_E_DORMIR'::text;
 
-alter table "public"."devices" add column "intervalo_acordar_minutos" integer not null default 10;
+alter table "public"."devices" add column if not exists "intervalo_acordar_minutos" integer not null default 10;
 
-alter table "public"."devices" add column "serial_number" text;
+alter table "public"."devices" add column if not exists "serial_number" text;
 
-alter table "public"."devices" add column "status" text not null default 'ONLINE'::text;
+alter table "public"."devices" add column if not exists "status" text not null default 'ONLINE'::text;
 
-alter table "public"."devices" add column "wifi_senha" text;
+alter table "public"."devices" add column if not exists "wifi_senha" text;
 
-alter table "public"."devices" add column "wifi_ssid" text;
+alter table "public"."devices" add column if not exists "wifi_ssid" text;
 
 alter table "public"."users" drop column "password";
 
@@ -79,6 +79,9 @@ CREATE UNIQUE INDEX devices_serial_number_key ON public.devices USING btree (ser
 alter table "public"."devices" add constraint "devices_serial_number_key" UNIQUE using index "devices_serial_number_key";
 
 alter table "public"."users" add constraint "users_id_fkey" FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE not valid;
+
+
+DELETE FROM public.users WHERE id NOT IN (SELECT id FROM auth.users);
 
 alter table "public"."users" validate constraint "users_id_fkey";
 

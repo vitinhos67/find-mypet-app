@@ -60,11 +60,15 @@ export class DeviceController {
 
             return reply.status(201).send(device);
         } catch (error: any) {
-            if (error?.code === "23505") {
-                return reply.status(409).send({ message: "Este hardware já se encontra registrado numa conta." });
+            // Se o erro vier com a nossa mensagem customizada do repositório,
+            // nós devolvemos com status 400 para o App conseguir ler e exibir.
+            if (error instanceof Error) {
+                return reply.status(400).send({ message: error.message });
             }
-            console.error("Erro no controller de device (Create):", error);
-            return reply.status(500).send({ message: "Erro interno ao registrar a coleira.", error });
+
+            // Se for um erro bizarro do servidor, aí sim devolve 500.
+            console.error("Erro interno:", error);
+            return reply.status(500).send({ message: "Falha interna ao registrar coleira." });
         }
     };
 

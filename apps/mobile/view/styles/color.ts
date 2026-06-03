@@ -7,14 +7,14 @@ export const Colors = {
         secondaryOrange: "#FFC68D",
     },
     light: {
-        background: "#e3f1ff",
-        surface: "#ffffff",  
-        textPrimary: "#1e293b",
-        textSecondary: "#64748b",
-        border: "#e2e8f0"
+        background: "#FFFFFF",
+        surface: "#F7F8FA",
+        textPrimary: "#1A2332",
+        textSecondary: "#8896A7",
+        border: "#EAEEF3"
     },
     dark: {
-        background: "#0f172a", 
+        background: "#0f172a",
         surface: "#1e293b",
         textPrimary: "#f8fafc",
         textSecondary: "#94a3b8",

@@ -1,7 +1,6 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify from "fastify";
-
 import { registerRoutes } from "./http/routes";
 import { env } from "./shared/env/env";
 import { registerErrorHandler } from "./shared/plugins/error-handler.plugin";

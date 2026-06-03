@@ -1,7 +1,9 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-import { Pet, PetPayload, SexoPet } from '../models/pet.model';
+import { Pet, PetPayload, SexoPet, SharedPetResponse } from '../models/pet.model';
 import { PetService } from '../services/PetService';
+import { ShareService } from '../services/ShareService';
 import { StorageService } from '../services/StorageService';
 
 function mapDbToPet(dbPet: any): Pet {
@@ -12,21 +14,44 @@ function mapDbToPet(dbPet: any): Pet {
         raca: dbPet.raca,
         cor: dbPet.cor,
         sexo: dbPet.sexo as SexoPet,
-        descricao: dbPet.descricao
+        descricao: dbPet.descricao,
+        isShared: false
+    };
+}
+
+function mapSharedToPet(shared: SharedPetResponse): Pet {
+    return {
+        id: shared.id,
+        foto: shared.image_href ?? undefined,
+        nome: shared.name,
+        raca: shared.raca ?? '',
+        cor: shared.cor ?? '',
+        sexo: (shared.sexo ?? 'MACHO') as SexoPet,
+        descricao: shared.descricao ?? '',
+        isShared: true,
+        sharePermission: shared.permission,
+        shareId: shared.share_id
     };
 }
 
 export function usePetViewModel() {
     const [pets, setPets] = useState<Pet[]>([]);
+    const [sharedPets, setSharedPets] = useState<Pet[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const carregarPets = useCallback(async () => {
         setIsLoading(true);
         try {
-            const resposta: any = await PetService.getPets();
-            const petsData = Array.isArray(resposta) ? resposta : (resposta?.data || []);
+            const [petsResposta, sharedResposta] = await Promise.all([
+                PetService.getPets(),
+                ShareService.getSharedWithMe().catch(() => [])
+            ]);
+
+            const petsData = Array.isArray(petsResposta) ? petsResposta : ((petsResposta as any)?.data || []);
+            const sharedData = Array.isArray(sharedResposta) ? sharedResposta : ((sharedResposta as any)?.data || []);
 
             setPets(petsData.map(mapDbToPet));
+            setSharedPets(sharedData.map(mapSharedToPet));
         } catch (error) {
             console.error('Erro ao carregar pets:', error);
             Alert.alert('Erro', 'Não foi possível carregar os pets da nuvem.');
@@ -117,16 +142,31 @@ export function usePetViewModel() {
     }
 
     function getPetById(id: string) {
-        return pets.find(pet => pet.id === id);
+        return pets.find(pet => pet.id === id) ?? sharedPets.find(pet => pet.id === id);
+    }
+
+    async function selecionarFoto(): Promise<string | null> {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+            allowsEditing: true,
+            aspect: [1, 1]
+        });
+        if (!result.canceled) {
+            return result.assets[0].uri;
+        }
+        return null;
     }
 
     return {
         pets,
+        sharedPets,
         isLoading,
         carregarPets,
         adicionarPet,
         atualizarPet,
         excluirPet,
-        getPetById
+        getPetById,
+        selecionarFoto
     };
 }

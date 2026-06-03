@@ -1,351 +1,355 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback } from 'react';
 import {
-    FlatList,
+    ActivityIndicator,
     Image,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTheme } from '../../hooks/useTheme';
+import { Pet } from '../../models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
-
-import { useTheme } from '../../hooks/useTheme';
 import { Colors } from '../styles/color';
-;
 
-type NavigationProp =
-    NativeStackNavigationProp<
-        PetStackParamList,
-        'PetList',
-        'Colar'
-    >;
+type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList'>;
 
-export default function PetListScreen() {
-
-    const navigation =
-        useNavigation<NavigationProp>();
-
-    const { pets, carregarPets } =
-        usePetViewModel();
-    console.log(pets)
-    const { darkMode } = useTheme();
-
-    const theme = darkMode
-        ? Colors.dark
-        : Colors.light;
-
-    useFocusEffect(
-        useCallback(() => {
-            carregarPets();
-        }, [carregarPets])
-    );
-
+function PetCard({ item, onPress, theme }: { item: Pet; onPress: () => void; theme: any }) {
+    const isMacho = item.sexo === 'MACHO';
     return (
-        <SafeAreaView
-            style={[
-                styles.container,
-                {
-                    backgroundColor:
-                        theme.background
-                }
-            ]}
+        <Pressable
+            style={({ pressed }) => [styles.card, { backgroundColor: theme.surface, opacity: pressed ? 0.88 : 1 }]}
+            onPress={onPress}
         >
-            <View
-                style={[
-                    styles.header,
-                    {
-                        backgroundColor:
-                            theme.surface,
-                    }
-                ]}
-            >
-                <View>
-                    <Text
-                        style={[
-                            styles.title,
-                            {
-                                color:
-                                    Colors.brand.primaryBlue
-                            }
-                        ]}
-                    >
-                        Meus Pets
-                    </Text>
-
-                    <Text
-                        style={[
-                            styles.subtitle,
-                            {
-                                color:
-                                    theme.textSecondary
-                            }
-                        ]}
-                    >
-                        Gerencie seus animais
-                    </Text>
+            {item.foto ? (
+                <Image source={{ uri: item.foto }} style={styles.avatar} />
+            ) : (
+                <View style={[styles.avatarPlaceholder, { backgroundColor: Colors.brand.primaryBlue + '15' }]}>
+                    <Text style={styles.avatarEmoji}>🐾</Text>
                 </View>
+            )}
 
-                <View style={{ flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
-                    <Pressable
-                        style={styles.btnAdd}
-                        onPress={() =>
-                            navigation.navigate(
-                                'PetAdd'
-                            )
-                        }
-                    >
-                        <Text
-                            style={styles.btnAddText}
-                        >
-                            + Novo
+            <View style={styles.cardBody}>
+                <Text style={[styles.cardName, { color: theme.textPrimary }]}>{item.nome}</Text>
+                <Text style={[styles.cardBreed, { color: theme.textSecondary }]} numberOfLines={1}>
+                    {item.raca || 'Raça não informada'}
+                </Text>
+                {item.isShared && item.sharePermission && (
+                    <View style={[
+                        styles.permTag,
+                        { backgroundColor: item.sharePermission === 'EDIT' ? '#FFF4E8' : '#EEF3FF' }
+                    ]}>
+                        <Text style={[
+                            styles.permTagText,
+                            { color: item.sharePermission === 'EDIT' ? Colors.brand.primaryOrange : Colors.brand.primaryBlue }
+                        ]}>
+                            {item.sharePermission === 'EDIT' ? 'Pode editar' : 'Visualização'}
                         </Text>
-                    </Pressable>
-
-                    <Pressable
-                        style={[styles.btnAdd, { backgroundColor: Colors.brand.primaryBlue }]}
-                        onPress={() => navigation.navigate('Collar' as any)}
-                    >
-                        <Text style={styles.btnAddText}>
-                            Coleiras
-                        </Text>
-                    </Pressable>
-                </View>
-            </View>
-
-            <FlatList
-                data={pets}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={
-                    styles.listContainer
-                }
-                renderItem={({ item }) => (
-                    <View
-                        style={[
-                            styles.card,
-                            {
-                                backgroundColor:
-                                    theme.surface
-                            }
-                        ]}
-                    >
-                        <View
-                            style={styles.cardInfo}
-                        >
-                            {item.foto ? (
-                                <Image
-                                    source={{
-                                        uri: item.foto
-                                    }}
-                                    style={
-                                        styles.petImage
-                                    }
-                                />
-                            ) : (
-                                <View
-                                    style={[
-                                        styles.placeholder,
-                                        {
-                                            backgroundColor:
-                                                theme.border
-                                        }
-                                    ]}
-                                >
-                                    <Text
-                                        style={
-                                            styles.placeholderText
-                                        }
-                                    >
-                                        🐾
-                                    </Text>
-                                </View>
-                            )}
-
-                            <View
-                                style={
-                                    styles.textContainer
-                                }
-                            >
-                                <Text
-                                    style={[
-                                        styles.nomeText,
-                                        {
-                                            color:
-                                                theme.textPrimary
-                                        }
-                                    ]}
-                                >
-                                    {item.nome}
-                                </Text>
-
-                                <Text
-                                    style={[
-                                        styles.racaText,
-                                        {
-                                            color:
-                                                theme.textSecondary
-                                        }
-                                    ]}
-                                >
-                                    {item.raca}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <Pressable
-                            style={
-                                styles.btnDetalhes
-                            }
-                            onPress={() =>
-                                navigation.navigate(
-                                    'PetDetails',
-                                    {
-                                        petId:
-                                            item.id
-                                    }
-                                )
-                            }
-                        >
-                            <Text
-                                style={
-                                    styles.btnDetalhesText
-                                }
-                            >
-                                Detalhes
-                            </Text>
-                        </Pressable>
                     </View>
                 )}
-                ListEmptyComponent={
-                    <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                        Nenhum pet cadastrado.
+            </View>
+
+            <View style={[styles.sexBadge, { backgroundColor: isMacho ? '#EEF3FF' : '#FFF0F7' }]}>
+                <Text style={[styles.sexIcon, { color: isMacho ? Colors.brand.primaryBlue : '#E879A8' }]}>
+                    {isMacho ? '♂' : '♀'}
+                </Text>
+            </View>
+        </Pressable>
+    );
+}
+
+function SectionHeader({ title, count }: { title: string; count: number }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    return (
+        <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{title}</Text>
+            {count > 0 && (
+                <View style={styles.countBadge}>
+                    <Text style={styles.countText}>{count}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
+
+function EmptySection({ icon, message }: { icon: string; message: string }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    return (
+        <View style={[styles.emptyBox, { backgroundColor: theme.surface }]}>
+            <Text style={styles.emptyIcon}>{icon}</Text>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>{message}</Text>
+        </View>
+    );
+}
+
+export default function PetListScreen() {
+    const navigation = useNavigation<NavigationProp>();
+    const { pets, sharedPets, isLoading, carregarPets } = usePetViewModel();
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+
+    useFocusEffect(useCallback(() => { carregarPets(); }, [carregarPets]));
+
+    const loading = isLoading && pets.length === 0 && sharedPets.length === 0;
+
+    return (
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            {/* Header */}
+            <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
+                <View>
+                    <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Pets</Text>
+                    <Text style={[styles.headerSub, { color: theme.textSecondary }]}>
+                        {pets.length + sharedPets.length === 0
+                            ? 'Nenhum pet cadastrado'
+                            : `${pets.length + sharedPets.length} ${pets.length + sharedPets.length === 1 ? 'pet' : 'pets'} no total`}
                     </Text>
-                }
-            />
+                </View>
+                <Pressable
+                    style={({ pressed }) => [styles.collarBtn, { borderColor: theme.border, opacity: pressed ? 0.7 : 1 }]}
+                    onPress={() => navigation.navigate('Collar' as any)}
+                >
+                    <Ionicons name="hardware-chip-outline" size={15} color="white" />
+                    <Text style={[styles.collarText]}>Coleiras</Text>
+                </Pressable>
+            </View>
+
+            {loading ? (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color={Colors.brand.primaryBlue} />
+                </View>
+            ) : (
+                <ScrollView
+                    contentContainerStyle={styles.scroll}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Meus Pets */}
+                    <SectionHeader title="Meus Pets" count={pets.length} />
+                    {pets.length === 0
+                        ? <EmptySection icon="🐾" message="Toque em + para cadastrar seu primeiro pet" />
+                        : pets.map(item => (
+                            <PetCard
+                                key={item.id}
+                                item={item}
+                                theme={theme}
+                                onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                            />
+                        ))
+                    }
+
+                    {/* Compartilhados comigo */}
+                    <SectionHeader title="Compartilhados comigo" count={sharedPets.length} />
+                    {sharedPets.length === 0
+                        ? <EmptySection icon="🔗" message="Quando alguém compartilhar um pet com você, ele aparecerá aqui" />
+                        : sharedPets.map(item => (
+                            <PetCard
+                                key={item.id}
+                                item={item}
+                                theme={theme}
+                                onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                            />
+                        ))
+                    }
+                </ScrollView>
+            )}
+
+            <Pressable
+                style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
+                onPress={() => navigation.navigate('PetAdd')}
+            >
+                <Ionicons name="add" size={28} color="#fff" />
+            </Pressable>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1
-    },
+    container: { flex: 1 },
 
     header: {
-        padding: 20,
+        paddingHorizontal: 24,
+        paddingVertical: 18,
         flexDirection: 'row',
-        justifyContent:
-            'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderColor: Colors.brand.primaryOrange
     },
 
-    title: {
-        fontSize: 20,
-        fontFamily: 'Inter-Bold'
+    headerTitle: {
+        fontSize: 26,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.5,
     },
 
-    subtitle: {
-        fontSize: 14,
-        marginTop: 4,
-        fontFamily: 'Inter-Regular'
+    headerSub: {
+        fontSize: 13,
+        fontFamily: 'Inter-Regular',
+        marginTop: 2,
     },
 
-    btnAdd: {
-        backgroundColor:
-            Colors.brand.primaryOrange,
+    collarBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.brand.primaryBlue,
+        gap: 6,
+        paddingHorizontal: 14,
         paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 8
+        borderRadius: 20,
+        borderWidth: 1,
     },
 
-    btnAddText: {
-        color: 'white',
-        fontFamily: 'Inter-Bold'
+    collarText: {
+        color: "white",
+        fontSize: 13,
+        fontFamily: 'Inter-Bold',
     },
 
-    listContainer: {
-        padding: 20,
-        gap: 15
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    scroll: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 100,
+        gap: 8,
+    },
+
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 10,
+        marginTop: 4,
+    },
+
+    sectionTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
+    },
+
+    countBadge: {
+        backgroundColor: Colors.brand.primaryBlue + '20',
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+
+    countText: {
+        fontSize: 12,
+        fontFamily: 'Inter-Bold',
+        color: Colors.brand.primaryBlue,
     },
 
     card: {
-        padding: 16,
-        borderRadius: 12,
-
-        flexDirection: 'row',
-
-        justifyContent:
-            'space-between',
-
-        alignItems: 'center',
-
-        elevation: 2
-    },
-
-    cardInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1
+        padding: 14,
+        borderRadius: 16,
+        gap: 14,
+        marginBottom: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        elevation: 1,
     },
 
-    petImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 35
+    avatar: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
     },
 
-    placeholder: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-
+    avatarPlaceholder: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
 
-    placeholderText: {
-        fontSize: 24
+    avatarEmoji: { fontSize: 22 },
+
+    cardBody: { flex: 1, gap: 3 },
+
+    cardName: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
     },
 
-    textContainer: {
-        marginLeft: 12
+    cardBreed: {
+        fontSize: 13,
+        fontFamily: 'Inter-Regular',
     },
 
-    nomeText: {
-        fontSize: 16,
-        fontFamily: 'Inter-Bold'
+    permTag: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 8,
+        marginTop: 2,
     },
 
-    racaText: {
-        fontSize: 14,
-        marginTop: 4,
-        fontFamily: 'Inter-Regular'
+    permTagText: {
+        fontSize: 11,
+        fontFamily: 'Inter-Bold',
     },
 
-    btnDetalhes: {
-        backgroundColor:
-            Colors.brand.primaryBlue,
-
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-
-        borderRadius: 8
+    sexBadge: {
+        width: 36,
+        height: 36,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
-    btnDetalhesText: {
-        color: 'white',
-        fontFamily: 'Inter-Bold'
+    sexIcon: { fontSize: 18, fontFamily: 'Inter-Bold' },
+
+    emptyBox: {
+        borderRadius: 16,
+        paddingVertical: 24,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 8,
     },
+
+    emptyIcon: { fontSize: 32 },
 
     emptyText: {
+        fontSize: 13,
+        fontFamily: 'Inter-Regular',
         textAlign: 'center',
-        marginTop: 50,
-        fontFamily: 'Inter-Regular'
-    }
+        lineHeight: 20,
+    },
+
+    fab: {
+        position: 'absolute',
+        bottom: 28,
+        right: 24,
+        width: 56,
+        height: 56,
+        borderRadius: 18,
+        backgroundColor: Colors.brand.primaryOrange,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: Colors.brand.primaryOrange,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+        elevation: 6,
+    },
 });

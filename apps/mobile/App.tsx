@@ -3,14 +3,29 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
 import { ThemeProvider } from './hooks/useTheme';
 import { initializeDatabase } from './database';
+import { ErrorBoundary } from './view/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
+declare const ErrorUtils: {
+    setGlobalHandler: (handler: (error: Error, isFatal?: boolean) => void) => void;
+};
+
+ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+    const timestamp = new Date().toISOString();
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[CRASH AUDIT] ${timestamp}`);
+    console.error(`[CRASH AUDIT] Tipo: ${isFatal ? 'FATAL (JS global)' : 'Não-fatal (JS global)'}`);
+    console.error(`[CRASH AUDIT] Mensagem: ${error.message}`);
+    console.error(`[CRASH AUDIT] Stack:\n${error.stack}`);
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+});
 
 export default function App() {
     const [userLogado, setUserLogado] = useState(false);
@@ -44,10 +59,14 @@ export default function App() {
     }, []);
     
     return (
-        <ThemeProvider>
-            <NavigationContainer>
-                {userLogado ? <TabNavigator /> : <AuthNavigator />}
-            </NavigationContainer>
-        </ThemeProvider>
+        <ErrorBoundary>
+            <SafeAreaProvider>
+                <ThemeProvider>
+                    <NavigationContainer>
+                        {userLogado ? <TabNavigator /> : <AuthNavigator />}
+                    </NavigationContainer>
+                </ThemeProvider>
+            </SafeAreaProvider>
+        </ErrorBoundary>
     );
 }
