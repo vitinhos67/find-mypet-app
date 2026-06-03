@@ -17,7 +17,7 @@ export class ProfileLocalRepository {
     static async upsert(
         userId: string,
         profile: UserProfile,
-        syncedAt = new Date().toISOString()
+        syncedAt: string | null = new Date().toISOString()
     ) {
         await initializeDatabase();
         const db = await getDatabase();

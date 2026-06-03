@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
 
+import { ProfileLocalRepository } from '../database';
 import { UpdateProfileInput, UserProfile } from '../models/profile.model';
 import { supabase } from '../src/shared/lib/supabase';
 import { ApiService } from './ApiService';
@@ -65,6 +66,8 @@ export class ProfileService {
                 JSON.stringify(usuarioAtual)
             );
 
+            await ProfileLocalRepository.upsert(user.id, usuarioAtual);
+
             return usuarioAtual;
         } catch (error) {
             console.log('Erro ao carregar usuário pela API:', error);
@@ -80,6 +83,12 @@ export class ProfileService {
 
         if (!user) {
             return null;
+        }
+
+        const usuarioCache = await ProfileLocalRepository.findByUserId(user.id);
+
+        if (usuarioCache) {
+            return usuarioCache;
         }
 
         const usuarioSalvo = await AsyncStorage.getItem(
@@ -105,6 +114,8 @@ export class ProfileService {
             `@usuario_${user.id}`,
             JSON.stringify(usuarioAtual)
         );
+
+        await ProfileLocalRepository.upsert(user.id, usuarioAtual, null);
 
         return usuarioAtual;
     }
@@ -141,6 +152,8 @@ export class ProfileService {
             JSON.stringify(usuarioAtual)
         );
 
+        await ProfileLocalRepository.upsert(profile.id, usuarioAtual);
+
         return usuarioAtual;
     }
 
@@ -158,17 +171,11 @@ export class ProfileService {
             return null;
         }
 
-        const usuarioSalvo = await AsyncStorage.getItem(
-            `@usuario_${user.id}`
-        );
+        const usuarioCache = await ProfileLocalRepository.findByUserId(user.id);
 
-        if (!usuarioSalvo) {
-            return null;
-        }
+        const usuario = usuarioCache ?? await this.carregarUsuarioLocal();
 
-        const usuario = JSON.parse(usuarioSalvo) as UserProfile;
-
-        return this.getAvatarDisplayUrl(usuario.avatarPath);
+        return this.getAvatarDisplayUrl(usuario?.avatarPath);
     }
 
     static async salvarImagemPerfil(
