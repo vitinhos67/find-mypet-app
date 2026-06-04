@@ -37,6 +37,7 @@ function mapSharedToPet(shared: SharedPetResponse): Pet {
 export function usePetViewModel() {
     const [pets, setPets] = useState<Pet[]>([]);
     const [sharedPets, setSharedPets] = useState<Pet[]>([]);
+    const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const carregarPets = useCallback(async () => {
@@ -55,6 +56,20 @@ export function usePetViewModel() {
         } catch (error) {
             console.error('Erro ao carregar pets:', error);
             Alert.alert('Erro', 'Não foi possível carregar os pets da nuvem.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    const carregarPetPorId = useCallback(async (id: string) => {
+        setIsLoading(true);
+        try {
+            const pet = await PetService.getPetById(id);
+            setSelectedPet(pet);
+            return pet;
+        } catch (error) {
+            console.error('Erro ao carregar detalhe do pet:', error);
+            return null;
         } finally {
             setIsLoading(false);
         }
@@ -142,7 +157,9 @@ export function usePetViewModel() {
     }
 
     function getPetById(id: string) {
-        return pets.find(pet => pet.id === id) ?? sharedPets.find(pet => pet.id === id);
+        return pets.find(pet => pet.id === id)
+            ?? sharedPets.find(pet => pet.id === id)
+            ?? (selectedPet?.id === id ? selectedPet : undefined);
     }
 
     async function selecionarFoto(): Promise<string | null> {
@@ -163,6 +180,7 @@ export function usePetViewModel() {
         sharedPets,
         isLoading,
         carregarPets,
+        carregarPetPorId,
         adicionarPet,
         atualizarPet,
         excluirPet,

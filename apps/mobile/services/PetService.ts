@@ -51,6 +51,11 @@ export class PetService {
         }
     }
 
+    static async getPetById(id: string): Promise<Pet | null> {
+        const pets = await this.getPets();
+        return pets.find((pet) => pet.id === id) ?? null;
+    }
+
     static async updatePet(id: string, data: PetPayload) {
         return await ApiService.request<PetResponse>(`/pets/${id}`, {
             method: 'PUT',

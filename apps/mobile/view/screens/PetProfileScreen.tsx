@@ -32,7 +32,7 @@ export default function PetProfileScreen() {
     const route = useRoute<RouteProps>();
     const { petId } = route.params;
 
-    const { getPetById, carregarPets, isLoading } = usePetViewModel();
+    const { getPetById, carregarPetPorId, isLoading } = usePetViewModel();
     const { localizacao, isLoading: isLoadingLocation } = useLocationViewModel(petId);
 
     const { darkMode } = useTheme();
@@ -41,7 +41,9 @@ export default function PetProfileScreen() {
 
     const [safeZone, setSafeZone] = useState<SafeZone | null>(null);
 
-    useEffect(() => { carregarPets(); }, [carregarPets]);
+    useEffect(() => {
+        carregarPetPorId(petId);
+    }, [carregarPetPorId, petId]);
 
     useFocusEffect(useCallback(() => {
         SafeZoneService.get(petId).then((resp: any) => {
