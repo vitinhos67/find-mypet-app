@@ -28,7 +28,14 @@ export default function PetDetailsScreen() {
     const navigation = useNavigation();
     const route = useRoute<PetDetailsRouteProp>();
     const { petId } = route.params;
-    const { getPetById, atualizarPet, excluirPet, carregarPets, selecionarFoto, isLoading } = usePetViewModel();
+    const {
+        getPetById,
+        atualizarPet,
+        excluirPet,
+        carregarPetPorId,
+        selecionarFoto,
+        isLoading
+    } = usePetViewModel();
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
 
@@ -41,7 +48,9 @@ export default function PetDetailsScreen() {
     const [descricao, setDescricao] = useState('');
     const [sexo, setSexo] = useState<'MACHO' | 'FEMEA'>('MACHO');
 
-    useEffect(() => { carregarPets(); }, [carregarPets]);
+    useEffect(() => {
+        carregarPetPorId(petId);
+    }, [carregarPetPorId, petId]);
 
     useEffect(() => {
         if (pet) {
