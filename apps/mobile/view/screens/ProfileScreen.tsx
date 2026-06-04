@@ -35,6 +35,8 @@ export default function ProfileScreen() {
     useEffect(() => { setAvatarFailed(false); }, [profileImage]);
 
     async function selecionarImagem() {
+        if (!isEditing) return;
+
         const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!perm.granted) return;
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -63,7 +65,11 @@ export default function ProfileScreen() {
 
                 {/* Avatar + info */}
                 <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
-                    <Pressable onPress={selecionarImagem} style={styles.avatarWrap}>
+                    <Pressable
+                        onPress={selecionarImagem}
+                        style={styles.avatarWrap}
+                        disabled={!isEditing || isSaving}
+                    >
                         {profileImage && !avatarFailed ? (
                             <ExpoImage
                                 key={profileImage}
@@ -80,9 +86,11 @@ export default function ProfileScreen() {
                                 </Text>
                             </View>
                         )}
-                        <View style={styles.avatarBadge}>
-                            <Ionicons name="camera" size={11} color="#fff" />
-                        </View>
+                        {isEditing && (
+                            <View style={styles.avatarBadge}>
+                                <Ionicons name="camera" size={11} color="#fff" />
+                            </View>
+                        )}
                     </Pressable>
 
                     <View style={styles.profileInfo}>
