@@ -95,7 +95,7 @@ export default function DeviceAddScreen() {
                                 value={serial}
                                 onChangeText={setSerial}
                                 autoCapitalize="characters"
-                                placeholder="Ex: KODA-89A1"
+                                placeholder="Ex: FMP12ABCD3"
                                 placeholderTextColor={theme.textSecondary}
                             />
                         </Field>

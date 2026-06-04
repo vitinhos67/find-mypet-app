@@ -4,15 +4,31 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../../hooks/useTheme';
 import { CollarStackParamList } from '../../navigation/types';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<CollarStackParamList, 'DeviceList'>;
-
+function SectionHeader({ title, count }: { title: string; count: number }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    return (
+        <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>{title}</Text>
+            {count > 0 && (
+                <View style={styles.countBadge}>
+                    <Text style={styles.countText}>{count}</Text>
+                </View>
+            )}
+        </View>
+    );
+}
 export default function DeviceListScreen() {
     const navigation = useNavigation<NavigationProp>();
     const { devices, carregarColeiras } = useDeviceViewModel();
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
 
     useFocusEffect(
         useCallback(() => {
@@ -21,18 +37,22 @@ export default function DeviceListScreen() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={[styles.header, { backgroundColor: theme.background, borderBottomColor: theme.border }]}>
                 <View style={styles.headerLeft}>
                     <TouchableOpacity
                         onPress={() => navigation.goBack()}
                         style={styles.backButton}
                     >
-                        <Ionicons name="chevron-back" size={28} color={Colors.brand.primaryBlue} />
+                        <Ionicons name="chevron-back" size={28} color={Colors.brand.primaryOrange} />
                     </TouchableOpacity>
                     <View>
-                        <Text style={styles.title}>Dispositivos</Text>
-                        <Text style={styles.subtitle}>Gerencie suas coleiras</Text>
+                        <Text style={[styles.title, { color: Colors.brand.primaryBlue }]}>Dispositivos</Text>
+                        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                            {devices.length === 0
+                                ? 'Nenhuma coleira cadastrada'
+                                : `${devices.length} ${devices.length === 1 ? 'coleira' : 'coleiras'} no total`}
+                        </Text>
                     </View>
                 </View>
             </View>
@@ -41,15 +61,17 @@ export default function DeviceListScreen() {
                 data={devices}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContainer}
+                ListHeaderComponent={<SectionHeader title="Minhas Coleiras" count={devices.length} />}                
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.card}
+                    <TouchableOpacity
+                        style={[styles.card, { backgroundColor: theme.surface }]}
                         onPress={() => navigation.navigate('DeviceConfigure', {
                             collarId: item.id,
                             currentPetId: item.petId
                         })}>
                         <View style={styles.cardInfo}>
-                            <Text style={styles.nomeText}>{item.nome}</Text>
-                            <Text style={styles.serialText}>S/N: {item.serialNumber}</Text> 
+                            <Text style={[styles.nomeText, { color: theme.textPrimary }]}>{item.nome}</Text>
+                            <Text style={[styles.serialText, { color: theme.textSecondary }]}>S/N: {item.serialNumber}</Text>
                             <Text style={item.petId ? styles.statusVinculado : styles.statusLivre}>
                                 {item.petId ? 'Vinculado a um Pet' : 'Pronto para uso'}
                             </Text>
@@ -82,6 +104,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 20,
         marginBottom: 20,
+        paddingBottom: 18,
+        borderBottomWidth: 1,
     }, 
     headerLeft: {
         flexDirection: 'row',
@@ -96,7 +120,7 @@ const styles = StyleSheet.create({
         includeFontPadding: false,
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: 'Inter-Regular',
         color: Colors.light.textSecondary,
         marginTop: 4,
@@ -200,5 +224,28 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.35,
         shadowRadius: 12,
         elevation: 6,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 10,
+        marginTop: 4,
+    },
+    sectionTitle: {
+        fontSize: 15,
+        fontFamily: 'Inter-Bold',
+        letterSpacing: -0.2,
+    },
+    countBadge: {
+        backgroundColor: Colors.brand.primaryBlue + '20',
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+    countText: {
+        fontSize: 12,
+        fontFamily: 'Inter-Bold',
+        color: Colors.brand.primaryBlue,
     },
 });
