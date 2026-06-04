@@ -58,7 +58,14 @@ export function useProfileViewModel() {
         imagemUri: string,
         mimeType?: string | null
     ) {
+        if (isSaving) {
+            return;
+        }
+
+        const imagemAnterior = profileImage;
+
         try {
+            setIsSaving(true);
             setProfileImage(imagemUri);
             setMessage(null);
             setErrorMessage(null);
@@ -74,7 +81,10 @@ export function useProfileViewModel() {
         
         } catch (error: any) {
             console.log('Erro ao salvar imagem de perfil:', error);
+            setProfileImage(imagemAnterior);
             setErrorMessage(error.message || 'Não foi possível salvar a foto de perfil.');
+        } finally {
+            setIsSaving(false);
         }
     }
 
