@@ -1,8 +1,7 @@
 import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
 
 const DEVICE_FIELDS =
-    "id, owner_id, name, serial_number, wifi_ssid, wifi_password, wake_interval, behavior_no_wifi, pet_id, status, updated_at";
-
+    "id, owner_id, name, serial_number, wifi_ssid, wifi_password, wake_interval, behavior_no_wifi, pet_id, status, updated_at, battery_level";
 export class DeviceRepository {
 
     // O método continua se chamando "create" para não quebrar o Controller,

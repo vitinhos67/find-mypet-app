@@ -90,7 +90,40 @@ function PetMarker({ pet, isSelected }: { pet: PetHomeType; isSelected: boolean 
         </View>
     );
 }
+function SmallBatteryIndicator({ level }: { level?: number | null }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    if (level === undefined || level === null) {
+        return (
+            <View style={[styles.smallBattery, { backgroundColor: darkMode ? '#ffffff10' : '#00000008' }]}>
+                <Ionicons name="battery-dead-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.smallBatteryText, { color: theme.textSecondary }]}>
+                    --%
+                </Text>
+            </View>
+        );
+    }
 
+    let iconName: keyof typeof Ionicons.glyphMap = "battery-full";
+    let color = "#22c55e";
+
+    if (level <= 20) {
+        iconName = "battery-dead";
+        color = "#ef4444"; 
+    } else if (level <= 60) {
+        iconName = "battery-half";
+        color = "#f59e0b"; 
+    }
+
+    return (
+        <View style={[styles.smallBattery, { backgroundColor: darkMode ? '#ffffff10' : '#00000008' }]}>
+            <Ionicons name={iconName} size={14} color={color} />
+            <Text style={[styles.smallBatteryText, { color: theme.textSecondary }]}>
+                {level}%
+            </Text>
+        </View>
+    );
+}
 export default function HomeScreen() {
     const { darkMode } = useTheme();
     const insets = useSafeAreaInsets();
@@ -276,17 +309,22 @@ export default function HomeScreen() {
                                         onPress={() => handlePetPress(item)}
                                         activeOpacity={0.8}
                                     >
-                                        <View
-                                            style={[styles.avatar, { backgroundColor: avatarColor, overflow: 'hidden' }]}
-                                        >
-                                            {item.foto ? (
-                                                <Image 
-                                                    source={{ uri: item.foto }} 
-                                                    style={{ width: '100%', height: '100%' }} 
-                                                    resizeMode="cover" 
-                                                />
-                                            ) : (
-                                                <Ionicons name="paw" size={24} color="white" />
+                                        <View style={styles.cardTopRow}>
+                                            <View
+                                                style={[styles.avatar, { backgroundColor: avatarColor, overflow: 'hidden', marginBottom: 0 }]}
+                                            >
+                                                {item.foto ? (
+                                                    <Image
+                                                        source={{ uri: item.foto }}
+                                                        style={{ width: '100%', height: '100%' }}
+                                                        resizeMode="cover"
+                                                    />
+                                                ) : (
+                                                    <Ionicons name="paw" size={24} color="white" />
+                                                )}
+                                            </View>
+                                            {item.nomeColeira != null && (
+                                                <SmallBatteryIndicator level={(item as any).batteryLevel} />
                                             )}
                                         </View>
 
@@ -674,5 +712,24 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'Inter-Regular',
         color: Colors.light.textSecondary,
+    },
+    cardTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 8,
+        gap: 5
+    },
+    smallBattery: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 6,
+        paddingVertical: 3,
+        borderRadius: 8,
+        gap: 3,
+    },
+    smallBatteryText: {
+        fontSize: 10,
+        fontFamily: 'Inter-Bold',
     },
 });

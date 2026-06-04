@@ -18,6 +18,7 @@ export type PetHomeType = {
     latitude?: number;
     longitude?: number;
     ultimaAtualizacao?: string;
+    batteryLevel?: number | null;
 };
 
 type MapRegion = {
@@ -85,6 +86,7 @@ export function useHomeViewModel() {
                     nomeColeira: device?.name ?? null,
                     deviceId: device?.id ?? null,
                     status,
+                    batteryLevel: device?.battery_level ?? null,
                 };
             });
 

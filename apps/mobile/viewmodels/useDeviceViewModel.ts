@@ -21,7 +21,8 @@ export function useDeviceViewModel() {
                     intervaloAcordarMinutos: dbDevice.wake_interval || 15,
                     comportamentoSemWifi: dbDevice.behavior_no_wifi || 'STORE',
                     petId: dbDevice.pet_id,
-                    status: dbDevice.status || 'ONLINE'
+                    status: dbDevice.status || 'ONLINE',
+                    batteryLevel: dbDevice.battery_level
                 }));
                 setDevices(devicesFormatados);
             } else {

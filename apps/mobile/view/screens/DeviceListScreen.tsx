@@ -24,6 +24,34 @@ function SectionHeader({ title, count }: { title: string; count: number }) {
         </View>
     );
 }
+function BatteryIndicator({ level }: { level?: number | null }) {
+    const { darkMode } = useTheme();
+    const theme = darkMode ? Colors.dark : Colors.light;
+    if (level === undefined || level === null) {
+        return (
+            <View style={styles.batteryContainer}>
+                <Ionicons name="battery-dead-outline" size={22} color={theme.textSecondary} />
+            </View>
+        );
+    }
+
+    let iconName: keyof typeof Ionicons.glyphMap = "battery-full";
+    let color = "#22c55e";
+
+    if (level <= 20) {
+        iconName = "battery-dead";
+        color = "#ef4444"; 
+    } else if (level <= 60) {
+        iconName = "battery-half";
+        color = "#f59e0b";
+    }
+
+    return (
+        <View style={styles.batteryContainer}>
+            <Ionicons name={iconName} size={22} color={color} />
+        </View>
+    );
+}
 export default function DeviceListScreen() {
     const navigation = useNavigation<NavigationProp>();
     const { devices, carregarColeiras } = useDeviceViewModel();
@@ -68,7 +96,8 @@ export default function DeviceListScreen() {
                         onPress={() => navigation.navigate('DeviceConfigure', {
                             collarId: item.id,
                             currentPetId: item.petId
-                        })}>
+                        })}
+                    >
                         <View style={styles.cardInfo}>
                             <Text style={[styles.nomeText, { color: theme.textPrimary }]}>{item.nome}</Text>
                             <Text style={[styles.serialText, { color: theme.textSecondary }]}>S/N: {item.serialNumber}</Text>
@@ -76,6 +105,7 @@ export default function DeviceListScreen() {
                                 {item.petId ? 'Vinculado a um Pet' : 'Pronto para uso'}
                             </Text>
                         </View>
+                        <BatteryIndicator level={item.batteryLevel} />
                     </TouchableOpacity>
                 )}
                 ListEmptyComponent={
@@ -247,5 +277,13 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontFamily: 'Inter-Bold',
         color: Colors.brand.primaryBlue,
+    },
+    batteryContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingLeft: 12,
+        borderLeftWidth: 1,
+        borderLeftColor: Colors.light.border,
+        marginLeft: 8,
     },
 });
