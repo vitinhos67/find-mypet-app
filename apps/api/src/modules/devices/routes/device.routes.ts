@@ -56,4 +56,16 @@ export async function deviceRoutes(app: FastifyInstance) {
         { preHandler: [validateBody(saveLocationBodySchema)] },
         locationController.saveForDevice
     );
+    app.get<{ Params: { id: string } }>(
+        "/:id/status",
+        { preHandler: [authenticateSupabaseUser] },
+        deviceController.getStatus
+    );
+
+    // App puxa o histórico de coordenadas para desenhar o mapa
+    app.get<{ Params: { id: string }, Querystring: { limit?: string } }>(
+        "/:id/locations",
+        { preHandler: [authenticateSupabaseUser] },
+        deviceController.getLocations
+    );
 }

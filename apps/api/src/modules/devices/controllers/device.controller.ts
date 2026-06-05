@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
+import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
 import { DeviceService } from "../services/device.services";
+
 export interface CreateDeviceBody {
     nome: string;
     serialNumber: string;
@@ -148,6 +150,91 @@ export class DeviceController {
         } catch (error) {
             console.error("Erro no controller de device (Link):", error);
             return reply.status(500).send({ message: "Erro ao vincular dispositivo ao pet.", error });
+        }
+    };
+    getStatus = async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+        const { id } = request.params;
+
+        if (!ownerId) return reply.status(401).send({ message: "Não autorizada." });
+
+        try {
+            const { data: device, error } = await supabaseAdmin
+                .from("devices")
+                .select("status, updated_at, wake_interval, battery_level")
+                .eq("id", id)
+                .eq("owner_id", ownerId)
+                .single();
+
+            if (error || !device) return reply.status(404).send({ message: "Dispositivo não encontrado." });
+
+            // MOTOR OFFLINE (Regra da Morte)
+            const lastPing = new Date(device.updated_at).getTime();
+            const now = Date.now();
+            const intervalMs = device.wake_interval * 60 * 1000;
+            const gracePeriodMs = 2 * 60 * 1000; // 2 min de tolerância
+
+            const isActuallyOffline = (now - lastPing) > (intervalMs + gracePeriodMs);
+
+            if (device.status === 'ONLINE' && isActuallyOffline) {
+                // Atualiza no banco silenciosamente
+                await supabaseAdmin.from("devices").update({ status: 'OFFLINE' }).eq("id", id);
+
+                return reply.status(200).send({
+                    status: 'OFFLINE',
+                    battery_level: device.battery_level,
+                    last_seen: device.updated_at
+                });
+            }
+
+            return reply.status(200).send({
+                status: device.status,
+                battery_level: device.battery_level,
+                last_seen: device.updated_at
+            });
+        } catch (error) {
+            console.error("Erro no controller de device (Status):", error);
+            return reply.status(500).send({ message: "Erro ao buscar status." });
+        }
+    };
+
+    getLocations = async (
+        request: FastifyRequest<{ Params: { id: string }, Querystring: { limit?: string } }>,
+        reply: FastifyReply
+    ) => {
+        const ownerId = request.supabaseUser?.id;
+        const { id } = request.params;
+        const limit = request.query.limit ? parseInt(request.query.limit) : 50;
+
+        if (!ownerId) return reply.status(401).send({ message: "Não autorizada." });
+
+        try {
+            // Verifica se a coleira pertence ao usuário antes de liberar o mapa
+            const { data: device } = await supabaseAdmin
+                .from("devices")
+                .select("id")
+                .eq("id", id)
+                .eq("owner_id", ownerId)
+                .single();
+
+            if (!device) return reply.status(403).send({ message: "Acesso negado." });
+
+            const { data: locations, error } = await supabaseAdmin
+                .from("device_locations")
+                .select("latitude, longitude, created_at, accuracy")
+                .eq("device_id", id)
+                .order("created_at", { ascending: false })
+                .limit(limit);
+
+            if (error) throw error;
+
+            return reply.status(200).send(locations);
+        } catch (error) {
+            console.error("Erro no controller de device (Locations):", error);
+            return reply.status(500).send({ message: "Erro ao buscar mapa." });
         }
     };
 }
