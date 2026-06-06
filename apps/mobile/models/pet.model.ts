@@ -13,6 +13,7 @@ export interface Pet {
     sharePermission?: SharePermission;
     shareId?: string;
     ownerEmail?: string;
+    ownerName?: string;
 }
 
 export interface PetPayload {
@@ -57,5 +58,6 @@ export interface SharedPetResponse {
     sexo: SexoPet | null;
     descricao: string | null;
     owner_id: string;
+    owner_name: string | null;
     created_at: string;
 }

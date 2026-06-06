@@ -2,6 +2,11 @@ import { supabase } from '../src/shared/lib/supabase';
 
 export const AuthService = {
 
+    async getCurrentUserId(): Promise<string | null> {
+        const { data } = await supabase.auth.getSession();
+        return data.session?.user.id ?? null;
+    },
+
     async login(email: string, senha: string) {
         const { data, error } = await supabase.auth.signInWithPassword({
             email,

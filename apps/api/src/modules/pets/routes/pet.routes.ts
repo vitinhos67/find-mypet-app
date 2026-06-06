@@ -42,4 +42,10 @@ export async function petRoutes(app: FastifyInstance) {
     { preHandler: [authenticateSupabaseUser] },
     petController.delete
   );
+
+  app.post<{ Body: { base64: string; mimeType?: string } }>(
+    "/upload-image",
+    { preHandler: [authenticateSupabaseUser] },
+    petController.uploadImage
+  );
 }

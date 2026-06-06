@@ -5,17 +5,21 @@ import type { CreateShareInput, PetShare, SharedPetResult } from "../models/shar
 
 export class ShareRepository {
   async resolveUserIdByEmail(email: string): Promise<string> {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
     if (error) {
       throw new AppException("Erro ao buscar usuário.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
     }
 
-    const user = data?.users?.find((u) => u.email === email);
-    if (!user) {
+    if (!data) {
       throw new AppException(`Nenhuma conta encontrada com o email "${email}".`, 404, ErrorCodes.NOT_FOUND);
     }
 
-    return user.id;
+    return data.id;
   }
 
   async create(input: CreateShareInput): Promise<PetShare> {
@@ -42,7 +46,13 @@ export class ShareRepository {
   async findByPetAndOwner(petId: string, ownerId: string): Promise<PetShare[]> {
     const { data, error } = await supabaseAdmin
       .from("pet_shares")
-      .select("*")
+      .select(`
+        *,
+        profiles:shared_with_user_id (
+          email,
+          full_name
+        )
+      `)
       .eq("pet_id", petId)
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
@@ -51,16 +61,10 @@ export class ShareRepository {
       throw new AppException("Não foi possível listar compartilhamentos.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
     }
 
-    const rows = data || [];
-    if (rows.length === 0) return rows;
-
-    // Enriquece com o email de cada usuário (só para exibição)
-    const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-    const usersMap = new Map(usersData?.users?.map((u) => [u.id, u.email]) ?? []);
-
-    return rows.map((row) => ({
+    return (data || []).map((row: any) => ({
       ...row,
-      shared_with_email: usersMap.get(row.shared_with_user_id) ?? row.shared_with_user_id,
+      shared_with_email: row.profiles?.email ?? row.shared_with_user_id,
+      profiles: undefined,
     }));
   }
 
@@ -91,7 +95,11 @@ export class ShareRepository {
           sexo,
           descricao,
           owner_id,
-          created_at
+          created_at,
+          profiles:owner_id (
+            full_name,
+            email
+          )
         )
       `)
       .eq("shared_with_user_id", userId);
@@ -103,7 +111,9 @@ export class ShareRepository {
     return (data || []).map((row: any) => ({
       share_id: row.id,
       permission: row.permission,
+      owner_name: row.pets?.profiles?.full_name ?? row.pets?.profiles?.email ?? null,
       ...row.pets,
+      profiles: undefined,
     }));
   }
 

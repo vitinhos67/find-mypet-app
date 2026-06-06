@@ -1,7 +1,9 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
+import { PetLocalRepository } from '../database';
 import { Pet, PetPayload, SexoPet, SharedPetResponse } from '../models/pet.model';
+import { AuthService } from '../services/AuthService';
 import { PetService } from '../services/PetService';
 import { ShareService } from '../services/ShareService';
 import { StorageService } from '../services/StorageService';
@@ -30,7 +32,8 @@ function mapSharedToPet(shared: SharedPetResponse): Pet {
         descricao: shared.descricao ?? '',
         isShared: true,
         sharePermission: shared.permission,
-        shareId: shared.share_id
+        shareId: shared.share_id,
+        ownerName: shared.owner_name ?? undefined,
     };
 }
 
@@ -51,11 +54,25 @@ export function usePetViewModel() {
             const petsData = Array.isArray(petsResposta) ? petsResposta : ((petsResposta as any)?.data || []);
             const sharedData = Array.isArray(sharedResposta) ? sharedResposta : ((sharedResposta as any)?.data || []);
 
-            setPets(petsData.map(mapDbToPet));
-            setSharedPets(sharedData.map(mapSharedToPet));
+            const mappedPets = petsData.map(mapDbToPet);
+            const mappedShared = sharedData.map(mapSharedToPet);
+
+            setPets(mappedPets);
+            setSharedPets(mappedShared);
+
+            const userId = await AuthService.getCurrentUserId();
+            if (userId) {
+                await PetLocalRepository.replaceAll(userId, mappedPets);
+            }
         } catch (error) {
             console.error('Erro ao carregar pets:', error);
-            Alert.alert('Erro', 'Não foi possível carregar os pets da nuvem.');
+            const userId = await AuthService.getCurrentUserId();
+            if (userId) {
+                const cached = await PetLocalRepository.findAll(userId);
+                setPets(cached);
+            } else {
+                Alert.alert('Erro', 'Não foi possível carregar os pets da nuvem.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -64,16 +81,37 @@ export function usePetViewModel() {
     const carregarPetPorId = useCallback(async (id: string) => {
         setIsLoading(true);
         try {
+            const inMemory = pets.find(p => p.id === id) ?? sharedPets.find(p => p.id === id);
+            if (inMemory) {
+                setSelectedPet(inMemory);
+                return inMemory;
+            }
+
             const pet = await PetService.getPetById(id);
-            setSelectedPet(pet);
-            return pet;
+            if (pet) {
+                setSelectedPet(pet);
+                return pet;
+            }
+
+
+            const userId = await AuthService.getCurrentUserId();
+            if (userId) {
+                const cached = await PetLocalRepository.findById(userId, id);
+                if (cached) {
+                    setSelectedPet(cached);
+                    return cached;
+                }
+            }
+
+            setSelectedPet(null);
+            return null;
         } catch (error) {
             console.error('Erro ao carregar detalhe do pet:', error);
             return null;
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [pets, sharedPets]);
 
     async function adicionarPet(
         foto: string,

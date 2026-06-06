@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useFocusEffect, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View, Modal } from 'react-native';
+import { ActivityIndicator, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
@@ -34,7 +34,6 @@ export default function PetProfileScreen() {
 
     useFocusEffect(useCallback(() => {
         SafeZoneService.get(petId).then((resp: any) => {
-            // A API envolve a resposta em { data, message } — desempacota corretamente
             const unwrapped = resp && typeof resp === 'object' && 'message' in resp ? resp.data : resp;
             setSafeZone(unwrapped ?? null);
         }).catch(() => setSafeZone(null));
@@ -147,7 +146,9 @@ export default function PetProfileScreen() {
                         <View style={[styles.sharedBadge, { backgroundColor: Colors.brand.primaryOrange + '18' }]}>
                             <Ionicons name="people-outline" size={13} color={Colors.brand.primaryOrange} />
                             <Text style={[styles.sharedBadgeText, { color: Colors.brand.primaryOrange }]}>
-                                {pet.sharePermission === 'EDIT' ? 'Compartilhado · Pode editar' : 'Compartilhado · Visualização'}
+                                {pet.ownerName ? `Compartilhado por ${pet.ownerName}` : 'Compartilhado'}
+                                {' · '}
+                                {pet.sharePermission === 'EDIT' ? 'Pode editar' : 'Visualização'}
                             </Text>
                         </View>
                     )}

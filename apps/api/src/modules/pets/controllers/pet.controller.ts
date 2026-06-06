@@ -1,5 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
+import { AppException } from "../../../shared/exceptions/app.exception";
+import { ErrorCodes } from "../../../shared/exceptions/error-codes";
+import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
 import { apiSuccess } from "../../../shared/utils/api-response";
 import { PetService } from "../services/pet.service";
 import type { CreatePetBody } from "../validators/create.validator";
@@ -68,5 +71,34 @@ export class PetController {
     await this.petService.delete(id, ownerId);
 
     return reply.status(200).send(apiSuccess(null, "Pet removido com sucesso."));
+  };
+
+  uploadImage = async (
+    request: FastifyRequest<{ Body: { base64: string; mimeType?: string } }>,
+    reply: FastifyReply
+  ) => {
+    const { base64, mimeType } = request.body;
+
+    if (!base64) {
+      throw new AppException("Campo 'base64' é obrigatório.", 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    const fileName = `${Date.now()}_pet.jpg`;
+    const filePath = `pets/${fileName}`;
+    const buffer = Buffer.from(base64, "base64");
+
+    const { error } = await supabaseAdmin.storage
+      .from("pets")
+      .upload(filePath, buffer, { contentType: mimeType || "image/jpeg" });
+
+    if (error) {
+      throw new AppException("Falha ao fazer upload da imagem.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
+    }
+
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from("pets")
+      .getPublicUrl(filePath);
+
+    return reply.status(200).send(apiSuccess({ url: publicUrl }, "Upload realizado com sucesso."));
   };
 }

@@ -28,5 +28,6 @@ export interface SharedPetResult {
   sexo: string | null;
   descricao: string | null;
   owner_id: string;
+  owner_name: string | null;
   created_at: string;
 }
