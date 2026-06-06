@@ -2,17 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
-import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useTheme } from '../../hooks/useTheme';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 import { Colors } from '../styles/color';
@@ -23,7 +14,7 @@ export default function ProfileScreen() {
     const { darkMode, toggleTheme } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
     const [avatarFailed, setAvatarFailed] = useState(false);
-
+    const [showFullImage, setShowFullImage] = useState(false);
     const {
         usuario, profileImage, isEditing, isSaving,
         nome, telefone, genero, message, errorMessage,
@@ -66,9 +57,14 @@ export default function ProfileScreen() {
                 {/* Avatar + info */}
                 <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
                     <Pressable
-                        onPress={selecionarImagem}
+                        onPress={() => {
+                            if (profileImage) {
+                                setShowFullImage(true);
+                            } else if (isEditing) {
+                                selecionarImagem();
+                            }
+                        }}
                         style={styles.avatarWrap}
-                        disabled={!isEditing || isSaving}
                     >
                         {profileImage && !avatarFailed ? (
                             <ExpoImage
@@ -241,6 +237,24 @@ export default function ProfileScreen() {
                     <Text style={styles.logoutText}>Sair da Conta</Text>
                 </Pressable>
             </ScrollView>
+
+            <Modal
+                visible={showFullImage}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowFullImage(false)}
+            >
+                <Pressable
+                    style={styles.fullImageContainer}
+                    onPress={() => setShowFullImage(false)}
+                >
+                    <ExpoImage
+                        source={{ uri: profileImage ?? undefined }}
+                        style={styles.fullImage}
+                        contentFit="contain"
+                    />
+                </Pressable>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -527,5 +541,17 @@ const styles = StyleSheet.create({
         color: '#EF4444',
         fontSize: 15,
         fontFamily: 'Inter-Bold',
+    },
+
+    fullImageContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    fullImage: {
+        width: '100%',
+        height: '80%',
     },
 });
