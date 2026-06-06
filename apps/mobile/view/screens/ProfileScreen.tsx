@@ -58,10 +58,13 @@ export default function ProfileScreen() {
                 <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
                     <Pressable
                         onPress={() => {
+                            if (isEditing) {
+                                selecionarImagem();
+                                return;
+                            }
+
                             if (profileImage) {
                                 setShowFullImage(true);
-                            } else if (isEditing) {
-                                selecionarImagem();
                             }
                         }}
                         style={styles.avatarWrap}
