@@ -1,6 +1,4 @@
-import { PetLocalRepository } from '../database';
 import { Pet, PetPayload, PetResponse, SexoPet } from '../models/pet.model';
-import { supabase } from '../src/shared/lib/supabase';
 import { ApiService } from './ApiService';
 
 type ApiResponse<T> = {
@@ -25,35 +23,20 @@ export class PetService {
     }
 
     static async getPets(): Promise<Pet[]> {
-        try {
-            const response = await ApiService.get<
-                ApiResponse<ApiPetResponse[]> | ApiPetResponse[]
-            >('/pets');
-            const pets = this.getPetsData(response)
-                .map((pet) => this.toPetCache(pet));
-            const userId = await this.getAuthenticatedUserId();
-
-            if (userId) {
-                await PetLocalRepository.replaceAll(userId, pets);
-            }
-
-            return pets;
-        } catch (error) {
-            console.log('Erro ao carregar pets pela API:', error);
-
-            const userId = await this.getAuthenticatedUserId();
-
-            if (!userId) {
-                throw error;
-            }
-
-            return PetLocalRepository.findAll(userId);
-        }
+        const response = await ApiService.get<
+            ApiResponse<ApiPetResponse[]> | ApiPetResponse[]
+        >('/pets');
+        return this.getPetsData(response).map(pet => this.toPetCache(pet));
     }
 
     static async getPetById(id: string): Promise<Pet | null> {
-        const pets = await this.getPets();
-        return pets.find((pet) => pet.id === id) ?? null;
+        const response = await ApiService.get<
+            { success: boolean; data: ApiPetResponse } | ApiPetResponse
+        >(`/pets/${id}`);
+        const raw = 'data' in response && response.data
+            ? (response as { success: boolean; data: ApiPetResponse }).data
+            : response as ApiPetResponse;
+        return this.toPetCache(raw);
     }
 
     static async updatePet(id: string, data: PetPayload) {
@@ -75,7 +58,7 @@ export class PetService {
         return Array.isArray(response) ? response : response.data || [];
     }
 
-    private static toPetCache(pet: ApiPetResponse): Pet {
+    static toPetCache(pet: ApiPetResponse): Pet {
         return {
             id: pet.id,
             foto: pet.image_href ?? pet.foto,
@@ -85,11 +68,5 @@ export class PetService {
             sexo: (pet.sexo ?? 'MACHO') as SexoPet,
             descricao: pet.descricao ?? '',
         };
-    }
-
-    private static async getAuthenticatedUserId() {
-        const { data } = await supabase.auth.getSession();
-
-        return data.session?.user.id ?? null;
     }
 }
