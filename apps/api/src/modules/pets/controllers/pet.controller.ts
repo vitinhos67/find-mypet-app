@@ -7,7 +7,13 @@ import type { CreatePetBody } from "../validators/create.validator";
 export class PetController {
   constructor(private readonly petService = new PetService()) { }
 
-  // Mantemos o List para a tua Home Screen continuar a funcionar
+  getById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    const userId = request.supabaseUser!.id;
+    const { id } = request.params;
+    const pet = await this.petService.getById(id, userId);
+    return reply.status(200).send(apiSuccess(pet, "Pet encontrado."));
+  };
+
   list = async (request: FastifyRequest, reply: FastifyReply) => {
     const ownerId = request.supabaseUser!.id;
     const pets = await this.petService.list(ownerId);

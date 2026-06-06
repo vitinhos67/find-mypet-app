@@ -28,6 +28,29 @@ export class PetRepository {
     return data;
   }
 
+  async findById(id: string, userId: string): Promise<Pet | null> {
+    const { data: pet, error } = await supabaseAdmin
+      .from("pets")
+      .select(PET_PUBLIC_FIELDS)
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) throw new AppException("Erro ao buscar pet.", 500, ErrorCodes.INTERNAL_ERROR, error.message);
+    if (!pet) return null;
+    if (pet.owner_id === userId) return pet;
+
+    const { data: share } = await supabaseAdmin
+      .from("pet_shares")
+      .select("id")
+      .eq("pet_id", id)
+      .eq("shared_with_user_id", userId)
+      .maybeSingle();
+
+    if (share) return pet;
+
+    throw new AppException("Pet não encontrado.", 404, ErrorCodes.NOT_FOUND);
+  }
+
   async findManyByOwnerId(ownerId: string): Promise<Pet[]> {
     console.log("Buscando pets para o owner_id:", ownerId);
     const { data, error } = await supabaseAdmin

@@ -9,6 +9,10 @@ export class PetService {
 
     return pet;
   }
+  async getById(id: string, userId: string): Promise<Pet | null> {
+    return this.petRepository.findById(id, userId);
+  }
+
   async list(ownerId: string): Promise<Pet[]> {
     return await this.petRepository.findManyByOwnerId(ownerId);
   }

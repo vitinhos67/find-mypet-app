@@ -19,6 +19,12 @@ export async function petRoutes(app: FastifyInstance) {
     petController.list
   );
 
+  app.get<{ Params: { id: string } }>(
+    "/:id",
+    { preHandler: [authenticateSupabaseUser] },
+    petController.getById
+  );
+
   app.post<{ Body: CreatePetBody }>(
     "/",
     { preHandler: [authenticateSupabaseUser, validateBody(createPetBodySchema)] },
