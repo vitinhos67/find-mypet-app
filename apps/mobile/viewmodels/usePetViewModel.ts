@@ -163,16 +163,27 @@ export function usePetViewModel() {
     }
 
     async function selecionarFoto(): Promise<string | null> {
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 1,
-            allowsEditing: true,
-            aspect: [1, 1]
-        });
-        if (!result.canceled) {
-            return result.assets[0].uri;
-        }
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert(
+                'Permissão necessária',
+                'Precisamos de acesso às suas fotos para selecionar uma imagem do pet.'
+            );
         return null;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        allowsEditing: true,
+        aspect: [1, 1]
+    });
+
+    if (!result.canceled) {
+        return result.assets[0].uri;
+    }
+
+    return null;
     }
 
     return {
