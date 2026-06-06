@@ -1,18 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback } from 'react';
-import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useTheme } from '../../hooks/useTheme';
 import { Pet } from '../../models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
@@ -21,7 +12,7 @@ import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList'>;
 
-function PetCard({ item, onPress, theme }: { item: Pet; onPress: () => void; theme: any }) {
+function PetCard({ item, onPress, theme, onImagePress }: { item: Pet; onPress: () => void; theme: any; onImagePress: (uri: string) => void; }) {
     const isMacho = item.sexo === 'MACHO';
     return (
         <Pressable
@@ -29,7 +20,14 @@ function PetCard({ item, onPress, theme }: { item: Pet; onPress: () => void; the
             onPress={onPress}
         >
             {item.foto ? (
-                <Image source={{ uri: item.foto }} style={styles.avatar} />
+                <Pressable
+                    onPress={(e) => { e.stopPropagation(); onImagePress(item.foto!); }}
+                >
+                    <Image
+                        source={{ uri: item.foto }}
+                        style={styles.avatar}
+                    />
+                </Pressable>
             ) : (
                 <View style={[styles.avatarPlaceholder, { backgroundColor: Colors.brand.primaryBlue + '15' }]}>
                     <Text style={styles.avatarEmoji}>🐾</Text>
@@ -96,6 +94,8 @@ export default function PetListScreen() {
     const { pets, sharedPets, isLoading, carregarPets } = usePetViewModel();
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
+    const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(null);
+    const [modalVisible, setModalVisible] = useState(false);
 
     useFocusEffect(useCallback(() => { carregarPets(); }, [carregarPets]));
 
@@ -141,6 +141,7 @@ export default function PetListScreen() {
                                 item={item}
                                 theme={theme}
                                 onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                                onImagePress={(uri) => { setImagemSelecionada(uri); setModalVisible(true); }}
                             />
                         ))
                     }
@@ -155,11 +156,32 @@ export default function PetListScreen() {
                                 item={item}
                                 theme={theme}
                                 onPress={() => navigation.navigate('PetProfile', { petId: item.id })}
+                                onImagePress={(uri) => { setImagemSelecionada(uri); setModalVisible(true); }}
                             />
                         ))
                     }
                 </ScrollView>
             )}
+            
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <Pressable
+                    style={styles.modalContainer}
+                    onPress={() => setModalVisible(false)}
+                >
+                {imagemSelecionada && (
+                    <Image
+                        source={{ uri: imagemSelecionada }}
+                        style={styles.modalImage}
+                        resizeMode="contain"
+                    />
+                )}
+                </Pressable>
+            </Modal>
 
             <Pressable
                 style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
@@ -352,4 +374,16 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
         elevation: 6,
     },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    
+    modalImage: {
+        width: '95%',
+        height: '80%',
+    },
+
 });

@@ -2,20 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useFocusEffect, useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-    ActivityIndicator,
-    Image,
-    Linking,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
-} from 'react-native';
+import { ActivityIndicator, Image, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View, Modal } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useTheme } from '../../hooks/useTheme';
 import { SafeZone } from '../../models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
@@ -31,15 +20,13 @@ export default function PetProfileScreen() {
     const navigation = useNavigation<NavProps>();
     const route = useRoute<RouteProps>();
     const { petId } = route.params;
-
     const { getPetById, carregarPetPorId, isLoading } = usePetViewModel();
     const { localizacao, isLoading: isLoadingLocation } = useLocationViewModel(petId);
-
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
     const isFocused = useIsFocused();
-
     const [safeZone, setSafeZone] = useState<SafeZone | null>(null);
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         carregarPetPorId(petId);
@@ -54,7 +41,6 @@ export default function PetProfileScreen() {
     }, [petId]));
 
     const pet = getPetById(petId);
-
     const isOwner = !pet?.isShared;
     const canEdit = !pet?.isShared || pet?.sharePermission === 'EDIT';
 
@@ -138,7 +124,9 @@ export default function PetProfileScreen() {
                 {/* Hero */}
                 <View style={styles.hero}>
                     {pet.foto ? (
-                        <Image source={{ uri: pet.foto }} style={styles.heroPhoto} />
+                        <Pressable onPress={() => setModalVisible(true)}>
+                            <Image source={{ uri: pet.foto }} style={styles.heroPhoto} />
+                        </Pressable>
                     ) : (
                         <View style={[styles.heroPlaceholder, { backgroundColor: Colors.brand.primaryBlue + '15' }]}>
                             <Text style={styles.heroEmoji}>🐾</Text>
@@ -279,6 +267,24 @@ export default function PetProfileScreen() {
                     )}
                 </View>
             </ScrollView>
+
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <Pressable
+                    style={styles.modalContainer}
+                    onPress={() => setModalVisible(false)}
+                >
+                    <Image
+                        source={{ uri: pet.foto }}
+                        style={styles.modalImage}
+                        resizeMode="contain"
+                    />
+                </Pressable>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -504,5 +510,17 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter-Regular',
         textAlign: 'center',
         lineHeight: 20,
+    },
+
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    modalImage: {
+        width: '95%',
+        height: '80%',
     },
 });

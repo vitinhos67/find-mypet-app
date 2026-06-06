@@ -1,20 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import {
-    ActivityIndicator,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View
-} from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useTheme } from '../../hooks/useTheme';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { SexoSelector } from '../components/SexoSelector';
@@ -25,7 +13,6 @@ export default function PetAddScreen() {
     const { adicionarPet, selecionarFoto, isLoading } = usePetViewModel();
     const { darkMode } = useTheme();
     const theme = darkMode ? Colors.dark : Colors.light;
-
     const [foto, setFoto] = useState('');
     const [nome, setNome] = useState('');
     const [raca, setRaca] = useState('');
