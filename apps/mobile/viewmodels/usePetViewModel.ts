@@ -93,20 +93,12 @@ export function usePetViewModel() {
                 return pet;
             }
 
-
-            const userId = await AuthService.getCurrentUserId();
-            if (userId) {
-                const cached = await PetLocalRepository.findById(userId, id);
-                if (cached) {
-                    setSelectedPet(cached);
-                    return cached;
-                }
-            }
-
             setSelectedPet(null);
             return null;
+
         } catch (error) {
             console.error('Erro ao carregar detalhe do pet:', error);
+            setSelectedPet(null);
             return null;
         } finally {
             setIsLoading(false);

@@ -1,5 +1,7 @@
+import { PetLocalRepository } from '../database';
 import { Pet, PetPayload, PetResponse, SexoPet } from '../models/pet.model';
 import { ApiService } from './ApiService';
+import { AuthService } from './AuthService';
 
 type ApiResponse<T> = {
     success: boolean;
@@ -30,13 +32,31 @@ export class PetService {
     }
 
     static async getPetById(id: string): Promise<Pet | null> {
-        const response = await ApiService.get<
-            { success: boolean; data: ApiPetResponse } | ApiPetResponse
-        >(`/pets/${id}`);
-        const raw = 'data' in response && response.data
-            ? (response as { success: boolean; data: ApiPetResponse }).data
-            : response as ApiPetResponse;
-        return this.toPetCache(raw);
+        try {
+            const response = await ApiService.get<
+                { success: boolean; data: ApiPetResponse } | ApiPetResponse
+            >(`/pets/${id}`);
+            const raw = 'data' in response && response.data
+                ? (response as { success: boolean; data: ApiPetResponse }).data
+                : response as ApiPetResponse;
+            const pet = this.toPetCache(raw);
+
+            const userId = await AuthService.getCurrentUserId();
+            if (userId) {
+                await PetLocalRepository.upsert(userId, pet);
+            }
+
+            return pet;
+        } catch (error) {
+            console.log('Erro ao carregar detalhe do pet pela API:', error);
+
+            const userId = await AuthService.getCurrentUserId();
+            if (!userId) {
+                throw error;
+            }
+
+            return PetLocalRepository.findById(userId, id);
+        }
     }
 
     static async updatePet(id: string, data: PetPayload) {
