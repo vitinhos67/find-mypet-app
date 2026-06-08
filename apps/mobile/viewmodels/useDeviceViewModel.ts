@@ -1,33 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
+import { CollarDevice } from '../models/device.model';
 import { DeviceService } from '../services/DeviceService';
 
 export function useDeviceViewModel() {
-    const [devices, setDevices] = useState<any[]>([]);
+    const [devices, setDevices] = useState<CollarDevice[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const carregarColeiras = useCallback(async () => {
         setIsLoading(true);
         try {
             const data = await DeviceService.getDevices();
-
-            if (Array.isArray(data)) {
-                const devicesFormatados = data.map((dbDevice: any) => ({
-                    id: dbDevice.id,
-                    nome: dbDevice.name || 'Sem Nome',
-                    serialNumber: dbDevice.serial_number,
-                    wifiSsid: dbDevice.wifi_ssid,
-                    wifiSenha: dbDevice.wifi_password,
-                    intervaloAcordarMinutos: dbDevice.wake_interval || 15,
-                    comportamentoSemWifi: dbDevice.behavior_no_wifi || 'STORE',
-                    petId: dbDevice.pet_id,
-                    status: dbDevice.status || 'ONLINE',
-                    batteryLevel: dbDevice.battery_level
-                }));
-                setDevices(devicesFormatados);
-            } else {
-                setDevices([]);
-            }
+            setDevices(data);
         } catch (error) {
             console.error('Erro ao buscar coleiras:', error);
             setDevices([]);

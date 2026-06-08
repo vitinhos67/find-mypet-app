@@ -1,4 +1,4 @@
-export type ComportamentoSemWifi = 'PERGUNTAR' | 'RASTREIO_ATIVO' | 'PEGAR_LOCAL_E_DORMIR' | 'IGNORAR';
+export type ComportamentoSemWifi = 'PERGUNTAR' | 'RASTREIO_ATIVO' | 'PEGAR_LOCAL_E_DORMIR' | 'IGNORAR' | 'STORE' | 'DISCARD';
 
 export interface CollarDevice {
     id: string;
