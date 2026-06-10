@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import MapView from 'react-native-maps';
+import { CollarDevice } from '../models/device.model';
 import { Alert, SafeZone } from '../models/safe-zone.model';
 import { DeviceService } from '../services/DeviceService';
 import { LocationService } from '../services/LocationService';
@@ -69,12 +70,12 @@ export function useHomeViewModel() {
                 ? petsResponse
                 : (petsResponse?.data ?? []);
 
-            const devicesData = Array.isArray(devicesResponse)
+            const devicesData: CollarDevice[] = Array.isArray(devicesResponse)
                 ? devicesResponse
                 : (devicesResponse?.data ?? []);
 
             const petsBase: PetHomeType[] = petsData.map((pet: any) => {
-                const device = devicesData.find((d: any) => d.pet_id === pet.id);
+                const device = devicesData.find((d) => d.petId === pet.id);
                 const status: PetStatus = device
                     ? (device.status === 'ONLINE' ? 'ONLINE' : 'OFFLINE')
                     : 'SEM_COLEIRA';
@@ -83,10 +84,10 @@ export function useHomeViewModel() {
                     id: pet.id,
                     nome: pet.name ?? pet.nome,
                     foto: pet.image_href ?? pet.foto,
-                    nomeColeira: device?.name ?? null,
+                    nomeColeira: device?.nome ?? null,
                     deviceId: device?.id ?? null,
                     status,
-                    batteryLevel: device?.battery_level ?? null,
+                    batteryLevel: device?.batteryLevel ?? null,
                 };
             });
 
