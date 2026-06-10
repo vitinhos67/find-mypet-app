@@ -27,6 +27,7 @@ jest.mock('../../database', () => ({
 describe('PetService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   describe('createPet', () => {
