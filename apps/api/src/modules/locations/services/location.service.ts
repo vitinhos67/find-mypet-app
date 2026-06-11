@@ -22,7 +22,7 @@ export class LocationService {
     if (!record.pet_id) return;
 
     // Busca o owner_id do pet para criar o alerta
-    const { supabaseAdmin } = await import("../../../shared/supabase/supabaseAdmin");
+    const { supabaseAdmin } = await import("../../../shared/supabase/supabaseAdmin.js");
     const { data: pet } = await supabaseAdmin
       .from("pets")
       .select("owner_id")

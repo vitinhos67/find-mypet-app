@@ -4,10 +4,24 @@ import { AppException } from "../../../shared/exceptions/app.exception";
 import { ErrorCodes } from "../../../shared/exceptions/error-codes";
 import { apiSuccess } from "../../../shared/utils/api-response";
 import { LocationService } from "../services/location.service";
-import type { SaveLocationBody } from "../validators/save.validator";
+
+// 1. Tipagem absoluta para o Fastify e TypeScript não chorarem
+export interface DeviceLocationBody {
+  device_id?: string;
+  latitude: number | string;
+  longitude: number | string;
+  precision?: number;
+  battery?: number;
+  is_fallback?: boolean;
+  hardware_log?: string;
+}
+
+export interface DeviceLocationParams {
+  id?: string;
+}
 
 export class LocationController {
-  constructor(private readonly locationService = new LocationService()) {}
+  constructor(private readonly locationService = new LocationService()) { }
 
   get = async (
     request: FastifyRequest<{ Params: { id: string } }>,
@@ -39,17 +53,28 @@ export class LocationController {
   };
 
   saveForDevice = async (
-    request: FastifyRequest<{ Params: { id: string }; Body: SaveLocationBody }>,
+    // 2. Aqui a mágica acontece: o TS agora sabe exatamente o formato da requisição
+    request: FastifyRequest<{ Params: DeviceLocationParams; Body: DeviceLocationBody }>,
     reply: FastifyReply
   ) => {
-    const { id: deviceId } = request.params;
-    const { latitude, longitude, precision } = request.body;
 
+    // Extratificando os dados com segurança
+    const body = request.body;
+    const deviceId = body.device_id || request.params.id;
+    const latitude = body.latitude;
+    const longitude = body.longitude;
+    const precision = body.precision;
+
+    if (!deviceId) {
+      throw new AppException("O device_id é obrigatório no payload.", 400, ErrorCodes.VALIDATION_ERROR);
+    }
+
+    // 3. Conversão segura: se o ESP mandar string, vira float.
     const location = await this.locationService.saveForDevice({
       device_id: deviceId,
-      latitude,
-      longitude,
-      precision,
+      latitude: typeof latitude === "string" ? parseFloat(latitude) : latitude,
+      longitude: typeof longitude === "string" ? parseFloat(longitude) : longitude,
+      precision: precision ? Number(precision) : 0,
     });
 
     return reply.status(201).send(

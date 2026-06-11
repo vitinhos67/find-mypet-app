@@ -8,23 +8,24 @@ export class HardwareController {
 
         const { data: device, error } = await supabaseAdmin
             .from("devices")
-            .select("id, wifi_ssid, wifi_password, wake_interval, behavior_no_wifi")
+            // 🔥 ADICIONE A COLUNA DE INTERVALO AQUI (ex: update_interval)
+            .select("behavior_no_wifi, wifi_ssid, wifi_password, wake_interval")
             .eq("serial_number", serial)
             .single();
 
         if (error || !device) {
+            console.error("❌ ERRO AO BUSCAR CONFIGURAÇÕES:", error);
             return reply.status(404).send({ message: "Dispositivo não encontrado." });
         }
 
         return reply.status(200).send({
-            device_id: device.id,
-            wifi_ssid: device.wifi_ssid,
-            wifi_password: device.wifi_password,
-            wake_interval: device.wake_interval,
-            behavior_no_wifi: device.behavior_no_wifi
+            behavior_no_wifi: device.behavior_no_wifi || "RASTREIO_ATIVO",
+            wifi_ssid: device.wifi_ssid || "",
+            wifi_password: device.wifi_password || "",
+            // 🔥 MANDA PRO ESP32 O NÚMERO QUE O APP SALVOU (Padrão: 1 minuto)
+            wake_interval: device.wake_interval || 1
         });
     };
-
     ping = async (req: FastifyRequest<{ Params: { serial: string }, Body: { battery_level?: number } }>, reply: FastifyReply) => {
         const { serial } = req.params;
         const { battery_level } = req.body;
@@ -48,11 +49,11 @@ export class HardwareController {
     };
 
     saveLocation = async (
-        req: FastifyRequest<{ Params: { serial: string }, Body: { latitude: number, longitude: number, precision?: number } }>,
+        req: FastifyRequest<{ Params: { serial: string }, Body: { latitude: number, longitude: number, precision?: number, battery_level?: number } }>,
         reply: FastifyReply
     ) => {
         const { serial } = req.params;
-        const { latitude, longitude, precision } = req.body;
+        const { latitude, longitude, battery_level } = req.body;
 
         const { data: device, error: fetchError } = await supabaseAdmin
             .from("devices")
@@ -72,10 +73,30 @@ export class HardwareController {
             });
 
         if (insertError) {
-            console.error("DEBUG SUPABASE ERROR:", JSON.stringify(insertError, null, 2));
-            return reply.status(500).send({ message: "Erro ao salvar coordenada.", details: insertError });
+            console.error("❌ ERRO AO SALVAR GPS:", insertError);
+            return reply.status(500).send({ message: "Erro ao salvar coordenada." });
         }
 
-        return reply.status(201).send({ message: "GPS salvo." });
+        // 🔥 ATUALIZANDO STATUS E BATERIA (Com log de erro)
+        const updatePayload: any = { status: 'ONLINE', updated_at: new Date().toISOString() };
+
+        if (battery_level !== undefined) {
+            // A maioria dos esquemas Supabase usa battery_level, atualize aqui se a sua coluna tiver outro nome
+            updatePayload.battery_level = battery_level;
+        }
+
+        const { error: updateError } = await supabaseAdmin
+            .from("devices")
+            .update(updatePayload)
+            .eq("id", device.id);
+
+        if (updateError) {
+            console.error("\n❌ ERRO DO SUPABASE AO SALVAR BATERIA:", updateError.message);
+            console.error("-> DICA: Verifique se a coluna na tabela 'devices' se chama 'battery_level' ou apenas 'battery'.\n");
+        } else {
+            console.log(`✅ [ESP32] Bateria (${battery_level}%) e Status atualizados no banco!`);
+        }
+
+        return reply.status(201).send({ message: "GPS e Bateria processados." });
     };
 }

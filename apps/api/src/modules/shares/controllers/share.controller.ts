@@ -63,10 +63,16 @@ export class ShareController {
     request: FastifyRequest,
     reply: FastifyReply
   ) => {
-    const userId = request.supabaseUser!.id;
+    try {
+      const userId = request.supabaseUser!.id;
+      const pets = await this.shareService.getSharedPets(userId);
 
-    const pets = await this.shareService.getSharedPets(userId);
-
-    return reply.status(200).send(apiSuccess(pets, "Pets compartilhados listados."));
+      return reply.status(200).send(apiSuccess(pets, "Pets compartilhados listados."));
+    } catch (error) {
+      // 🔥 A MÁGICA: Vai cuspir no terminal exatamente qual linha do banco tá quebrando!
+      console.error("\n❌ ERRO FATAL NO REPOSITÓRIO DE COMPARTILHAMENTO:");
+      console.error(error);
+      return reply.status(500).send({ message: "Erro interno ao buscar pets compartilhados.", details: error });
+    }
   };
 }

@@ -18,4 +18,8 @@ export async function locationRoutes(app: FastifyInstance) {
     { preHandler: [authenticateSupabaseUser] },
     locationController.get
   );
+  app.post(
+    "/device",
+    locationController.saveForDevice
+  );
 }
