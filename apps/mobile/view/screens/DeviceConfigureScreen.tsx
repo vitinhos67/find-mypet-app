@@ -17,7 +17,7 @@ export default function DeviceConfigureScreen() {
     const { pets, carregarPets } = usePetViewModel();
     useEffect(() => {
         carregarPets();
-    }, []);
+    }, [carregarPets]);
 
     const navigation = useNavigation();
     const route = useRoute<ConfigureRouteProp>();
