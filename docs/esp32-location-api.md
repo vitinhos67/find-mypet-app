@@ -1,80 +1,87 @@
-# ESP32 — Envio de Localização GPS
+# ESP32 — Comunicação HTTP do Rastreador
 
-Este documento descreve como o firmware do ESP32 deve enviar a posição GPS para a API do Find My Pet.
+Este documento descreve o fluxo HTTP REST usado pelo firmware do ESP32-C3 SuperMini no Find MyPet.
 
----
+Firmware atual:
 
-## Endpoint
-
-```
-POST /api/devices/{deviceId}/location
+```text
+firmware/esp32/find_mypet_tracker/find_mypet_tracker.ino
 ```
 
-- `{deviceId}` — UUID do dispositivo (coleira), cadastrado previamente no banco.
-- **Não requer autenticação** — o device ID já identifica a coleira.
+O dispositivo se identifica pelo `SERIAL_NUMBER` configurado no firmware. Nas rotas abaixo, `{serial}` representa esse número de série.
 
----
+## Fluxo
 
-## Requisição
+1. O ESP32 conecta ao Wi-Fi.
+2. O ESP32 busca configurações atuais do dispositivo na API.
+3. O ESP32 lê bateria via ADC.
+4. O ESP32 envia localização e bateria para a API.
+5. O aplicativo mobile consome os dados de dispositivo e localização pelos services do app.
 
-### Headers
+## Buscar Configuração
 
+```http
+GET /api/hardware/{serial}/config
 ```
+
+Resposta esperada:
+
+```json
+{
+  "behavior_no_wifi": "RASTREIO_ATIVO",
+  "wifi_ssid": "NomeDaRede",
+  "wifi_password": "SenhaDaRede",
+  "wake_interval": 1
+}
+```
+
+Campos usados pelo firmware:
+
+- `wifi_ssid`: rede Wi-Fi configurada para o dispositivo;
+- `wifi_password`: senha da rede Wi-Fi;
+- `behavior_no_wifi`: comportamento quando estiver fora da rede esperada;
+- `wake_interval`: intervalo de envio/checagem configurado pelo app.
+
+## Enviar Localização e Bateria
+
+```http
+POST /api/hardware/{serial}/location
+```
+
+Headers:
+
+```http
 Content-Type: application/json
 ```
 
-### Body (JSON)
-
-| Campo       | Tipo             | Obrigatório | Descrição                                    |
-| ----------- | ---------------- | ----------- | -------------------------------------------- |
-| `latitude`  | `number`         | Sim         | Latitude em graus decimais (ex: `-23.5505`)  |
-| `longitude` | `number`         | Sim         | Longitude em graus decimais (ex: `-46.6333`) |
-| `precision` | `number \| null` | Não         | Precisão do GPS em metros (ex: `5.2`)        |
-
-**Exemplo:**
+Body enviado pelo ESP32:
 
 ```json
 {
-  "latitude": -23.5505,
-  "longitude": -46.6333,
-  "precision": 4.8
+  "latitude": -21.1306,
+  "longitude": -42.3643,
+  "precision": 0,
+  "battery_level": 85
 }
 ```
 
----
+Campos:
 
-## Resposta de Sucesso
+- `latitude`: latitude em graus decimais;
+- `longitude`: longitude em graus decimais;
+- `precision`: precisão informada pelo firmware;
+- `battery_level`: nível de bateria calculado a partir da leitura ADC.
 
-**HTTP 201 Created**
+Resposta esperada em sucesso:
 
-```json
-{
-  "success": true,
-  "data": {
-    "deviceId": "uuid-do-device",
-    "latitude": -23.5505,
-    "longitude": -46.6333,
-    "precision": 4.8,
-    "updatedAt": "2026-06-01T12:00:00.000Z"
-  },
-  "message": "Localização salva com sucesso."
-}
+```http
+201 Created
 ```
 
----
+## Nota de Segurança
 
-## Comportamento Interno
+O fluxo atual de firmware/demo usa endpoints HTTP identificados pelo número de série do dispositivo. Para produção, o projeto deveria adicionar autenticação mais forte, TLS e/ou credenciais assinadas por dispositivo.
 
-1. A API recebe as coordenadas do device.
-2. Busca o `pet_id` atualmente vinculado ao device na tabela `devices`.
-3. Insere um novo registro em `device_locations` com `device_id`, `pet_id` (pode ser `null` se a coleira não estiver vinculada a um pet) e as coordenadas.
-4. O campo `recorded_at` é preenchido automaticamente com o timestamp do servidor (`now()`).
+## Observação
 
-> Isso garante que o histórico de localização por pet seja preciso mesmo quando uma coleira é transferida entre pets.
-
-## Notas
-
-- O `deviceId` deve estar cadastrado na tabela `devices` antes do primeiro envio.
-- Se o device não estiver vinculado a nenhum pet, a localização é salva com `pet_id = null` — útil para testes de hardware.
-- A precisão (`precision`) é opcional, mas recomendada para filtrar leituras ruins do GPS.
-- Recomenda-se enviar apenas quando o GPS tiver um fix válido (HDOP aceitável).
+A rota `POST /api/devices/{deviceId}/location` não é a rota ativa usada pelo firmware atual. O firmware usa as rotas `GET /api/hardware/{serial}/config` e `POST /api/hardware/{serial}/location`.
