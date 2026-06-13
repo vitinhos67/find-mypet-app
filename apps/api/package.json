@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
+    "test": "tsx --test \"src/**/*.test.ts\"",
     "start": "node dist/main.js"
   },
   "dependencies": {
