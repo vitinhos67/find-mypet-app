@@ -39,7 +39,11 @@ export default function Cadastro() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={styles.container}
+            testID="create-account-screen"
+            accessibilityLabel="create-account-screen"
+        >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

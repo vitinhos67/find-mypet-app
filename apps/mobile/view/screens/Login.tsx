@@ -34,7 +34,11 @@ export default function Login() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={styles.container}
+            testID="login-screen"
+            accessibilityLabel="login-screen"
+        >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -65,6 +69,8 @@ export default function Login() {
                             <View style={styles.inputRow}>
                                 <Ionicons name="mail-outline" size={18} color={Colors.light.textSecondary} style={styles.inputIcon} />
                                 <TextInput
+                                    testID="login-email-input"
+                                    accessibilityLabel="login-email-input"
                                     style={styles.input}
                                     placeholder="seu@email.com"
                                     placeholderTextColor={Colors.light.textSecondary}
@@ -83,6 +89,8 @@ export default function Login() {
                             <View style={styles.inputRow}>
                                 <Ionicons name="lock-closed-outline" size={18} color={Colors.light.textSecondary} style={styles.inputIcon} />
                                 <TextInput
+                                    testID="login-password-input"
+                                    accessibilityLabel="login-password-input"
                                     style={[styles.input, { flex: 1 }]}
                                     placeholder="Sua senha"
                                     placeholderTextColor={Colors.light.textSecondary}
@@ -117,6 +125,8 @@ export default function Login() {
 
                         {/* Botão entrar */}
                         <Pressable
+                            testID="login-submit-button"
+                            accessibilityLabel="login-submit-button"
                             style={({ pressed }) => [styles.btnPrimary, { opacity: pressed || isLoading ? 0.8 : 1 }]}
                             onPress={handleEntrar}
                             disabled={isLoading}
@@ -130,7 +140,12 @@ export default function Login() {
                         {/* Rodapé */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Não tem uma conta? </Text>
-                            <Pressable onPress={() => navigation.navigate('Cadastro')} hitSlop={8}>
+                            <Pressable
+                                testID="login-create-account-button"
+                                accessibilityLabel="login-create-account-button"
+                                onPress={() => navigation.navigate('Cadastro')}
+                                hitSlop={8}
+                            >
                                 <Text style={styles.footerLink}>Criar conta</Text>
                             </Pressable>
                         </View>
