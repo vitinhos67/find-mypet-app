@@ -4,7 +4,6 @@ import React, {
     ReactNode,
     useContext,
     useEffect,
-    useState,
 } from 'react';
 
 type ThemeContextType = {
@@ -19,10 +18,30 @@ type Props = {
     children: ReactNode;
 };
 
+type ThemeState = {
+    darkMode: boolean;
+};
+
+type ThemeAction =
+    | { type: 'set'; darkMode: boolean }
+    | { type: 'toggle' };
+
+function themeReducer(state: ThemeState, action: ThemeAction): ThemeState {
+    switch (action.type) {
+        case 'set':
+            return { darkMode: action.darkMode };
+        case 'toggle':
+            return { darkMode: !state.darkMode };
+        default:
+            return state;
+    }
+}
+
 export function ThemeProvider({ children }: Props) {
 
-    const [darkMode, setDarkMode] =
-        useState(false);
+    const [state, dispatch] = React.useReducer(themeReducer, {
+        darkMode: false,
+    });
 
     useEffect(() => {
         carregarTema();
@@ -34,15 +53,15 @@ export function ThemeProvider({ children }: Props) {
             await AsyncStorage.getItem('@dark_mode');
 
         if (temaSalvo === 'true') {
-            setDarkMode(true);
+            dispatch({ type: 'set', darkMode: true });
         }
     }
 
     async function toggleTheme() {
 
-        const novoTema = !darkMode;
+        const novoTema = !state.darkMode;
 
-        setDarkMode(novoTema);
+        dispatch({ type: 'toggle' });
 
         await AsyncStorage.setItem(
             '@dark_mode',
@@ -54,7 +73,7 @@ export function ThemeProvider({ children }: Props) {
 
         <ThemeContext.Provider
             value={{
-                darkMode,
+                darkMode: state.darkMode,
                 toggleTheme
             }}
         >
