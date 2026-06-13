@@ -1,0 +1,13 @@
+appId: com.findmypet.app
+---
+- launchApp
+- assertVisible:
+    id: login-screen
+- tapOn:
+    id: login-create-account-button
+- assertVisible:
+    id: create-account-screen
+- assertVisible: Criar conta
+- back
+- assertVisible:
+    id: login-screen

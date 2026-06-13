@@ -1,0 +1,16 @@
+appId: com.findmypet.app
+---
+- launchApp
+- assertVisible:
+    id: login-screen
+- tapOn:
+    id: login-email-input
+- inputText: invalid@example.com
+- tapOn:
+    id: login-password-input
+- inputText: senha-invalida
+- tapOn:
+    id: login-submit-button
+- assertVisible:
+    id: login-screen
+- assertVisible: Bem-vindo de volta
