@@ -1,13 +1,13 @@
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { AuthService } from '../../services/AuthService';
+import { AuthService } from '../../src/services/AuthService';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
 }));
 
-jest.mock('../../services/AuthService', () => ({
+jest.mock('../../src/services/AuthService', () => ({
   AuthService: {
     login: jest.fn(),
   },

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import ProfileScreen from '../../view/screens/ProfileScreen';
-import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
+import ProfileScreen from '../../src/view/screens/ProfileScreen';
+import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
 
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
@@ -23,14 +23,14 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
     toggleTheme: jest.fn(),
   }),
 }));
 
-jest.mock('../../viewmodels/useProfileViewModel', () => ({
+jest.mock('../../src/viewmodels/useProfileViewModel', () => ({
   useProfileViewModel: jest.fn(),
 }));
 

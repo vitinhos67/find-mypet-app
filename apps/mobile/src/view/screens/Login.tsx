@@ -51,7 +51,7 @@ export default function Login() {
                     {/* Branding */}
                     <View style={styles.branding}>
                         <Image
-                            source={require('../../assets/images/logo-pet.png')}
+                            source={require('../../../assets/images/logo-pet.png')}
                             style={styles.logo}
                         />
                         <Text style={styles.appName}>Find my PET</Text>

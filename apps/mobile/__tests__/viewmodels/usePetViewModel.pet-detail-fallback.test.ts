@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { PetLocalRepository } from '../../database';
-import { Pet } from '../../models/pet.model';
-import { ApiService } from '../../services/ApiService';
-import { AuthService } from '../../services/AuthService';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { PetLocalRepository } from '../../src/database';
+import { Pet } from '../../src/models/pet.model';
+import { ApiService } from '../../src/services/ApiService';
+import { AuthService } from '../../src/services/AuthService';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 
 jest.mock('expo-image-picker', () => ({
   requestMediaLibraryPermissionsAsync: jest.fn(),
@@ -14,25 +14,25 @@ jest.mock('expo-image-picker', () => ({
   },
 }));
 
-jest.mock('../../services/ApiService', () => ({
+jest.mock('../../src/services/ApiService', () => ({
   ApiService: {
     get: jest.fn(),
   },
 }));
 
-jest.mock('../../services/AuthService', () => ({
+jest.mock('../../src/services/AuthService', () => ({
   AuthService: {
     getCurrentUserId: jest.fn(),
   },
 }));
 
-jest.mock('../../services/StorageService', () => ({
+jest.mock('../../src/services/StorageService', () => ({
   StorageService: {
     uploadPetImage: jest.fn(),
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   PetLocalRepository: {
     findById: jest.fn(),
     findAll: jest.fn(),

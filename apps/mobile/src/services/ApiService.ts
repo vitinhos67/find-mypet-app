@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '@env';
 
-import { supabase } from '../src/shared/lib/supabase';
+import { supabase } from '../shared/lib/supabase';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

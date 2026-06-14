@@ -1,10 +1,10 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
-import { ProfileLocalRepository } from '../../database';
-import { UserProfile } from '../../models/profile.model';
+import { ProfileLocalRepository } from '../../src/database';
+import { UserProfile } from '../../src/models/profile.model';
 import { supabase } from '../../src/shared/lib/supabase';
-import { ApiService } from '../../services/ApiService';
-import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
+import { ApiService } from '../../src/services/ApiService';
+import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
@@ -34,7 +34,7 @@ jest.mock('../../src/shared/lib/supabase', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   ProfileLocalRepository: {
     upsert: jest.fn(),
     findByUserId: jest.fn(),

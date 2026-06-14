@@ -250,7 +250,7 @@ export default function DeviceConfigureScreen() {
                             ) : (
                                 <View>
                                     <Text style={[styles.infoText, { color: theme.textPrimary }]}>Você ainda não possui Pets cadastrados.</Text>
-                                    <Text style={[styles.subInfoText, { color: theme.textSecondary }]}>Vá à aba "Pets" para adicionar um animal antes de vinculá-lo.</Text>
+                                    <Text style={[styles.subInfoText, { color: theme.textSecondary }]}>Vá à aba {'"'}Pets{'"'} para adicionar um animal antes de vinculá-lo.</Text>
                                 </View>
                             )}
                         </Field>

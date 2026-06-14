@@ -60,7 +60,7 @@ export default function Cadastro() {
                         </Pressable>
                         <View style={styles.brandingInline}>
                             <Image
-                                source={require('../../assets/images/logo-pet.png')}
+                                source={require('../../../assets/images/logo-pet.png')}
                                 style={styles.logoSmall}
                             />
                             <Text style={styles.appName}>Find my PET</Text>

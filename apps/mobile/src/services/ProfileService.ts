@@ -4,7 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 import { ProfileLocalRepository } from '../database';
 import { UpdateProfileInput, UserProfile } from '../models/profile.model';
-import { supabase } from '../src/shared/lib/supabase';
+import { supabase } from '../shared/lib/supabase';
 import { ApiService } from './ApiService';
 
 const AVATARS_BUCKET = 'avatars';

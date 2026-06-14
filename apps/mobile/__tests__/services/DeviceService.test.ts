@@ -1,9 +1,9 @@
-import { DeviceService } from '../../services/DeviceService';
-import { ApiService } from '../../services/ApiService';
-import { DeviceLocalRepository } from '../../database';
-import { AuthService } from '../../services/AuthService';
+import { DeviceService } from '../../src/services/DeviceService';
+import { ApiService } from '../../src/services/ApiService';
+import { DeviceLocalRepository } from '../../src/database';
+import { AuthService } from '../../src/services/AuthService';
 
-jest.mock('../../services/ApiService', () => ({
+jest.mock('../../src/services/ApiService', () => ({
   ApiService: {
     get: jest.fn(),
     post: jest.fn(),
@@ -11,14 +11,14 @@ jest.mock('../../services/ApiService', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   DeviceLocalRepository: {
     replaceAll: jest.fn(),
     findAll: jest.fn(),
   },
 }));
 
-jest.mock('../../services/AuthService', () => ({
+jest.mock('../../src/services/AuthService', () => ({
   AuthService: {
     getCurrentUserId: jest.fn(),
   },

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import DeviceListScreen from '../../view/screens/DeviceListScreen';
-import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import DeviceListScreen from '../../src/view/screens/DeviceListScreen';
+import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
 
 const mockGoBack = jest.fn();
 const mockNavigate = jest.fn();
@@ -25,13 +25,13 @@ jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (callback: () => void) => callback(),
 }));
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
   }),
 }));
 
-jest.mock('../../viewmodels/useDeviceViewModel', () => ({
+jest.mock('../../src/viewmodels/useDeviceViewModel', () => ({
   useDeviceViewModel: jest.fn(),
 }));
 
