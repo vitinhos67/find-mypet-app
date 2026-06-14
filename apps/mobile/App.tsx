@@ -10,6 +10,7 @@ import { supabase } from './src/shared/lib/supabase';
 import { ThemeProvider } from './hooks/useTheme';
 import { initializeDatabase } from './database';
 import { ErrorBoundary } from './view/components/ErrorBoundary';
+import { PushNotificationService } from './services/PushNotificationService';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +45,7 @@ export default function App() {
                     setUserLogado(false);
                 } else {
                     setUserLogado(true);
+                    PushNotificationService.registerAndSync();
                 }
             } else {
                 setUserLogado(false);
@@ -52,6 +54,9 @@ export default function App() {
 
         const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
             setUserLogado(!!session);
+            if (session) {
+                PushNotificationService.registerAndSync();
+            }
         });
         return () => {
             authListener.subscription.unsubscribe();

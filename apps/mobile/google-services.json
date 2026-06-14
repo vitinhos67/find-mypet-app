@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "406196950395",
+    "project_id": "findmypet-42d4f",
+    "storage_bucket": "findmypet-42d4f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406196950395:android:09e5c652330804d76d59de",
+        "android_client_info": {
+          "package_name": "com.findmypet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvLKm_LHAZJnV2A3WFlx83eo7fBm3XRIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406196950395:android:e150f3697bfd43c96d59de",
+        "android_client_info": {
+          "package_name": "com.findmypet.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvLKm_LHAZJnV2A3WFlx83eo7fBm3XRIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
