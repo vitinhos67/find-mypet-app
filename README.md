@@ -19,7 +19,7 @@ Fluxo principal:
 Mobile App -> Supabase Auth -> API -> Supabase Database
 ```
 
-O aplicativo mobile usa Supabase Auth para autenticação e chama a API com token Bearer. Dados de perfil, pets, dispositivos e localização são consumidos pelo mobile por meio de services.
+O aplicativo mobile usa Supabase Auth para autenticação e chama a API com token Bearer. Dados de perfil, pets, dispositivos e localização são consumidos pelo mobile por meio de `apps/mobile/src/services`.
 
 O firmware se comunica com o sistema por endpoints HTTP REST de hardware. Ele busca configurações do dispositivo na API e envia dados de localização e bateria.
 
@@ -28,7 +28,7 @@ O firmware se comunica com o sistema por endpoints HTTP REST de hardware. Ele bu
 Destaques do app em `apps/mobile`:
 
 - autenticação com Supabase Auth;
-- estrutura inspirada em MVVM: telas, viewmodels, services, models e database;
+- estrutura inspirada em MVVM: `apps/mobile/src/view`, `apps/mobile/src/viewmodels`, `apps/mobile/src/services`, `apps/mobile/src/models`, `apps/mobile/src/database`, `apps/mobile/src/hooks` e `apps/mobile/src/navigation`;
 - `AsyncStorage` para dados simples de sessão e preferências;
 - SQLite para cache offline estruturado;
 - fallback offline para perfil, pets, detalhe de pet e dispositivos;
@@ -55,7 +55,7 @@ O projeto mobile possui:
 - testes unitários;
 - testes de integração;
 - testes de UI;
-- testes de chamadas mobile/API em services;
+- testes de chamadas mobile/API nos services em `apps/mobile/src/services`;
 - fluxos E2E em YAML para Maestro.
 
 Os fluxos E2E exigem Maestro e um build de desenvolvimento ou standalone instalado em emulador/dispositivo com o app id configurado.
