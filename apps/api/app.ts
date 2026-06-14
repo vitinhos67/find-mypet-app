@@ -1,5 +1,5 @@
-import { buildServer } from "./server";
-import { env } from "./shared/env/env";
+import { buildServer } from "./src/server";
+import { env } from "./src/shared/env/env";
 
 async function bootstrap() {
   const app = await buildServer();
