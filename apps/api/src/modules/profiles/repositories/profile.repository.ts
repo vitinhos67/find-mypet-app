@@ -78,6 +78,13 @@ export class ProfileRepository {
         return data;
     }
 
+    async updateFcmToken(id: string, fcmToken: string): Promise<void> {
+        await supabaseAdmin
+            .from("profiles")
+            .update({ fcm_token: fcmToken, updated_at: new Date().toISOString() })
+            .eq("id", id);
+    }
+
     async updateById(id: string, input: UpdateProfileInput): Promise<Profile> {
         const { data, error } = await supabaseAdmin
             .from("profiles")

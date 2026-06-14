@@ -11,9 +11,7 @@ export async function meRoutes(app: FastifyInstance) {
 
   app.get(
     "/",
-    {
-      preHandler: authenticateSupabaseUser,
-    },
+    { preHandler: authenticateSupabaseUser },
     meController.show
   );
 
@@ -26,5 +24,17 @@ export async function meRoutes(app: FastifyInstance) {
       ],
     },
     meController.updateProfile
+  );
+
+  app.post<{ Body: { base64: string; mimeType?: string; extension?: string } }>(
+    "/avatar",
+    { preHandler: [authenticateSupabaseUser] },
+    meController.uploadAvatar
+  );
+
+  app.patch<{ Body: { fcm_token: string } }>(
+    "/fcm-token",
+    { preHandler: [authenticateSupabaseUser] },
+    meController.saveFcmToken
   );
 }

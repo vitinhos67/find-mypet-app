@@ -16,6 +16,7 @@ const envSchema = z.object({
     .positive()
     .default(60 * 60 * 24 * 7),
   CORS_ORIGIN: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

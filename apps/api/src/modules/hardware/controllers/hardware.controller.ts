@@ -1,5 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { supabaseAdmin } from "../../../shared/supabase/supabaseAdmin";
+import { AlertService } from "../../alerts/services/alert.service";
+import { NotificationService } from "../../notifications/services/notification.service";
+
+const alertService = new AlertService();
+const notificationService = new NotificationService();
 
 export class HardwareController {
 
@@ -8,7 +13,6 @@ export class HardwareController {
 
         const { data: device, error } = await supabaseAdmin
             .from("devices")
-            // 🔥 ADICIONE A COLUNA DE INTERVALO AQUI (ex: update_interval)
             .select("behavior_no_wifi, wifi_ssid, wifi_password, wake_interval")
             .eq("serial_number", serial)
             .single();
@@ -22,10 +26,10 @@ export class HardwareController {
             behavior_no_wifi: device.behavior_no_wifi || "RASTREIO_ATIVO",
             wifi_ssid: device.wifi_ssid || "",
             wifi_password: device.wifi_password || "",
-            // 🔥 MANDA PRO ESP32 O NÚMERO QUE O APP SALVOU (Padrão: 1 minuto)
             wake_interval: device.wake_interval || 1
         });
     };
+
     ping = async (req: FastifyRequest<{ Params: { serial: string }, Body: { battery_level?: number } }>, reply: FastifyReply) => {
         const { serial } = req.params;
         const { battery_level } = req.body;
@@ -57,7 +61,7 @@ export class HardwareController {
 
         const { data: device, error: fetchError } = await supabaseAdmin
             .from("devices")
-            .select("id, pet_id")
+            .select("id, pet_id, pets!inner(owner_id)")
             .eq("serial_number", serial)
             .single();
 
@@ -77,13 +81,8 @@ export class HardwareController {
             return reply.status(500).send({ message: "Erro ao salvar coordenada." });
         }
 
-        // 🔥 ATUALIZANDO STATUS E BATERIA (Com log de erro)
         const updatePayload: any = { status: 'ONLINE', updated_at: new Date().toISOString() };
-
-        if (battery_level !== undefined) {
-            // A maioria dos esquemas Supabase usa battery_level, atualize aqui se a sua coluna tiver outro nome
-            updatePayload.battery_level = battery_level;
-        }
+        if (battery_level !== undefined) updatePayload.battery_level = battery_level;
 
         const { error: updateError } = await supabaseAdmin
             .from("devices")
@@ -91,10 +90,24 @@ export class HardwareController {
             .eq("id", device.id);
 
         if (updateError) {
-            console.error("\n❌ ERRO DO SUPABASE AO SALVAR BATERIA:", updateError.message);
-            console.error("-> DICA: Verifique se a coluna na tabela 'devices' se chama 'battery_level' ou apenas 'battery'.\n");
-        } else {
-            console.log(`✅ [ESP32] Bateria (${battery_level}%) e Status atualizados no banco!`);
+            console.error("❌ ERRO AO SALVAR BATERIA:", updateError.message);
+        }
+
+        // Verificação de zona segura + push notification (sem bloquear a resposta)
+        if (device.pet_id) {
+            const ownerId = (device.pets as any)?.owner_id as string | undefined;
+            if (ownerId) {
+                alertService
+                    .checkAndCreateAlert(device.pet_id, ownerId, latitude, longitude)
+                    .then((alert) => {
+                        if (alert) {
+                            notificationService
+                                .notifyOutsideSafeZone(device.pet_id, ownerId, latitude, longitude)
+                                .catch((err) => console.error("❌ ERRO AO ENVIAR NOTIFICAÇÃO:", err));
+                        }
+                    })
+                    .catch((err) => console.error("❌ ERRO AO VERIFICAR ZONA SEGURA:", err));
+            }
         }
 
         return reply.status(201).send({ message: "GPS e Bateria processados." });
