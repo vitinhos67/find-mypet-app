@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.alerts (
+enCREATE TABLE IF NOT EXISTS public.alerts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   pet_id uuid NOT NULL REFERENCES public.pets(id) ON DELETE CASCADE,
   owner_id uuid NOT NULL,
@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.alerts (
 
 ALTER TABLE public.alerts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Dono ve e atualiza seus alertas" ON public.alerts;
 CREATE POLICY "Dono ve e atualiza seus alertas"
   ON public.alerts FOR ALL
   USING (owner_id = auth.uid())

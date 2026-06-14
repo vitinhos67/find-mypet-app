@@ -57,6 +57,8 @@ supabase/.branches/
 supabase/.temp/
 .vscode/
 
+**/firebase_credentials.json
+
 # TypeScript
 *.tsbuildinfo
 
