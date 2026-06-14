@@ -1,4 +1,4 @@
-import { supabase } from '../src/shared/lib/supabase';
+import { supabase } from '../shared/lib/supabase';
 
 export const AuthService = {
 

@@ -3,10 +3,10 @@ import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { PetLocalRepository } from '../src/database';
 import { Pet, PetPayload, SexoPet, SharedPetResponse } from '../src/models/pet.model';
-import { AuthService } from '../services/AuthService';
-import { PetService } from '../services/PetService';
-import { ShareService } from '../services/ShareService';
-import { StorageService } from '../services/StorageService';
+import { AuthService } from '../src/services/AuthService';
+import { PetService } from '../src/services/PetService';
+import { ShareService } from '../src/services/ShareService';
+import { StorageService } from '../src/services/StorageService';
 
 function mapDbToPet(dbPet: any): Pet {
     return {

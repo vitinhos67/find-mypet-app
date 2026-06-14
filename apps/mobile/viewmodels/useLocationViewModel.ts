@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PetLocation } from '../src/models/location.model';
-import { LocationService } from '../services/LocationService';
+import { LocationService } from '../src/services/LocationService';
 
 export function useLocationViewModel(petId: string) {
     const [localizacao, setLocalizacao] = useState<PetLocation | null>(null);

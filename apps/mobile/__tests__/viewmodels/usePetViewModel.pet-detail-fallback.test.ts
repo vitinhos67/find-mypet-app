@@ -2,8 +2,8 @@ import { act, renderHook } from '@testing-library/react-native';
 
 import { PetLocalRepository } from '../../src/database';
 import { Pet } from '../../src/models/pet.model';
-import { ApiService } from '../../services/ApiService';
-import { AuthService } from '../../services/AuthService';
+import { ApiService } from '../../src/services/ApiService';
+import { AuthService } from '../../src/services/AuthService';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 
 jest.mock('expo-image-picker', () => ({
@@ -14,19 +14,19 @@ jest.mock('expo-image-picker', () => ({
   },
 }));
 
-jest.mock('../../services/ApiService', () => ({
+jest.mock('../../src/services/ApiService', () => ({
   ApiService: {
     get: jest.fn(),
   },
 }));
 
-jest.mock('../../services/AuthService', () => ({
+jest.mock('../../src/services/AuthService', () => ({
   AuthService: {
     getCurrentUserId: jest.fn(),
   },
 }));
 
-jest.mock('../../services/StorageService', () => ({
+jest.mock('../../src/services/StorageService', () => ({
   StorageService: {
     uploadPetImage: jest.fn(),
   },

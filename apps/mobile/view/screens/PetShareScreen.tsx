@@ -19,7 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { PetShare, SharePermission } from '../../src/models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
-import { ShareService } from '../../services/ShareService';
+import { ShareService } from '../../src/services/ShareService';
 import { Colors } from '../styles/color';
 
 type RouteProps = RouteProp<PetStackParamList, 'PetShare'>;

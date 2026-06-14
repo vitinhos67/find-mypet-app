@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react-native';
 import { ProfileLocalRepository } from '../../src/database';
 import { UserProfile } from '../../src/models/profile.model';
 import { supabase } from '../../src/shared/lib/supabase';
-import { ApiService } from '../../services/ApiService';
+import { ApiService } from '../../src/services/ApiService';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({

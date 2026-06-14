@@ -1,4 +1,4 @@
-import { PetShare, SharedPetResponse, SharePermission } from '../src/models/pet.model';
+import { PetShare, SharedPetResponse, SharePermission } from '../models/pet.model';
 import { ApiService } from './ApiService';
 
 export class ShareService {

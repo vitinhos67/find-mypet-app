@@ -19,7 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { SafeZone } from '../../src/models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
-import { SafeZoneService } from '../../services/SafeZoneService';
+import { SafeZoneService } from '../../src/services/SafeZoneService';
 import { Colors } from '../styles/color';
 
 type RouteProps = RouteProp<PetStackParamList, 'SafeZone'>;

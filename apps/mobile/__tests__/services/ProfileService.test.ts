@@ -1,5 +1,5 @@
-import { ProfileService } from '../../services/ProfileService';
-import { ApiService } from '../../services/ApiService';
+import { ProfileService } from '../../src/services/ProfileService';
+import { ApiService } from '../../src/services/ApiService';
 import { ProfileLocalRepository } from '../../src/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../src/shared/lib/supabase';
@@ -12,7 +12,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
     removeItem: jest.fn(),
 }));
 
-jest.mock('../../services/ApiService', () => ({
+jest.mock('../../src/services/ApiService', () => ({
     ApiService: {
         get: jest.fn(),
         patch: jest.fn(),

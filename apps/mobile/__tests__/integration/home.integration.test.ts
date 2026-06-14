@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 
 import { DeviceLocalRepository } from '../../src/database';
 import { supabase } from '../../src/shared/lib/supabase';
-import { ApiService } from '../../services/ApiService';
+import { ApiService } from '../../src/services/ApiService';
 import { useHomeViewModel } from '../../viewmodels/useHomeViewModel';
 
 jest.mock('react-native-maps', () => 'MapView');

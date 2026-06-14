@@ -1,6 +1,6 @@
 import { ApiService } from './ApiService';
-import { DeviceLocalRepository } from '../src/database';
-import { CollarDevice, ComportamentoSemWifi } from '../src/models/device.model';
+import { DeviceLocalRepository } from '../database';
+import { CollarDevice, ComportamentoSemWifi } from '../models/device.model';
 import { AuthService } from './AuthService';
 
 type ApiResponse<T> = {

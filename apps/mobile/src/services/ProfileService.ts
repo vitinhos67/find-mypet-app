@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { ProfileLocalRepository } from '../src/database';
-import { UpdateProfileInput, UserProfile } from '../src/models/profile.model';
-import { supabase } from '../src/shared/lib/supabase';
+import { ProfileLocalRepository } from '../database';
+import { UpdateProfileInput, UserProfile } from '../models/profile.model';
+import { supabase } from '../shared/lib/supabase';
 import { ApiService } from './ApiService';
 
 const AVATARS_BUCKET = 'avatars';

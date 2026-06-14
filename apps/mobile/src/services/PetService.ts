@@ -1,5 +1,5 @@
-import { PetLocalRepository } from '../src/database';
-import { Pet, PetPayload, PetResponse, SexoPet } from '../src/models/pet.model';
+import { PetLocalRepository } from '../database';
+import { Pet, PetPayload, PetResponse, SexoPet } from '../models/pet.model';
 import { ApiService } from './ApiService';
 import { AuthService } from './AuthService';
 

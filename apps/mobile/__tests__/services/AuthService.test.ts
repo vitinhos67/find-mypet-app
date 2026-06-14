@@ -1,4 +1,4 @@
-import { AuthService } from '../../services/AuthService';
+import { AuthService } from '../../src/services/AuthService';
 import { supabase } from '../../src/shared/lib/supabase';
 
 jest.mock('../../src/shared/lib/supabase', () => ({

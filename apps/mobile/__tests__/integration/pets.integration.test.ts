@@ -3,7 +3,7 @@ import { act, renderHook } from '@testing-library/react-native';
 import { PetLocalRepository } from '../../src/database';
 import { Pet } from '../../src/models/pet.model';
 import { supabase } from '../../src/shared/lib/supabase';
-import { ApiService } from '../../services/ApiService';
+import { ApiService } from '../../src/services/ApiService';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 
 jest.mock('expo-image-picker', () => ({
@@ -14,7 +14,7 @@ jest.mock('expo-image-picker', () => ({
   },
 }));
 
-jest.mock('../../services/StorageService', () => ({
+jest.mock('../../src/services/StorageService', () => ({
   StorageService: {
     uploadPetImage: jest.fn(),
   },

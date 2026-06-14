@@ -1,6 +1,6 @@
 import { decode } from 'base64-arraybuffer';
 import * as FileSystem from 'expo-file-system/legacy';
-import { supabase } from '../src/shared/lib/supabase';
+import { supabase } from '../shared/lib/supabase';
 
 export class StorageService {
     static async uploadPetImage(fileUri: string): Promise<string | null> {

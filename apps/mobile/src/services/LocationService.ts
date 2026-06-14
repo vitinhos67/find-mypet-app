@@ -1,4 +1,4 @@
-import { PetLocation } from '../src/models/location.model';
+import { PetLocation } from '../models/location.model';
 import { ApiService } from './ApiService';
 
 export class LocationService {

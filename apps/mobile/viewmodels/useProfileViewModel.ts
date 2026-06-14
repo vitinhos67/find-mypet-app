@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { UserProfile } from '../src/models/profile.model';
-import { ProfileService } from '../services/ProfileService';
+import { ProfileService } from '../src/services/ProfileService';
 
 const GENEROS_PERMITIDOS = ['Masculino', 'Feminino', 'Outro'];
 

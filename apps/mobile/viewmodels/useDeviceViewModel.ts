@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { CollarDevice } from '../src/models/device.model';
-import { DeviceService } from '../services/DeviceService';
+import { DeviceService } from '../src/services/DeviceService';
 
 export function useDeviceViewModel() {
     const [devices, setDevices] = useState<CollarDevice[]>([]);
