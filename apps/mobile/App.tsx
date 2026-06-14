@@ -4,11 +4,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PushNotificationService } from './services/PushNotificationService';
 import { initializeDatabase } from './src/database';
 import { ThemeProvider } from './src/hooks/useTheme';
 import { AuthNavigator } from './src/navigation/AuthNavigator';
 import { TabNavigator } from './src/navigation/TabNavigator';
+import { PushNotificationService } from './src/services/PushNotificationService';
 import { supabase } from './src/shared/lib/supabase';
 import { ErrorBoundary } from './src/view/components/ErrorBoundary';
 
