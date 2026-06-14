@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const saveLocationBodySchema = z.object({
-  latitude: z.number({ required_error: "Latitude é obrigatória." }),
-  longitude: z.number({ required_error: "Longitude é obrigatória." }),
+  latitude: z.number({ message: "Latitude é obrigatória." }),
+  longitude: z.number({ message: "Longitude é obrigatória." }),
   precision: z.number().nullable().optional(),
 });
 

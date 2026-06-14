@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authenticateSupabaseUser } from "../../../shared/middlewares/authenticate-supabase-user.middleware";
 import { validateBody } from "../../../shared/middlewares/validate.middleware";
-import { LocationController } from "../../locations/controllers/location.controller";
-import { saveLocationBodySchema, type SaveLocationBody } from "../../locations/validators/save.validator";
+import { DeviceLocationBody, LocationController } from "../../locations/controllers/location.controller";
+import { saveLocationBodySchema } from "../../locations/validators/save.validator";
 import {
     CreateDeviceBody,
     DeviceController,
@@ -51,7 +51,7 @@ export async function deviceRoutes(app: FastifyInstance) {
     );
 
     // ESP32 envia coordenadas GPS da coleira
-    app.post<{ Params: { id: string }; Body: SaveLocationBody }>(
+    app.post<{ Params: { id: string }; Body: DeviceLocationBody }>(
         "/:id/location",
         { preHandler: [validateBody(saveLocationBodySchema)] },
         locationController.saveForDevice

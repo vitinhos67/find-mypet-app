@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { authenticateSupabaseUser } from "../../../shared/middlewares/authenticate-supabase-user.middleware";
 import { validateBody } from "../../../shared/middlewares/validate.middleware";
 import { ShareController } from "../controllers/share.controller";
-import { createShareBodySchema, updatePermissionBodySchema } from "../validators/share.validator";
+import { createShareBodySchema, updatePermissionBodySchema, type CreateShareBody, type UpdatePermissionBody } from "../validators/share.validator";
 
 const shareController = new ShareController();
 
@@ -14,7 +14,7 @@ export async function petShareRoutes(app: FastifyInstance) {
     }
   });
 
-  app.post<{ Params: { petId: string } }>(
+  app.post<{ Params: { petId: string }; Body: CreateShareBody }>(
     "/:petId/shares",
     { preHandler: [authenticateSupabaseUser, validateBody(createShareBodySchema)] },
     shareController.create
@@ -32,7 +32,7 @@ export async function petShareRoutes(app: FastifyInstance) {
     shareController.remove
   );
 
-  app.patch<{ Params: { petId: string; shareId: string } }>(
+  app.patch<{ Params: { petId: string; shareId: string }; Body: UpdatePermissionBody }>(
     "/:petId/shares/:shareId",
     { preHandler: [authenticateSupabaseUser, validateBody(updatePermissionBodySchema)] },
     shareController.updatePermission

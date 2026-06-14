@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { authenticateSupabaseUser } from "../../../shared/middlewares/authenticate-supabase-user.middleware";
 import { validateBody } from "../../../shared/middlewares/validate.middleware";
 import { SafeZoneController } from "../controllers/safe-zone.controller";
-import { upsertSafeZoneSchema } from "../validators/safe-zone.validator";
+import { upsertSafeZoneSchema, type UpsertSafeZoneBody } from "../validators/safe-zone.validator";
 
 const ctrl = new SafeZoneController();
 
@@ -14,7 +14,7 @@ export async function safeZoneRoutes(app: FastifyInstance) {
   });
 
   // POST /api/pets/:petId/safe-zone
-  app.post<{ Params: { petId: string } }>(
+  app.post<{ Params: { petId: string }; Body: UpsertSafeZoneBody }>(
     "/:petId/safe-zone",
     { preHandler: [authenticateSupabaseUser, validateBody(upsertSafeZoneSchema)] },
     ctrl.upsert

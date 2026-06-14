@@ -22,7 +22,7 @@ export function registerErrorHandler(app: FastifyInstance) {
       );
     }
 
-    if ("validation" in error && error.validation) {
+    if (typeof error === "object" && error !== null && "validation" in error && (error as Record<string, unknown>).validation) {
       return reply.status(400).send(
         apiError("Requisição inválida.", ErrorCodes.VALIDATION_ERROR, {
           issues: error.validation,
