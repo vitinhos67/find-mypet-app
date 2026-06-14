@@ -3,7 +3,7 @@ import { Pressable, Text } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { ThemeProvider, useTheme } from '../../hooks/useTheme';
+import { ThemeProvider, useTheme } from '../../src/hooks/useTheme';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: jest.fn(),

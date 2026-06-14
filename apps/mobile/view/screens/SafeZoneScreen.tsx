@@ -16,7 +16,7 @@ import * as Location from 'expo-location';
 import MapView, { Circle, MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../src/hooks/useTheme';
 import { SafeZone } from '../../src/models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
 import { SafeZoneService } from '../../src/services/SafeZoneService';

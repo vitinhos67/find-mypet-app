@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../src/hooks/useTheme';
 import { PetShare, SharePermission } from '../../src/models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
 import { ShareService } from '../../src/services/ShareService';

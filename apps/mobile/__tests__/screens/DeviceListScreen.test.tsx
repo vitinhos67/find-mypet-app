@@ -25,7 +25,7 @@ jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (callback: () => void) => callback(),
 }));
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
   }),

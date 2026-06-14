@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../src/hooks/useTheme';
 import { CollarStackParamList } from '../../navigation/types';
 import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';

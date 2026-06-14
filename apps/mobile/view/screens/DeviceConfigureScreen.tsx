@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../hooks/useTheme';
+import { useTheme } from '../../src/hooks/useTheme';
 import { ComportamentoSemWifi } from '../../src/models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
 import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';

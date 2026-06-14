@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
-import { ThemeProvider } from './hooks/useTheme';
+import { ThemeProvider } from './src/hooks/useTheme';
 import { initializeDatabase } from './src/database';
 import { ErrorBoundary } from './view/components/ErrorBoundary';
 

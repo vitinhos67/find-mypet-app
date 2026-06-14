@@ -27,7 +27,7 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
   }),

@@ -23,7 +23,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
     toggleTheme: jest.fn(),
