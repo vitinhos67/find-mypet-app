@@ -1,7 +1,7 @@
-import { PetLocalRepository } from '../../../database/repositories/PetLocalRepository';
+import { PetLocalRepository } from '../../../src/database/repositories/PetLocalRepository';
 import { Pet } from '../../../src/models/pet.model';
-import { initializeDatabase } from '../../../database/migrations';
-import { getDatabase } from '../../../database/sqlite';
+import { initializeDatabase } from '../../../src/database/migrations';
+import { getDatabase } from '../../../src/database/sqlite';
 
 type PetCacheEntry = {
   payload_json: string;
@@ -51,11 +51,11 @@ const mockDb = {
   }),
 };
 
-jest.mock('../../../database/migrations', () => ({
+jest.mock('../../../src/database/migrations', () => ({
   initializeDatabase: jest.fn(),
 }));
 
-jest.mock('../../../database/sqlite', () => ({
+jest.mock('../../../src/database/sqlite', () => ({
   getDatabase: jest.fn(),
 }));
 

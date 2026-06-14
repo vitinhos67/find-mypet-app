@@ -1,6 +1,6 @@
 import { DeviceService } from '../../services/DeviceService';
 import { ApiService } from '../../services/ApiService';
-import { DeviceLocalRepository } from '../../database';
+import { DeviceLocalRepository } from '../../src/database';
 import { AuthService } from '../../services/AuthService';
 
 jest.mock('../../services/ApiService', () => ({
@@ -11,7 +11,7 @@ jest.mock('../../services/ApiService', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   DeviceLocalRepository: {
     replaceAll: jest.fn(),
     findAll: jest.fn(),

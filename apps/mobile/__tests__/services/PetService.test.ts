@@ -1,7 +1,7 @@
 import { PetService } from '../../services/PetService';
 import { ApiService } from '../../services/ApiService';
 import { AuthService } from '../../services/AuthService';
-import { PetLocalRepository } from '../../database';
+import { PetLocalRepository } from '../../src/database';
 
 jest.mock('../../services/ApiService', () => ({
   ApiService: {
@@ -17,7 +17,7 @@ jest.mock('../../services/AuthService', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   PetLocalRepository: {
     upsert: jest.fn(),
     findById: jest.fn(),

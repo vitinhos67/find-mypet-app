@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
-import { DeviceLocalRepository } from '../../database';
+import { DeviceLocalRepository } from '../../src/database';
 import { CollarDevice } from '../../src/models/device.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
@@ -14,7 +14,7 @@ jest.mock('../../src/shared/lib/supabase', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   DeviceLocalRepository: {
     replaceAll: jest.fn(),
     findAll: jest.fn(),

@@ -8,7 +8,7 @@ import { AuthNavigator } from './navigation/AuthNavigator';
 import { TabNavigator } from './navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
 import { ThemeProvider } from './hooks/useTheme';
-import { initializeDatabase } from './database';
+import { initializeDatabase } from './src/database';
 import { ErrorBoundary } from './view/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();

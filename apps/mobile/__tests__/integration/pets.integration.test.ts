@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { PetLocalRepository } from '../../database';
+import { PetLocalRepository } from '../../src/database';
 import { Pet } from '../../src/models/pet.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
@@ -28,7 +28,7 @@ jest.mock('../../src/shared/lib/supabase', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   PetLocalRepository: {
     replaceAll: jest.fn(),
     findAll: jest.fn(),

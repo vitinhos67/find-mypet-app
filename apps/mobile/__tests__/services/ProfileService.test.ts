@@ -1,6 +1,6 @@
 import { ProfileService } from '../../services/ProfileService';
 import { ApiService } from '../../services/ApiService';
-import { ProfileLocalRepository } from '../../database';
+import { ProfileLocalRepository } from '../../src/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../src/shared/lib/supabase';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -19,7 +19,7 @@ jest.mock('../../services/ApiService', () => ({
     },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
     ProfileLocalRepository: {
         upsert: jest.fn(),
         findByUserId: jest.fn(),

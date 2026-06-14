@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-import { PetLocalRepository } from '../database';
+import { PetLocalRepository } from '../src/database';
 import { Pet, PetPayload, SexoPet, SharedPetResponse } from '../src/models/pet.model';
 import { AuthService } from '../services/AuthService';
 import { PetService } from '../services/PetService';

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { PetLocalRepository } from '../../database';
+import { PetLocalRepository } from '../../src/database';
 import { Pet } from '../../src/models/pet.model';
 import { ApiService } from '../../services/ApiService';
 import { AuthService } from '../../services/AuthService';
@@ -32,7 +32,7 @@ jest.mock('../../services/StorageService', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   PetLocalRepository: {
     findById: jest.fn(),
     findAll: jest.fn(),

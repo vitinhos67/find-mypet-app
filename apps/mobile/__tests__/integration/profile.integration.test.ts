@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
-import { ProfileLocalRepository } from '../../database';
+import { ProfileLocalRepository } from '../../src/database';
 import { UserProfile } from '../../src/models/profile.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
@@ -34,7 +34,7 @@ jest.mock('../../src/shared/lib/supabase', () => ({
   },
 }));
 
-jest.mock('../../database', () => ({
+jest.mock('../../src/database', () => ({
   ProfileLocalRepository: {
     upsert: jest.fn(),
     findByUserId: jest.fn(),

@@ -1,5 +1,5 @@
 import { ApiService } from './ApiService';
-import { DeviceLocalRepository } from '../database';
+import { DeviceLocalRepository } from '../src/database';
 import { CollarDevice, ComportamentoSemWifi } from '../src/models/device.model';
 import { AuthService } from './AuthService';
 

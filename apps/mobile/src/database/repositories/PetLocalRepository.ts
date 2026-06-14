@@ -1,94 +1,94 @@
-import { CollarDevice } from '../../src/models/device.model';
+import { Pet } from '../../models/pet.model';
 import { initializeDatabase } from '../migrations';
 import { getDatabase } from '../sqlite';
 
-type DeviceCacheRow = {
+type PetCacheRow = {
     payload_json: string;
 };
 
-export class DeviceLocalRepository {
-    static async replaceAll(userId: string, devices: CollarDevice[]) {
+export class PetLocalRepository {
+    static async replaceAll(userId: string, pets: Pet[]) {
         await initializeDatabase();
         const db = await getDatabase();
         const now = new Date().toISOString();
 
         await db.withTransactionAsync(async () => {
             await db.runAsync(
-                'DELETE FROM devices_cache WHERE user_id = ?;',
+                'DELETE FROM pets_cache WHERE user_id = ?;',
                 userId
             );
 
-            for (const device of devices) {
-                await this.upsertInTransaction(userId, device, now);
+            for (const pet of pets) {
+                await this.upsertInTransaction(userId, pet, now);
             }
         });
     }
 
-    static async upsert(userId: string, device: CollarDevice) {
+    static async upsert(userId: string, pet: Pet) {
         await initializeDatabase();
         await this.upsertInTransaction(
             userId,
-            device,
+            pet,
             new Date().toISOString()
         );
     }
 
-    static async findAll(userId: string): Promise<CollarDevice[]> {
+    static async findAll(userId: string): Promise<Pet[]> {
         await initializeDatabase();
         const db = await getDatabase();
-        const rows = await db.getAllAsync<DeviceCacheRow>(
+        const rows = await db.getAllAsync<PetCacheRow>(
             `
             SELECT payload_json
-            FROM devices_cache
+            FROM pets_cache
             WHERE user_id = ?
             ORDER BY updated_at DESC;
             `,
             userId
         );
 
-        return rows.map((row) => JSON.parse(row.payload_json) as CollarDevice);
+        return rows.map((row) => JSON.parse(row.payload_json) as Pet);
     }
 
     static async findById(
         userId: string,
-        deviceId: string
-    ): Promise<CollarDevice | null> {
+        petId: string
+    ): Promise<Pet | null> {
         await initializeDatabase();
         const db = await getDatabase();
-        const row = await db.getFirstAsync<DeviceCacheRow>(
+        const row = await db.getFirstAsync<PetCacheRow>(
             `
             SELECT payload_json
-            FROM devices_cache
+            FROM pets_cache
             WHERE user_id = ? AND id = ?;
             `,
             userId,
-            deviceId
+            petId
         );
 
-        return row ? JSON.parse(row.payload_json) as CollarDevice : null;
+        return row ? JSON.parse(row.payload_json) as Pet : null;
     }
 
-    static async deleteById(userId: string, deviceId: string) {
+    static async deleteById(userId: string, petId: string) {
         await initializeDatabase();
         const db = await getDatabase();
 
         await db.runAsync(
-            'DELETE FROM devices_cache WHERE user_id = ? AND id = ?;',
+            'DELETE FROM pets_cache WHERE user_id = ? AND id = ?;',
             userId,
-            deviceId
+            petId
         );
     }
 
     private static async upsertInTransaction(
         userId: string,
-        device: CollarDevice,
+        pet: Pet,
         now: string
     ) {
         const db = await getDatabase();
 
         await db.runAsync(
             `
-            INSERT INTO devices_cache (
+            INSERT INTO pets_cache (
                 user_id,
                 id,
                 payload_json,
@@ -102,8 +102,8 @@ export class DeviceLocalRepository {
                 synced_at = excluded.synced_at;
             `,
             userId,
-            device.id,
-            JSON.stringify(device),
+            pet.id,
+            JSON.stringify(pet),
             now,
             now
         );
