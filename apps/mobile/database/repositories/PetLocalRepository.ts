@@ -1,4 +1,4 @@
-import { Pet } from '../../models/pet.model';
+import { Pet } from '../../src/models/pet.model';
 import { initializeDatabase } from '../migrations';
 import { getDatabase } from '../sqlite';
 

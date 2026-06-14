@@ -17,7 +17,7 @@ import MapView, { Circle, MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/useTheme';
-import { SafeZone } from '../../models/safe-zone.model';
+import { SafeZone } from '../../src/models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
 import { SafeZoneService } from '../../services/SafeZoneService';
 import { Colors } from '../styles/color';

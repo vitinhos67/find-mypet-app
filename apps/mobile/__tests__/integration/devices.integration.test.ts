@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
 import { DeviceLocalRepository } from '../../database';
-import { CollarDevice } from '../../models/device.model';
+import { CollarDevice } from '../../src/models/device.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';

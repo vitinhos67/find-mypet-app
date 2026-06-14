@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-native';
 
 import { PetLocalRepository } from '../../database';
-import { Pet } from '../../models/pet.model';
+import { Pet } from '../../src/models/pet.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';

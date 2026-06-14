@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { PetLocation } from '../models/location.model';
+import { PetLocation } from '../src/models/location.model';
 import { LocationService } from '../services/LocationService';
 
 export function useLocationViewModel(petId: string) {

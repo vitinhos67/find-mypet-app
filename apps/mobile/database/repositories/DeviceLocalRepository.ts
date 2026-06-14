@@ -1,4 +1,4 @@
-import { CollarDevice } from '../../models/device.model';
+import { CollarDevice } from '../../src/models/device.model';
 import { initializeDatabase } from '../migrations';
 import { getDatabase } from '../sqlite';
 

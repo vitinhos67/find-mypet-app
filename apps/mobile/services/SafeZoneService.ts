@@ -1,4 +1,4 @@
-import { Alert, SafeZone } from '../models/safe-zone.model';
+import { Alert, SafeZone } from '../src/models/safe-zone.model';
 import { ApiService } from './ApiService';
 
 export class SafeZoneService {

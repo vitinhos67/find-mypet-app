@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
 import { ProfileLocalRepository } from '../../database';
-import { UserProfile } from '../../models/profile.model';
+import { UserProfile } from '../../src/models/profile.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../services/ApiService';
 import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';

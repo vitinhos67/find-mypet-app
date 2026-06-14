@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { CollarDevice } from '../models/device.model';
+import { CollarDevice } from '../src/models/device.model';
 import { DeviceService } from '../services/DeviceService';
 
 export function useDeviceViewModel() {

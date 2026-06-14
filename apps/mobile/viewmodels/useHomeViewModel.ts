@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import MapView from 'react-native-maps';
-import { CollarDevice } from '../models/device.model';
-import { Alert, SafeZone } from '../models/safe-zone.model';
+import { CollarDevice } from '../src/models/device.model';
+import { Alert, SafeZone } from '../src/models/safe-zone.model';
 import { DeviceService } from '../services/DeviceService';
 import { LocationService } from '../services/LocationService';
 import { PetService } from '../services/PetService';

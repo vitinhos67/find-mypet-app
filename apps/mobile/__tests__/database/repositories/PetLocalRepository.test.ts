@@ -1,5 +1,5 @@
 import { PetLocalRepository } from '../../../database/repositories/PetLocalRepository';
-import { Pet } from '../../../models/pet.model';
+import { Pet } from '../../../src/models/pet.model';
 import { initializeDatabase } from '../../../database/migrations';
 import { getDatabase } from '../../../database/sqlite';
 

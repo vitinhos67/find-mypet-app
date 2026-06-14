@@ -1,4 +1,4 @@
-import { UserProfile } from '../../models/profile.model';
+import { UserProfile } from '../../src/models/profile.model';
 import { initializeDatabase } from '../migrations';
 import { getDatabase } from '../sqlite';
 

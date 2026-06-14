@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/useTheme';
-import { ComportamentoSemWifi } from '../../models/device.model';
+import { ComportamentoSemWifi } from '../../src/models/device.model';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 

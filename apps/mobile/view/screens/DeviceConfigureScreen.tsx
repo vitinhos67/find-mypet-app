@@ -5,7 +5,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../hooks/useTheme';
-import { ComportamentoSemWifi } from '../../models/device.model';
+import { ComportamentoSemWifi } from '../../src/models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
 import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { usePetViewModel } from '../../viewmodels/usePetViewModel';
