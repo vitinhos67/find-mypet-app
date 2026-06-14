@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
-import { formatUpdatedAt, useHomeViewModel } from '../../viewmodels/useHomeViewModel';
+import { formatUpdatedAt, useHomeViewModel } from '../../src/viewmodels/useHomeViewModel';
 import { Colors } from '../styles/color';
 
 const STATUS_LABEL: Record<string, string> = {

@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { Pet } from '../../src/models/pet.model';
 import { PetStackParamList } from '../../navigation/types';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList'>;

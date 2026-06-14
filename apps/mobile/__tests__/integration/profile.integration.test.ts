@@ -4,7 +4,7 @@ import { ProfileLocalRepository } from '../../src/database';
 import { UserProfile } from '../../src/models/profile.model';
 import { supabase } from '../../src/shared/lib/supabase';
 import { ApiService } from '../../src/services/ApiService';
-import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
+import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),

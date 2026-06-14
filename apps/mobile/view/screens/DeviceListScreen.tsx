@@ -6,7 +6,7 @@ import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { CollarStackParamList } from '../../navigation/types';
-import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<CollarStackParamList, 'DeviceList'>;

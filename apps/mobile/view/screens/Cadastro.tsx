@@ -17,7 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthStackParams } from '../../navigation/types';
-import { useCadastroViewModel } from '../../viewmodels/useCadastroViewModel';
+import { useCadastroViewModel } from '../../src/viewmodels/useCadastroViewModel';
 import { Colors } from '../styles/color';
 
 const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];

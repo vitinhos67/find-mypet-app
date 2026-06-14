@@ -9,8 +9,8 @@ import { useTheme } from '../../hooks/useTheme';
 import { SafeZone } from '../../src/models/safe-zone.model';
 import { PetStackParamList } from '../../navigation/types';
 import { SafeZoneService } from '../../src/services/SafeZoneService';
-import { useLocationViewModel } from '../../viewmodels/useLocationViewModel';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { useLocationViewModel } from '../../src/viewmodels/useLocationViewModel';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type RouteProps = RouteProp<PetStackParamList, 'PetProfile'>;

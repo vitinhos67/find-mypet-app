@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
 import MapView from 'react-native-maps';
-import { CollarDevice } from '../src/models/device.model';
-import { Alert, SafeZone } from '../src/models/safe-zone.model';
-import { DeviceService } from '../src/services/DeviceService';
-import { LocationService } from '../src/services/LocationService';
-import { PetService } from '../src/services/PetService';
-import { SafeZoneService } from '../src/services/SafeZoneService';
+import { CollarDevice } from '../models/device.model';
+import { Alert, SafeZone } from '../models/safe-zone.model';
+import { DeviceService } from '../services/DeviceService';
+import { LocationService } from '../services/LocationService';
+import { PetService } from '../services/PetService';
+import { SafeZoneService } from '../services/SafeZoneService';
 
 export type PetStatus = 'ONLINE' | 'OFFLINE' | 'SEM_COLEIRA';
 

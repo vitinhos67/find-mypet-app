@@ -4,7 +4,7 @@ import { PetLocalRepository } from '../../src/database';
 import { Pet } from '../../src/models/pet.model';
 import { ApiService } from '../../src/services/ApiService';
 import { AuthService } from '../../src/services/AuthService';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 
 jest.mock('expo-image-picker', () => ({
   requestMediaLibraryPermissionsAsync: jest.fn(),

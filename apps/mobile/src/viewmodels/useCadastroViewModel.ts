@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { AuthService } from '../src/services/AuthService';
+import { AuthService } from '../services/AuthService';
 
 export function useCadastroViewModel() {
     const [isLoading, setIsLoading] = useState(false);

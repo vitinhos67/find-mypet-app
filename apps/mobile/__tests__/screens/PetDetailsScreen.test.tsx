@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 
 import PetDetailsScreen from '../../view/screens/PetDetailsScreen';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 
 const mockGoBack = jest.fn();
 
@@ -33,7 +33,7 @@ jest.mock('../../hooks/useTheme', () => ({
   }),
 }));
 
-jest.mock('../../viewmodels/usePetViewModel', () => ({
+jest.mock('../../src/viewmodels/usePetViewModel', () => ({
   usePetViewModel: jest.fn(),
 }));
 

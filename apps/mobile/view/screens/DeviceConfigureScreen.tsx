@@ -7,8 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { ComportamentoSemWifi } from '../../src/models/device.model';
 import { CollarStackParamList } from '../../navigation/types';
-import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type ConfigureRouteProp = RouteProp<CollarStackParamList, 'DeviceConfigure'>;

@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 
 import ProfileScreen from '../../view/screens/ProfileScreen';
-import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
+import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
 
 jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
@@ -30,7 +30,7 @@ jest.mock('../../hooks/useTheme', () => ({
   }),
 }));
 
-jest.mock('../../viewmodels/useProfileViewModel', () => ({
+jest.mock('../../src/viewmodels/useProfileViewModel', () => ({
   useProfileViewModel: jest.fn(),
 }));
 
