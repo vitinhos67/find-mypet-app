@@ -6,7 +6,7 @@ import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/hooks/useTheme';
 import { Pet } from '../../src/models/pet.model';
-import { PetStackParamList } from '../../navigation/types';
+import { PetStackParamList } from '../../src/navigation/types';
 import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 

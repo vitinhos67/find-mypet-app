@@ -1,9 +1,9 @@
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import DeviceAddScreen from '../view/screens/DeviceAddScreen';
-import DeviceConfigureScreen from '../view/screens/DeviceConfigureScreen';
-import DeviceListScreen from '../view/screens/DeviceListScreen';
+import DeviceAddScreen from '../../view/screens/DeviceAddScreen';
+import DeviceConfigureScreen from '../../view/screens/DeviceConfigureScreen';
+import DeviceListScreen from '../../view/screens/DeviceListScreen';
 import { CollarStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<CollarStackParamList>();

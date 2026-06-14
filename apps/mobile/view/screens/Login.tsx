@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AuthStackParams } from '../../navigation/types';
+import { AuthStackParams } from '../../src/navigation/types';
 import { useLoginViewModel } from '../../src/viewmodels/useLoginViewModel';
 import { Colors } from '../styles/color';
 

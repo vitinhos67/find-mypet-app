@@ -18,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../src/hooks/useTheme';
 import { SafeZone } from '../../src/models/safe-zone.model';
-import { PetStackParamList } from '../../navigation/types';
+import { PetStackParamList } from '../../src/navigation/types';
 import { SafeZoneService } from '../../src/services/SafeZoneService';
 import { Colors } from '../styles/color';
 

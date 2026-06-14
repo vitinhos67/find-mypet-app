@@ -2,10 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../src/hooks/useTheme';
-import HomeScreen from '../view/screens/HomeScreen';
-import ProfileScreen from '../view/screens/ProfileScreen';
-import { Colors } from '../view/styles/color';
+import { useTheme } from '../hooks/useTheme';
+import HomeScreen from '../../view/screens/HomeScreen';
+import ProfileScreen from '../../view/screens/ProfileScreen';
+import { Colors } from '../../view/styles/color';
 import { PetNavigator } from './PetNavigator';
 
 const Tab = createBottomTabNavigator();

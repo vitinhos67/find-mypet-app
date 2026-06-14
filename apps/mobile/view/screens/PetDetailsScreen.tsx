@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/hooks/useTheme';
-import { PetStackParamList } from '../../navigation/types';
+import { PetStackParamList } from '../../src/navigation/types';
 import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 import { SexoSelector } from '../components/SexoSelector';
 import { Colors } from '../styles/color';
