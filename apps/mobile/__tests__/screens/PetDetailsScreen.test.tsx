@@ -1,8 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import PetDetailsScreen from '../../view/screens/PetDetailsScreen';
-import { usePetViewModel } from '../../viewmodels/usePetViewModel';
+import PetDetailsScreen from '../../src/view/screens/PetDetailsScreen';
+import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 
 const mockGoBack = jest.fn();
 
@@ -27,13 +27,13 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-jest.mock('../../hooks/useTheme', () => ({
+jest.mock('../../src/hooks/useTheme', () => ({
   useTheme: () => ({
     darkMode: false,
   }),
 }));
 
-jest.mock('../../viewmodels/usePetViewModel', () => ({
+jest.mock('../../src/viewmodels/usePetViewModel', () => ({
   usePetViewModel: jest.fn(),
 }));
 

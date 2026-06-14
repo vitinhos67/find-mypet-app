@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, renderHook } from '@testing-library/react-native';
 
 import { supabase } from '../../src/shared/lib/supabase';
-import { useLoginViewModel } from '../../viewmodels/useLoginViewModel';
+import { useLoginViewModel } from '../../src/viewmodels/useLoginViewModel';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),

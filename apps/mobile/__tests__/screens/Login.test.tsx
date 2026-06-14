@@ -1,8 +1,8 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import Login from '../../view/screens/Login';
-import { useLoginViewModel } from '../../viewmodels/useLoginViewModel';
+import Login from '../../src/view/screens/Login';
+import { useLoginViewModel } from '../../src/viewmodels/useLoginViewModel';
 
 const mockNavigate = jest.fn();
 const realizarLoginMock = jest.fn();
@@ -23,7 +23,7 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-jest.mock('../../viewmodels/useLoginViewModel', () => ({
+jest.mock('../../src/viewmodels/useLoginViewModel', () => ({
   useLoginViewModel: jest.fn(),
 }));
 

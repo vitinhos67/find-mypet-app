@@ -4,12 +4,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthNavigator } from './navigation/AuthNavigator';
-import { TabNavigator } from './navigation/TabNavigator';
+import { AuthNavigator } from './src/navigation/AuthNavigator';
+import { TabNavigator } from './src/navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
-import { ThemeProvider } from './hooks/useTheme';
-import { initializeDatabase } from './database';
-import { ErrorBoundary } from './view/components/ErrorBoundary';
+import { ThemeProvider } from './src/hooks/useTheme';
+import { initializeDatabase } from './src/database';
+import { ErrorBoundary } from './src/view/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
