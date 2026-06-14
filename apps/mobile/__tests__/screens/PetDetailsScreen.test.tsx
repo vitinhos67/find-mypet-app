@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import PetDetailsScreen from '../../view/screens/PetDetailsScreen';
+import PetDetailsScreen from '../../src/view/screens/PetDetailsScreen';
 import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
 
 const mockGoBack = jest.fn();

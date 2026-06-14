@@ -4,8 +4,8 @@ import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { useProfileViewModel } from '../../viewmodels/useProfileViewModel';
 import { Colors } from '../styles/color';
 
 const GENERO_OPTIONS = ['Masculino', 'Feminino', 'Outro'];

@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../src/hooks/useTheme';
-import { ComportamentoSemWifi } from '../../src/models/device.model';
-import { CollarStackParamList } from '../../src/navigation/types';
-import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
-import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { ComportamentoSemWifi } from '../../models/device.model';
+import { CollarStackParamList } from '../../navigation/types';
+import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type ConfigureRouteProp = RouteProp<CollarStackParamList, 'DeviceConfigure'>;
@@ -250,7 +250,7 @@ export default function DeviceConfigureScreen() {
                             ) : (
                                 <View>
                                     <Text style={[styles.infoText, { color: theme.textPrimary }]}>Você ainda não possui Pets cadastrados.</Text>
-                                    <Text style={[styles.subInfoText, { color: theme.textSecondary }]}>Vá à aba "Pets" para adicionar um animal antes de vinculá-lo.</Text>
+                                    <Text style={[styles.subInfoText, { color: theme.textSecondary }]}>Vá à aba {'"'}Pets{'"'} para adicionar um animal antes de vinculá-lo.</Text>
                                 </View>
                             )}
                         </Field>

@@ -17,8 +17,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AuthStackParams } from '../../src/navigation/types';
-import { useLoginViewModel } from '../../src/viewmodels/useLoginViewModel';
+import { AuthStackParams } from '../../navigation/types';
+import { useLoginViewModel } from '../../viewmodels/useLoginViewModel';
 import { Colors } from '../styles/color';
 
 export default function Login() {
@@ -51,7 +51,7 @@ export default function Login() {
                     {/* Branding */}
                     <View style={styles.branding}>
                         <Image
-                            source={require('../../assets/images/logo-pet.png')}
+                            source={require('../../../assets/images/logo-pet.png')}
                             style={styles.logo}
                         />
                         <Text style={styles.appName}>Find my PET</Text>

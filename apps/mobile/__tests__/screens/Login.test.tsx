@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 
-import Login from '../../view/screens/Login';
+import Login from '../../src/view/screens/Login';
 import { useLoginViewModel } from '../../src/viewmodels/useLoginViewModel';
 
 const mockNavigate = jest.fn();

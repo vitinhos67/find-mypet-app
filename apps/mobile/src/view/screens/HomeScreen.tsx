@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { PetHomeType, formatUpdatedAt, useHomeViewModel } from '../../src/viewmodels/useHomeViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { PetHomeType, formatUpdatedAt, useHomeViewModel } from '../../viewmodels/useHomeViewModel';
 import { Colors } from '../styles/color';
 
 const DARK_MAP_STYLE = [

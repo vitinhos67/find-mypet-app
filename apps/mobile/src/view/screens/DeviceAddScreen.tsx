@@ -14,9 +14,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useTheme } from '../../src/hooks/useTheme';
-import { ComportamentoSemWifi } from '../../src/models/device.model';
-import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { ComportamentoSemWifi } from '../../models/device.model';
+import { useDeviceViewModel } from '../../viewmodels/useDeviceViewModel';
 import { Colors } from '../styles/color';
 
 export default function DeviceAddScreen() {

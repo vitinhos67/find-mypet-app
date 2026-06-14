@@ -4,10 +4,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { Pet } from '../../src/models/pet.model';
-import { PetStackParamList } from '../../src/navigation/types';
-import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { Pet } from '../../models/pet.model';
+import { PetStackParamList } from '../../navigation/types';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type NavigationProp = NativeStackNavigationProp<PetStackParamList, 'PetList'>;

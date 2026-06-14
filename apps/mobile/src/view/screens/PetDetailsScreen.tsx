@@ -3,9 +3,9 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { PetStackParamList } from '../../src/navigation/types';
-import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { PetStackParamList } from '../../navigation/types';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { SexoSelector } from '../components/SexoSelector';
 import { Colors } from '../styles/color';
 

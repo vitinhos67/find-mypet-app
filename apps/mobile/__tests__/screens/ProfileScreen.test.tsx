@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import ProfileScreen from '../../view/screens/ProfileScreen';
+import ProfileScreen from '../../src/view/screens/ProfileScreen';
 import { useProfileViewModel } from '../../src/viewmodels/useProfileViewModel';
 
 jest.mock('@expo/vector-icons', () => ({

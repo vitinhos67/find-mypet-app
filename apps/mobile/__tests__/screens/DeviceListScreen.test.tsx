@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 
-import DeviceListScreen from '../../view/screens/DeviceListScreen';
+import DeviceListScreen from '../../src/view/screens/DeviceListScreen';
 import { useDeviceViewModel } from '../../src/viewmodels/useDeviceViewModel';
 
 const mockGoBack = jest.fn();

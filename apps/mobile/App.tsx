@@ -9,7 +9,7 @@ import { TabNavigator } from './src/navigation/TabNavigator';
 import { supabase } from './src/shared/lib/supabase';
 import { ThemeProvider } from './src/hooks/useTheme';
 import { initializeDatabase } from './src/database';
-import { ErrorBoundary } from './view/components/ErrorBoundary';
+import { ErrorBoundary } from './src/view/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 

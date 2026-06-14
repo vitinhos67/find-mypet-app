@@ -5,12 +5,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { SafeZone } from '../../src/models/safe-zone.model';
-import { PetStackParamList } from '../../src/navigation/types';
-import { SafeZoneService } from '../../src/services/SafeZoneService';
-import { useLocationViewModel } from '../../src/viewmodels/useLocationViewModel';
-import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { SafeZone } from '../../models/safe-zone.model';
+import { PetStackParamList } from '../../navigation/types';
+import { SafeZoneService } from '../../services/SafeZoneService';
+import { useLocationViewModel } from '../../viewmodels/useLocationViewModel';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { Colors } from '../styles/color';
 
 type RouteProps = RouteProp<PetStackParamList, 'PetProfile'>;

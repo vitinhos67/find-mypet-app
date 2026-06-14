@@ -3,8 +3,8 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../src/hooks/useTheme';
-import { usePetViewModel } from '../../src/viewmodels/usePetViewModel';
+import { useTheme } from '../../hooks/useTheme';
+import { usePetViewModel } from '../../viewmodels/usePetViewModel';
 import { SexoSelector } from '../components/SexoSelector';
 import { Colors } from '../styles/color';
 

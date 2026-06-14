@@ -1,11 +1,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import PetAddScreen from '../../view/screens/PetAddScreen';
-import PetDetailsScreen from '../../view/screens/PetDetailsScreen';
-import PetListScreen from '../../view/screens/PetListScreen';
-import PetProfileScreen from '../../view/screens/PetProfileScreen';
-import PetShareScreen from '../../view/screens/PetShareScreen';
-import SafeZoneScreen from '../../view/screens/SafeZoneScreen';
+import PetAddScreen from '../view/screens/PetAddScreen';
+import PetDetailsScreen from '../view/screens/PetDetailsScreen';
+import PetListScreen from '../view/screens/PetListScreen';
+import PetProfileScreen from '../view/screens/PetProfileScreen';
+import PetShareScreen from '../view/screens/PetShareScreen';
+import SafeZoneScreen from '../view/screens/SafeZoneScreen';
 import { CollarNavigator } from './CollarNavigator';
 import { PetStackParamList } from './types';
 
