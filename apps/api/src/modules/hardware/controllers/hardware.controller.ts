@@ -93,7 +93,6 @@ export class HardwareController {
             console.error("❌ ERRO AO SALVAR BATERIA:", updateError.message);
         }
 
-        // Verificação de zona segura + push notification (sem bloquear a resposta)
         if (device.pet_id) {
             const ownerId = (device.pets as any)?.owner_id as string | undefined;
             if (ownerId) {
