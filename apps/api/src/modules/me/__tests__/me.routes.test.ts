@@ -1,6 +1,6 @@
-import { after, afterEach, before, beforeEach, describe, it } from "node:test";
-import assert from "node:assert/strict";
 import type { FastifyInstance } from "fastify";
+import assert from "node:assert/strict";
+import { after, afterEach, before, beforeEach, describe, it } from "node:test";
 
 process.env.NODE_ENV = "test";
 process.env.SUPABASE_URL = "https://test.supabase.co";
@@ -150,7 +150,7 @@ function authHeader(token = "valid-token") {
 
 describe("Rotas /api/me", () => {
   before(async () => {
-    const serverModule = await import("../../../server.js");
+    const serverModule = await import("../../../app.js");
     const supabaseModule = await import("../../../shared/supabase/supabaseAdmin.js");
 
     buildServer = serverModule.buildServer;
